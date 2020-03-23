@@ -58,15 +58,41 @@ class GreedyDPP:
 		self.L = np.multiply(self.L, knn_sym)
 
 	def initialize_jaccard_kernel(self, k):
-		"""Use Jaccard kernel
-		k: number of neighbors in original kNN graph
-		"""
+		"""Set Jaccard kernel"""
+
 		if self.verbose:
 			print("Computing kNN graph...")
-		knn_graph = kneighbors_graph(self.Y, k, include_self=True).toarray()
+
+		knn_graph = kneighbors_graph(self.Y, k, include_self=True)
+
+		# all neighbors within path length two
+		path_len_2 = knn_graph @ knn_graph
+
 		if self.verbose:
-			print("Computing Jaccard similarity")
-		self.L = 1. - cdist(knn_graph, knn_graph, metric="jaccard")
+			print("Making graph symmetric...")
+
+		# symmetrize graph using OR
+		sym_graph = (path_len_2 + path_len_2.T > 0).astype(int)
+
+		# compute row sums
+		row_sums = sym_graph.sum(axis=1)
+
+		# compute weights using Jaccard similarity
+		jaccard_graph = coo_matrix(sym_graph)
+
+		if self.verbose:
+			print("Computing intersections...")
+
+		# compute intersections
+		intersections = dok_matrix(sym_graph @ sym_graph.T)
+
+		if self.verbose:
+			print("Computing Jaccard similarity for %d pairs..." % len(jaccard_graph.data))
+		for v, (i,j) in enumerate(zip(jaccard_graph.row, jaccard_graph.col)):
+			intersection = intersections[i,j]
+			jaccard_graph.data[v] = intersection / (row_sums[i,0] + row_sums[j,0] - intersection)
+
+		self.L = jaccard_graph.toarray()
 
 	def initialize_sparse_jaccard(self, k):
 		"""PhenoGraph-like Jaccard kernels
