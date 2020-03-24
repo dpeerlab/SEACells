@@ -66,6 +66,10 @@ class dpp:
 
 		#self.M = row_norms * jaccard_graph * row_norms
 
+	def set_kernel(self, M):
+		"""Set precomputed kernel"""
+		self.M = csr_matrix(M)
+
 	def sample(self, max_iter = None):
 		"""Greedily adds points until determinant starts to decrease"""
 		if self.verbose:
