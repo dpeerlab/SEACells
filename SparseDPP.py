@@ -121,7 +121,7 @@ class dpp:
 		if self.verbose:
 			print("Computing metacell assignments...")
 
-		self.compute_metacell_assignments_euclidean()
+		self.compute_metacell_assignments_geodesic()
 		return self.metacells
 
 	def compute_metacell_assignments_geodesic(self):
