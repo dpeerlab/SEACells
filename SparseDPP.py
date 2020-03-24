@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.sparse import coo_matrix, csr_matrix, dok_matrix
+from scipy.sparse.csgraph import johnson, dijkstra
 from scipy.sparse.linalg import norm
 from scipy.spatial.distance import cdist
 from sklearn.neighbors import kneighbors_graph
@@ -60,11 +61,7 @@ class dpp:
 		# compute row norms
 		row_norms = csr_matrix(np.diag(norm(jaccard_graph, axis=1)))
 
-		self.L = jaccard_graph
-
 		self.M = jaccard_graph
-
-		#self.M = row_norms * jaccard_graph * row_norms
 
 	def set_kernel(self, M):
 		"""Set precomputed kernel"""
@@ -120,8 +117,26 @@ class dpp:
 			it += 1
 
 		self.metacells = Yg
+
+		if self.verbose:
+			print("Computing metacell assignments...")
+
 		self.compute_metacell_assignments_euclidean()
 		return self.metacells
+
+	def compute_metacell_assignments_geodesic(self):
+		"""Compute metacell assignments based on geodesic distance"""
+
+		if self.metacells is None:
+			print("Metacells not computed yet.")
+		else:
+			dpp_distances = johnson(self.M, directed=False, indices=np.array(range(self.n))[self.metacells])
+			print(dpp_distances.shape)
+			dpp_clusters = np.argmin(dpp_distances, axis=1)
+			dpp_boolean = (dpp_distances == dpp_distances.min(axis=1)[:,None]).astype(int)
+
+			self.metacell_assignments = dpp_clusters
+			self.metacell_boolean = dpp_boolean
 
 	def compute_metacell_assignments_euclidean(self):
 		"""Return metacell assignment (int) for each data point in Y"""
