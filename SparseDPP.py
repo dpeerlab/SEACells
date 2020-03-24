@@ -19,7 +19,7 @@ class dpp:
 		# verbosity
 		self.verbose = True
 
-	def initialize_kernel(self, k):
+	def initialize_kernel_jaccard(self, k):
 		"""Use Jaccard kernel from kNN graph.
 		Nodes weighted by L2-norm 
 		User must specify k"""
@@ -63,6 +63,42 @@ class dpp:
 
 		self.M = jaccard_graph
 
+	def initialize_kernel_rbf(self, k, r):
+		"""use RBF kernel with adaptive bandwidth
+		User must specify k, r"""
+
+		if self.verbose:
+			print("Computing kNN graph...")
+
+		# get distance between kNN
+		knn_graph = kneighbors_graph(self.Y, k, mode="connectivity", include_self=True)
+		knn_dist = kneighbors_graph(self.Y, k, mode="distance", include_self=True).todok()
+		knn_dist_lil = knn_dist.tolil()
+
+		# get adaptive bandwidths
+		bw_per_cell = np.zeros(self.n)
+		if self.verbose:
+			print("Computing adaptive bandwidths...")
+
+		for row_idx in range(self.n):
+			row = np.array(knn_dist_lil[row_idx].data[0])
+			bw = row[np.argsort(np.argsort(-row)) == r]
+			bw_per_cell[row_idx] = 1./bw
+
+		if self.verbose:
+			print("Making graph symmetric...")
+
+		# symmetrize graph using AND
+		sym_graph = coo_matrix((knn_graph + knn_graph.T > 0).astype(float))
+
+		if self.verbose:
+			print("Computing edge weights for %d pairs" % len(sym_graph.data))
+
+		for v, (i,j) in enumerate(zip(sym_graph.row, sym_graph.col)):
+			sym_graph.data[v] = np.exp(-bw_per_cell[i] * bw_per_cell[j] * max(knn_dist[i,j], knn_dist[j,i])**2)
+
+		self.M = csr_matrix(sym_graph)
+
 	def set_kernel(self, M):
 		"""Set precomputed kernel"""
 		self.M = csr_matrix(M)
@@ -105,15 +141,15 @@ class dpp:
 			else:
 				Yg[j] = True
 
-			# update e, c, and d
-			e_n = (self.M[j,:].toarray() - c @ c[j,:].T)/d[0,j]
-			c[:,it] = e_n
-			d = d - np.square(e_n)
+				# update e, c, and d
+				e_n = (self.M[j,:].toarray() - c @ c[j,:].T)/d[0,j]
+				c[:,it] = e_n
+				d = d - np.square(e_n)
 
-			# remove d[j] so it won't be chosen again in future iterations
-			d[0,j] = 0.
+				# remove d[j] so it won't be chosen again in future iterations
+				d[0,j] = 0.
 
-			# update iteration count
+				# update iteration count
 			it += 1
 
 		self.metacells = Yg
@@ -130,8 +166,7 @@ class dpp:
 		if self.metacells is None:
 			print("Metacells not computed yet.")
 		else:
-			dpp_distances = johnson(self.M, directed=False, indices=np.array(range(self.n))[self.metacells])
-			print(dpp_distances.shape)
+			dpp_distances = johnson(self.M, directed=False, indices=np.array(range(self.n))[self.metacells]).T
 			dpp_clusters = np.argmin(dpp_distances, axis=1)
 			dpp_boolean = (dpp_distances == dpp_distances.min(axis=1)[:,None]).astype(int)
 
