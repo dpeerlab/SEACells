@@ -112,7 +112,7 @@ class avs:
 			print("Metacells not computed yet.")
 		else:
 			dpp_distances = cdist(self.Y, self.Y[self.metacells,:])
-			dpp_clusters = np.argmax(dpp_distances, axis=1)
+			dpp_clusters = np.argmin(dpp_distances, axis=1)
 			dpp_boolean = csr_matrix((dpp_distances == dpp_distances.min(axis=1)[:,None]).astype(int))
 
 			# set stuff
