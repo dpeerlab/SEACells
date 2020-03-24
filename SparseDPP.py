@@ -87,7 +87,7 @@ class dpp:
 		print(d.shape)
 
 		# stores indices of currently selected metacells
-		Yg = []
+		Yg = np.zeros(self.n).astype(bool)
 
 		# whether or not to keep adding metacells
 		cont = True
@@ -106,10 +106,10 @@ class dpp:
 				# keep going only if determinant is non-decreasing
 				cont = False
 			else:
-				Yg.append(j)
+				Yg[j] = True
 
 			# update e, c, and d
-			e_n = (self.M[j,:].todense() - c @ c[j,:].T)/d[0,j]
+			e_n = (self.M[j,:].toarray() - c @ c[j,:].T)/d[0,j]
 			c[:,it] = e_n
 			d = d - np.square(e_n)
 
@@ -119,7 +119,7 @@ class dpp:
 			# update iteration count
 			it += 1
 
-		self.metacells = np.array(Yg)
+		self.metacells = Yg
 		self.compute_metacell_assignments_euclidean()
 		return self.metacells
 
@@ -143,7 +143,7 @@ class dpp:
 			return
 		if coordinates is None:
 			coordinates = self.Y
-		weights = np.multiply(self.metacell_boolean, self.L[self.metacells,:].todense().T)
+		weights = np.multiply(self.metacell_boolean, self.M[self.metacells,:].todense().T)
 		return np.array((weights.T @ coordinates) / weights.sum(axis=0).T)
 
 	def compute_metacell_connectivities(self):
