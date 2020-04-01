@@ -68,7 +68,7 @@ class pam:
 		self.G = jaccard_graph
 		self.M = similarity_matrix
 
-	def initialize_centers(self, k):
+	def initialize_centers_uniform(self, k):
 		# k = number of centers
 		# for now just random uniform sample
 		self.centers = np.random.choice(range(self.n), k, replace=False)
@@ -217,7 +217,7 @@ class pam:
 		# pick k centers
 		#self.initialize_centers(k)
 		if init_centers is None:
-			self.initialize_centers_dpp()
+			self.initialize_centers_uniform(max_centers)
 		elif init_centers == "dpp":
 			self.initialize_centers_dpp(max_iter=max_centers)
 		elif init_centers == "cur":
