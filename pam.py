@@ -212,6 +212,10 @@ class pam:
 		metacell_sizes = self.get_metacell_sizes()
 		self.centers = self.centers[metacell_sizes >= thres]
 
+	def get_metacell_graph(self):
+		"""New connectivity graph for meta-cells"""
+		return (self.assignments_bool.T @ self.G @ self.assignments_bool > 0).astype(float)
+
 	def k_medoids(self, min_size, max_iter, init_centers=None, k=50, epsilon=1., max_centers=200):
 
 		# pick k centers
