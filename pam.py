@@ -1,259 +1,357 @@
 # An implementation of of the Partioning Around Medoids (PAM) algorithm on a graph
 import numpy as np
-from scipy.sparse import coo_matrix, csr_matrix, dok_matrix
+from scipy.sparse import coo_matrix, csr_matrix, dok_matrix, lil_matrix
 from sklearn.neighbors import kneighbors_graph
 from scipy.sparse.csgraph import johnson, dijkstra
 from scipy.sparse.linalg import svds
 
+# for parallelizing stuff
+from multiprocessing import cpu_count, Pool
+from contextlib import closing
+from joblib import Parallel, delayed
+from itertools import repeat, starmap
+import tqdm
+
+# get number of cores for multiprocessing
+NUM_CORES = cpu_count()
+
+def update_centers_for_cluster(graph, cluster_assignments, cluster_idx):
+    """Helper function of updating center of a given cluster
+    Graph: connectivity graph. higher edge weight = higher distance
+    """
+    # all indices for points
+    full_indices = np.array(range(graph.shape[0]))
+
+    # indices of points assigned to cluster index
+    indices = full_indices[cluster_assignments[:,cluster_idx].astype(bool)]
+
+    # distance matrix defined by graph
+    dist_mtx = dijkstra(graph, directed=False, indices=indices)[:,indices]
+
+    # new center with shortest total distance to other points
+    new_center = indices[np.argmin(dist_mtx.sum(axis=1))]
+
+    return new_center
+
 class pam:
 
-	def __init__(self, Y, verbose:bool=False):
-		"""Initialize model parameters"""
-		# data parameters
-		self.n, self.d = Y.shape
+    def __init__(self, Y, n_cores:int=-1, verbose:bool=False):
+        """Initialize model parameters"""
+        # data parameters
+        self.n, self.d = Y.shape
+
+        # indices of each point
+        self.indices = np.array(range(self.n))
+
+        # save data
+        self.Y = Y
+
+        # number of cores for parallelization
+        if n_cores != -1:
+            self.num_cores = n_cores
+        else:
+            self.num_cores = NUM_CORES
 
-		# indices of each point
-		self.indices = np.array(range(self.n))
+        # model params
+        self.verbose=verbose
+
+    def initialize_kernel_jaccard(self, k):
+        """Use Jaccard kernel from kNN graph.
+        Nodes weighted by L2-norm 
+        User must specify k"""
+        if self.verbose:
+            print("Computing kNN graph...")
 
-		# save data
-		self.Y = Y
+        knn_graph = kneighbors_graph(self.Y, k, include_self=False)
+        print(np.max(np.sum(knn_graph, axis=1)))
 
-		# model params
-		self.verbose=verbose
+        # take AND
+        if self.verbose:
+            print("Making graph symmetric...")
+        sym_graph = (np.multiply(knn_graph, knn_graph.T) > 0).astype(float)
+
+        # all neighbors within path length two
+        path_len_2 = ((sym_graph @ sym_graph) > 0).astype(float)
+
+        # compute row sums
+        row_sums = np.sum(sym_graph, axis=1)
 
-	def initialize_kernel_jaccard(self, k):
-		"""Use Jaccard kernel from kNN graph.
-		Nodes weighted by L2-norm 
-		User must specify k"""
-		if self.verbose:
-			print("Computing kNN graph...")
+        # compute weights using Jaccard similarity
+        jaccard_graph = coo_matrix(path_len_2)
+        similarity_matrix = coo_matrix(path_len_2)
 
-		knn_graph = kneighbors_graph(self.Y, k, include_self=False)
+        if self.verbose:
+            print("Computing intersections for %d pairs..." % len(path_len_2.data))
 
-		# take AND
-		sym_graph = (np.multiply(knn_graph, knn_graph.T) > 0).astype(float)
+        # compute intersections
+        all_intersections = sym_graph.dot(sym_graph.T)
+        masked_intersections = (all_intersections.multiply(path_len_2)).astype(float)
 
-		# all neighbors within path length two
-		path_len_2 = sym_graph @ sym_graph
+        if self.verbose:
+            print("Constructing DOK matrix...")
+        intersections = dok_matrix(masked_intersections)
 
-		if self.verbose:
-			print("Making graph symmetric...")
+        if self.verbose:
+            print("Computing Jaccard similarity for %d pairs..." % len(jaccard_graph.data))
+        for v, (i,j) in enumerate(zip(jaccard_graph.row, jaccard_graph.col)):
+            intersection = intersections[i,j]
+            jaccard_sim = intersection / float(row_sums[i,0] + row_sums[j,0] - intersection)
+            similarity_matrix.data[v] = jaccard_sim
+            jaccard_graph.data[v] = 1 - jaccard_sim
 
-		# compute row sums
-		row_sums = sym_graph.sum(axis=1)
+        # convert jaccard graph to csr matrix
+        jaccard_graph = csr_matrix(jaccard_graph)
+        similarity_matrix = csr_matrix(similarity_matrix)
 
-		# compute weights using Jaccard similarity
-		jaccard_graph = coo_matrix(path_len_2)
-		similarity_matrix = coo_matrix(path_len_2)
+        # graph, where edges are weights
+        self.G = jaccard_graph
+        self.M = similarity_matrix
 
-		if self.verbose:
-			print("Computing intersections...")
+    def set_distances(self, d):
+        self.G = d
 
-		# compute intersections
-		intersections = dok_matrix(sym_graph @ sym_graph.T)
+    def set_similarity(self, s):
+        self.M = s
 
-		if self.verbose:
-			print("Computing Jaccard similarity for %d pairs..." % len(jaccard_graph.data))
-		for v, (i,j) in enumerate(zip(jaccard_graph.row, jaccard_graph.col)):
-			intersection = intersections[i,j]
-			jaccard_sim = intersection / float(row_sums[i,0] + row_sums[j,0] - intersection)
-			similarity_matrix.data[v] = jaccard_sim
-			jaccard_graph.data[v] = 1 - jaccard_sim
+    def initialize_centers_uniform(self, k):
+        # k = number of centers
+        # for now just random uniform sample
+        self.centers = np.random.choice(range(self.n), k, replace=False)
 
-		# convert jaccard graph to csr matrix
-		jaccard_graph = csr_matrix(jaccard_graph)
-		similarity_matrix = csr_matrix(similarity_matrix)
+    def initialize_centers_dpp(self, max_iter:int=200):
+        """Greedily adds points until determinant starts to decrease"""
+        if self.verbose:
+            print("Finding metacells...")
 
-		# graph, where edges are weights
-		self.G = jaccard_graph
-		self.M = similarity_matrix
+        # store max iter
+        if max_iter is None:
+            max_iter = self.n
 
-	def initialize_centers_uniform(self, k):
-		# k = number of centers
-		# for now just random uniform sample
-		self.centers = np.random.choice(range(self.n), k, replace=False)
+        # stores last row of cholesky decomposition of subset kernel matrix
+        c = np.zeros((self.n, self.n))
 
-	def initialize_centers_dpp(self, max_iter:int=200):
-		"""Greedily adds points until determinant starts to decrease"""
-		if self.verbose:
-			print("Finding metacells...")
+        # stores contribution of each point to the determinant
+        d = self.M.diagonal().reshape(1,-1)
 
-		# store max iter
-		if max_iter is None:
-			max_iter = self.n
+        # stores indices of currently selected metacells
+        Yg = np.zeros(self.n).astype(bool)
 
-		# stores last row of cholesky decomposition of subset kernel matrix
-		c = np.zeros((self.n, self.n))
+        # whether or not to keep adding metacells
+        cont = True
+        it = 0
 
-		# stores contribution of each point to the determinant
-		d = self.M.diagonal().reshape(1,-1)
+        while cont and it < max_iter:
+            if self.verbose:
+                print("Beginning iteration %d" % it)
 
-		# stores indices of currently selected metacells
-		Yg = np.zeros(self.n).astype(bool)
+            # find current max
+            j = np.argmax(d)
 
-		# whether or not to keep adding metacells
-		cont = True
-		it = 0
+            # update selected indices if appropriate
+            Yg[j] = True
 
-		while cont and it < max_iter:
-			if self.verbose:
-				print("Beginning iteration %d" % it)
+            # update e, c, and d
+            e_n = (self.M[j,:].toarray() - c @ c[j,:].T)/d[0,j]
+            c[:,it] = e_n
+            d = d - np.square(e_n)
 
-			# find current max
-			j = np.argmax(d)
+            # remove d[j] so it won't be chosen again in future iterations
+            d[0,j] = 0.
 
-			# update selected indices if appropriate
-			Yg[j] = True
+            # update iteration count
+            it += 1
 
-			# update e, c, and d
-			e_n = (self.M[j,:].toarray() - c @ c[j,:].T)/d[0,j]
-			c[:,it] = e_n
-			d = d - np.square(e_n)
+        self.centers = self.indices[Yg]
 
-			# remove d[j] so it won't be chosen again in future iterations
-			d[0,j] = 0.
+    def initialize_centers_cur(self, k:int, epsilon:float):
+        """Implementation of row/column selection using leverage scores
+        Inputs:
+            k (int): desired rank
+            epsilon (float): error tolerance
+        """
+        if self.verbose:
+            print("Computing first %d singular vectors..." % k)
 
-			# update iteration count
-			it += 1
+        # Note: per documentation, the order of singular values is not guaranteed
+        u, s, vt = svds(self.M, k=k)
 
-		self.centers = self.indices[Yg]
+        if self.verbose:
+            print("Computing leverage scores...")
 
-	def initialize_centers_cur(self, k:int, epsilon:float):
-		"""Implementation of row/column selection using leverage scores
-		Inputs:
-			k (int): desired rank
-			epsilon (float): error tolerance
-		"""
-		if self.verbose:
-			print("Computing first %d singular vectors..." % k)
+        # compute square norms of right singular vectors
+        lev_scores = np.square(np.linalg.norm(vt, axis=0))
+        norm_lev_scores = (1./k) * lev_scores
 
-		# Note: per documentation, the order of singular values is not guaranteed
-		u, s, vt = svds(self.M, k=k)
+        if self.verbose:
+            print("Computing column probabilities...")
 
-		if self.verbose:
-			print("Computing leverage scores...")
+        # multiplicative constant that increases # columns selected
+        c = k * np.log(k) / epsilon**2
 
-		# compute square norms of right singular vectors
-		lev_scores = np.square(np.linalg.norm(vt, axis=0))
-		norm_lev_scores = (1./k) * lev_scores
+        # compute column selection probabilities
+        p = np.minimum(1., c * norm_lev_scores)
 
-		if self.verbose:
-			print("Computing column probabilities...")
+        if self.verbose:
+            print("Selecting columns...")
 
-		# multiplicative constant that increases # columns selected
-		c = k * np.log(k) / epsilon**2
+        # sample
+        selected = (np.random.binomial(1, p=p) > 0)
 
-		# compute column selection probabilities
-		p = np.minimum(1., c * norm_lev_scores)
+        # set selected colummns
+        self.centers = self.indices[selected]
 
-		if self.verbose:
-			print("Selecting columns...")
+        if self.verbose:
+            print("Selected %d columns!" % len(self.centers))
 
-		# sample
-		selected = (np.random.binomial(1, p=p) > 0)
+    def assign_clusters(self):
+        # find distance from each point to each center
+        dist_mtx = johnson(self.G, directed=False, indices = self.centers).T
 
-		# set selected colummns
-		self.centers = self.indices[selected]
+        # assign points to closest
+        self.assignments = np.argmin(dist_mtx, axis=1)
 
-		if self.verbose:
-			print("Selected %d columns!" % len(self.centers))
+        # boolean
+        self.assignments_bool = (dist_mtx == dist_mtx.min(axis=1)[:,None]).astype(int)
 
-	def assign_clusters(self):
-		# find distance from each point to each center
-		dist_mtx = johnson(self.G, directed=False, indices = self.centers).T
 
-		# assign points to closest
-		self.assignments = np.argmin(dist_mtx, axis=1)
 
-		# boolean
-		self.assignments_bool = (dist_mtx == dist_mtx.min(axis=1)[:,None]).astype(int)
+    def update_centers(self, k):
 
-	def update_centers(self, k):
+        converged = True
 
-		converged = True
+        for clust in range(k):
+            # get current center
+            curr_center = self.centers[clust]
 
-		for clust in range(k):
-			# get current center
-			curr_center = self.centers[clust]
+            if self.verbose:
+                print("Processing cluster %d" % clust)
+                print("Current center: %d" % curr_center)
+            assigned_points = self.indices[self.assignments_bool[:,clust].astype(bool)]
 
-			if self.verbose:
-				print("Processing cluster %d" % clust)
-				print("Current center: %d" % curr_center)
-			assigned_points = self.indices[self.assignments_bool[:,clust].astype(bool)]
+            # compute distances
+            dist_mtx = dijkstra(self.G, directed=False, indices = assigned_points)[:,assigned_points]
 
-			# compute distances
-			dist_mtx = dijkstra(self.G, directed=False, indices = assigned_points)[:,assigned_points]
+            # pick the point with the minimum total distance to all points
+            new_center = assigned_points[np.argmin(dist_mtx.sum(axis=1))]
 
-			# pick the point with the minimum total distance to all points
-			new_center = assigned_points[np.argmin(dist_mtx.sum(axis=1))]
+            if self.verbose:
+                print("New center: %d" % new_center)
 
-			if self.verbose:
-				print("New center: %d" % new_center)
+            # check if update
+            if curr_center != new_center:
+                converged = False
 
-			# check if update
-			if curr_center != new_center:
-				converged = False
+            # update center
+            self.centers[clust] = new_center
 
-			# update center
-			self.centers[clust] = new_center
+        return converged
 
-		return converged
+    def get_metacell_coordinates(self, coordinates=None):
+        if coordinates is None:
+            coordinates = self.Y
 
-	def get_metacell_coordinates(self, coordinates=None):
-		if coordinates is None:
-			coordinates = self.Y
+        return coordinates[self.centers,:]
 
-		return coordinates[self.centers,:]
+    def get_smoothed_metacell_coordinates(self, coordinates=None):
+        if coordinates is None:
+            coordinates = self.Y
 
-	def get_metacell_sizes(self):
-		return np.sum(self.assignments_bool, axis=0)
+        weights = self.assignments_bool
+        sum_weights = weights.sum(axis=0, keepdims=True)
 
-	def prune_small_metacells(self, thres:int=1):
-		metacell_sizes = self.get_metacell_sizes()
-		self.centers = self.centers[metacell_sizes >= thres]
+        return np.array(weights.T @ coordinates / sum_weights.T)
 
-	def get_metacell_graph(self):
-		"""New connectivity graph for meta-cells"""
-		return (self.assignments_bool.T @ self.G @ self.assignments_bool > 0).astype(float)
+    def get_metacell_sizes(self):
+        return np.sum(self.assignments_bool, axis=0)
 
-	def k_medoids(self, min_size, max_iter, init_centers=None, k=50, epsilon=1., max_centers=200):
+    def prune_small_metacells(self, thres:int=1):
+        metacell_sizes = self.get_metacell_sizes()
+        self.centers = self.centers[metacell_sizes >= thres]
 
-		# pick k centers
-		#self.initialize_centers(k)
-		if init_centers is None:
-			self.initialize_centers_uniform(max_centers)
-		elif init_centers == "dpp":
-			self.initialize_centers_dpp(max_iter=max_centers)
-		elif init_centers == "cur":
-			self.initialize_centers_cur(k=k, epsilon=epsilon)
+    def get_metacell_graph(self):
+        """New connectivity graph for meta-cells"""
+        return (self.assignments_bool.T @ self.G @ self.assignments_bool > 0).astype(float)
 
+    def k_medoids(self, min_size:int=20, max_iter:int=10, init_centers="cur", k=50, epsilon=1., max_centers=200):
 
-		k = len(self.centers)
+        # pick k centers
+        #self.initialize_centers(k)
+        if init_centers is None:
+            self.initialize_centers_uniform(max_centers)
+        elif init_centers == "dpp":
+            self.initialize_centers_dpp(max_iter=max_centers)
+        elif init_centers == "cur":
+            self.initialize_centers_cur(k=k, epsilon=epsilon)
 
-		# count iterations
-		it = 0
 
-		converged = False
+        k = len(self.centers)
 
-		while not converged and it < max_iter:
+        # count iterations
+        it = 0
 
-			if self.verbose:
-				print("Iteration %d of %d" % (it, max_iter))
+        converged = False
 
-			# update iteration count
-			it += 1
+        while not converged and it < max_iter:
 
-			# assign clusters
-			self.assign_clusters()
+            if self.verbose:
+                print("Iteration %d of %d" % (it, max_iter))
 
-			# prune small metacells
-			self.prune_small_metacells(thres=min_size)
+            # update iteration count
+            it += 1
 
-			if len(self.centers) != k:
-				k = len(self.centers)
-				self.assign_clusters()
+            # assign clusters
+            self.assign_clusters()
 
-			# update location of medoids
-			converged = self.update_centers(k)
-			if converged:
-				print("Converged after %d iterations(s)!" % it)
+            # prune small metacells
+            self.prune_small_metacells(thres=min_size)
+
+            if len(self.centers) != k:
+                k = len(self.centers)
+                self.assign_clusters()
+
+            # update location of medoids
+            converged = self.update_centers(k)
+            if converged:
+                print("Converged after %d iterations(s)!" % it)
+
+
+    def k_medoids_parallel(self, min_size:int=20, max_iter:int=10, init_centers="cur", k=50, epsilon=1., max_centers=200):
+        
+        if init_centers is None:
+            self.initialize_centers_uniform(max_centers)
+        elif init_centers == "dpp":
+            self.initialize_centers_dpp(max_iter=max_centers)
+        elif init_centers == "cur":
+            self.initialize_centers_cur(k=k, epsilon=epsilon)
+        k = len(self.centers)
+
+        it=1
+        converged=False
+
+        with Parallel(n_jobs=self.num_cores, backend="threading") as parallel:
+
+            while not converged and it <= max_iter:
+
+                if self.verbose:
+                    print("Iteration %d of %d" % (it, max_iter))
+
+                # assign clusters
+                self.assign_clusters()
+                self.prune_small_metacells()
+
+                # iterable
+                cluster_it = tqdm.tqdm(range(k))
+
+                new_centers = parallel(delayed(update_centers_for_cluster)(self.G, 
+                    self.assignments_bool, cluster_idx) for cluster_idx in cluster_it)
+
+                new_centers = np.array(new_centers)
+
+                if np.all(new_centers == self.centers):
+                    converged=True
+                    print("Converged after %d iterations(s)!" % it)
+
+                self.centers = new_centers
+
+                it += 1
+
