@@ -4,6 +4,7 @@ from scipy.sparse import coo_matrix, csr_matrix, dok_matrix, lil_matrix
 from sklearn.neighbors import kneighbors_graph
 from scipy.sparse.csgraph import johnson, dijkstra
 from scipy.sparse.linalg import svds
+from scipy.spatial.distance import cdist
 
 # for parallelizing stuff
 from multiprocessing import cpu_count, Pool
@@ -25,8 +26,34 @@ def update_centers_for_cluster(graph, cluster_assignments, cluster_idx):
     # indices of points assigned to cluster index
     indices = full_indices[cluster_assignments[:,cluster_idx].astype(bool)]
 
-    # distance matrix defined by graph
-    dist_mtx = dijkstra(graph, directed=False, indices=indices)[:,indices]
+    # define subgraph
+    subgraph = graph[indices,:][:,indices]
+
+    # distance matrix defined by graph (try cosine distance, graph distance is slow)
+    # dist_mtx = johnson(graph, directed=False, indices=indices)[:,indices]
+    dist_mtx = johnson(subgraph, directed=False)
+
+    # new center with shortest total distance to other points
+    new_center = indices[np.argmin(dist_mtx.sum(axis=1))]
+
+    return new_center
+
+def update_centers_for_cluster_euclidean(data, cluster_assignments, cluster_idx):
+    """Helper function of updating center of a given cluster
+    Graph: connectivity graph. higher edge weight = higher distance
+    """
+
+    # all indices for points
+    full_indices = np.array(range(data.shape[0]))
+
+    # indices of points assigned to cluster index
+    indices = full_indices[cluster_assignments[:,cluster_idx].astype(bool)]
+
+    # data points in cluster
+    cluster_points = data[indices,:]
+
+    # distance matrix based on Euclidean or cosine distance
+    dist_mtx = cdist(cluster_points, cluster_points, metric="euclidean")
 
     # new center with shortest total distance to other points
     new_center = indices[np.argmin(dist_mtx.sum(axis=1))]
@@ -63,7 +90,6 @@ class pam:
             print("Computing kNN graph...")
 
         knn_graph = kneighbors_graph(self.Y, k, include_self=False)
-        print(np.max(np.sum(knn_graph, axis=1)))
 
         # take AND
         if self.verbose:
@@ -106,6 +132,43 @@ class pam:
         # graph, where edges are weights
         self.G = jaccard_graph
         self.M = similarity_matrix
+
+    def jaccard_for_row(self, G, row_sums, i):
+        intersection = G[i,:].dot(G.T)
+        subset_sizes = row_sums[i] + row_sums
+        return lil_matrix(intersection / (subset_sizes.reshape(1,-1) - intersection))
+
+
+    def initialize_kernel_jaccard_parallel(self, k):
+        if self.verbose:
+            print("Computing kNN graph...")
+
+        knn_graph = kneighbors_graph(self.Y, k, include_self=False)
+
+        # take AND
+        if self.verbose:
+            print("Making graph symmetric...")
+        sym_graph = (np.multiply(knn_graph, knn_graph.T) > 0).astype(float)
+        row_sums = np.sum(sym_graph, axis=1)
+
+        if self.verbose:
+            print("Computing Jaccard similarity...")
+
+        with Parallel(n_jobs=self.num_cores, backend="threading") as parallel:
+            similarity_matrix_rows = parallel(delayed(self.jaccard_for_row)(sym_graph, row_sums, i) for i in tqdm.tqdm(range(self.n)))
+
+        if self.verbose:
+            print("Building similarity LIL matrix...")
+
+        similarity_matrix = lil_matrix((self.n, self.n))
+        for i in tqdm.tqdm(range(self.n)):
+            similarity_matrix[i] = similarity_matrix_rows[i]
+
+        if self.verbose:
+            print("Constructing CSR matrix...")
+
+        self.M = similarity_matrix.tocsr()
+        self.G = (self.M > 0).astype(float)
 
     def set_distances(self, d):
         self.G = d
@@ -210,9 +273,24 @@ class pam:
         # assign points to closest
         self.assignments = np.argmin(dist_mtx, axis=1)
 
+        # save distances
+        # self.metacell_distances = np.exp(-dist_mtx)
+        self.metacell_distances = 1. / (dist_mtx + 1.)
+
         # boolean
         self.assignments_bool = (dist_mtx == dist_mtx.min(axis=1)[:,None]).astype(int)
 
+    def assign_clusters_euclidean(self):
+        dist_mtx = cdist(self.Y, self.Y[self.centers,:], metric="euclidean")
+
+        # assign points to closest
+        self.assignments = np.argmin(dist_mtx, axis=1)
+
+        # save distances
+        self.metacell_distances = np.exp(-dist_mtx)
+
+        # boolean
+        self.assignments_bool = (dist_mtx == dist_mtx.min(axis=1)[:,None]).astype(int)
 
 
     def update_centers(self, k):
@@ -256,7 +334,7 @@ class pam:
         if coordinates is None:
             coordinates = self.Y
 
-        weights = self.assignments_bool
+        weights = np.multiply(self.assignments_bool, self.metacell_distances)
         sum_weights = weights.sum(axis=0, keepdims=True)
 
         return np.array(weights.T @ coordinates / sum_weights.T)
@@ -315,7 +393,7 @@ class pam:
                 print("Converged after %d iterations(s)!" % it)
 
 
-    def k_medoids_parallel(self, min_size:int=20, max_iter:int=10, init_centers="cur", k=50, epsilon=1., max_centers=200):
+    def k_medoids_parallel(self, min_size:int=20, max_iter:int=50, init_centers="cur", k=50, epsilon=1., max_centers=200):
         
         if init_centers is None:
             self.initialize_centers_uniform(max_centers)
@@ -323,7 +401,9 @@ class pam:
             self.initialize_centers_dpp(max_iter=max_centers)
         elif init_centers == "cur":
             self.initialize_centers_cur(k=k, epsilon=epsilon)
-        k = len(self.centers)
+
+        self.assign_clusters_euclidean()
+        self.prune_small_metacells(thres=min_size)
 
         it=1
         converged=False
@@ -335,14 +415,12 @@ class pam:
                 if self.verbose:
                     print("Iteration %d of %d" % (it, max_iter))
 
-                # assign clusters
-                self.assign_clusters()
-                self.prune_small_metacells()
+                k = len(self.centers)
 
                 # iterable
                 cluster_it = tqdm.tqdm(range(k))
 
-                new_centers = parallel(delayed(update_centers_for_cluster)(self.G, 
+                new_centers = parallel(delayed(update_centers_for_cluster_euclidean)(self.Y, 
                     self.assignments_bool, cluster_idx) for cluster_idx in cluster_it)
 
                 new_centers = np.array(new_centers)
@@ -352,6 +430,11 @@ class pam:
                     print("Converged after %d iterations(s)!" % it)
 
                 self.centers = new_centers
+
+                # assign clusters
+                self.assign_clusters_euclidean()
+                self.prune_small_metacells(thres=min_size)
+                self.assign_clusters_euclidean()
 
                 it += 1
 
