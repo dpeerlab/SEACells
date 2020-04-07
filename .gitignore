@@ -1,3 +1,6 @@
+# raw data
+*.pickle
+
 # ipynb
 *.ipynb
 

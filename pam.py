@@ -1,10 +1,11 @@
 # An implementation of of the Partioning Around Medoids (PAM) algorithm on a graph
 import numpy as np
-from scipy.sparse import coo_matrix, csr_matrix, dok_matrix, lil_matrix
+from scipy.sparse import coo_matrix, csr_matrix, dok_matrix, lil_matrix, diags
 from sklearn.neighbors import kneighbors_graph
 from scipy.sparse.csgraph import johnson, dijkstra
-from scipy.sparse.linalg import svds
+from scipy.sparse.linalg import svds, eigs, eigsh
 from scipy.spatial.distance import cdist
+from scipy.special import logsumexp
 
 # for parallelizing stuff
 from multiprocessing import cpu_count, Pool
@@ -15,6 +16,65 @@ import tqdm
 
 # get number of cores for multiprocessing
 NUM_CORES = cpu_count()
+
+#################################################
+# Helper functions parallelization
+#
+#################################################
+
+def logsumexp_row_nonzeros(X):
+    """Sparse logsumexp"""
+    result = np.empty(X.shape[0])
+    for i in range(X.shape[0]):
+        result[i] = logsumexp(X.data[X.indptr[i]:X.indptr[i+1]])
+    return result
+
+def normalize_row_nonzeros(X, logsum):
+    """Sparse logsumexp"""
+    for i in range(X.shape[0]):
+        X.data[X.indptr[i]:X.indptr[i+1]] = np.exp(X.data[X.indptr[i]:X.indptr[i+1]] - logsum[i])
+    return X
+
+def kth_neighbor_distance(distances, k, i):
+    """Returns distance to kth nearest neighbor
+    Distances: sparse CSR matrix
+    k: kth nearest neighbor
+    i: index of row"""
+
+    # convert row to 1D array
+    row_as_array = distances[i,:].toarray().ravel()
+
+    # number of nonzero elements
+    num_nonzero = np.sum(row_as_array > 0)
+
+    # argsort
+    kth_neighbor_idx = np.argsort(np.argsort(-row_as_array)) == num_nonzero - k
+    return np.linalg.norm(row_as_array[kth_neighbor_idx])
+
+def rbf_for_row(G, data, median_distances, i):
+
+    # convert row to binary numpy array
+    row_as_array = G[i,:].toarray().ravel()
+
+    # compute distances ||x - y||^2
+    numerator = np.sum(np.square(data[i,:] - data), axis=1, keepdims=False)
+
+    # compute radii
+    denominator = median_distances[i] * median_distances
+
+    # exp
+    full_row = np.exp(-numerator / denominator)
+
+    # masked row
+    masked_row = np.multiply(full_row, row_as_array)
+
+    return lil_matrix(masked_row)
+
+
+def jaccard_for_row(G, row_sums, i):
+    intersection = G[i,:].dot(G.T)
+    subset_sizes = row_sums[i] + row_sums
+    return lil_matrix(intersection / (subset_sizes.reshape(1,-1) - intersection))
 
 def update_centers_for_cluster(graph, cluster_assignments, cluster_idx):
     """Helper function of updating center of a given cluster
@@ -79,83 +139,32 @@ class pam:
         else:
             self.num_cores = NUM_CORES
 
+        self.M = None # similarity matrix
+        self.G = None # graph
+        self.T = None # transition matrix
+        self.embedding = None # embedding
+
         # model params
         self.verbose=verbose
 
-    def initialize_kernel_jaccard(self, k):
-        """Use Jaccard kernel from kNN graph.
-        Nodes weighted by L2-norm 
-        User must specify k"""
-        if self.verbose:
-            print("Computing kNN graph...")
-
-        knn_graph = kneighbors_graph(self.Y, k, include_self=False)
-
-        # take AND
-        if self.verbose:
-            print("Making graph symmetric...")
-        sym_graph = (np.multiply(knn_graph, knn_graph.T) > 0).astype(float)
-
-        # all neighbors within path length two
-        path_len_2 = ((sym_graph @ sym_graph) > 0).astype(float)
-
-        # compute row sums
-        row_sums = np.sum(sym_graph, axis=1)
-
-        # compute weights using Jaccard similarity
-        jaccard_graph = coo_matrix(path_len_2)
-        similarity_matrix = coo_matrix(path_len_2)
-
-        if self.verbose:
-            print("Computing intersections for %d pairs..." % len(path_len_2.data))
-
-        # compute intersections
-        all_intersections = sym_graph.dot(sym_graph.T)
-        masked_intersections = (all_intersections.multiply(path_len_2)).astype(float)
-
-        if self.verbose:
-            print("Constructing DOK matrix...")
-        intersections = dok_matrix(masked_intersections)
-
-        if self.verbose:
-            print("Computing Jaccard similarity for %d pairs..." % len(jaccard_graph.data))
-        for v, (i,j) in enumerate(zip(jaccard_graph.row, jaccard_graph.col)):
-            intersection = intersections[i,j]
-            jaccard_sim = intersection / float(row_sums[i,0] + row_sums[j,0] - intersection)
-            similarity_matrix.data[v] = jaccard_sim
-            jaccard_graph.data[v] = 1 - jaccard_sim
-
-        # convert jaccard graph to csr matrix
-        jaccard_graph = csr_matrix(jaccard_graph)
-        similarity_matrix = csr_matrix(similarity_matrix)
-
-        # graph, where edges are weights
-        self.G = jaccard_graph
-        self.M = similarity_matrix
-
-    def jaccard_for_row(self, G, row_sums, i):
-        intersection = G[i,:].dot(G.T)
-        subset_sizes = row_sums[i] + row_sums
-        return lil_matrix(intersection / (subset_sizes.reshape(1,-1) - intersection))
-
-
     def initialize_kernel_jaccard_parallel(self, k):
+        """Uses Jaccard similarity between nearest neighbor sets as PSD kernel"""
         if self.verbose:
             print("Computing kNN graph...")
 
-        knn_graph = kneighbors_graph(self.Y, k, include_self=False)
+        knn_graph = kneighbors_graph(self.Y, k, include_self=True)
 
         # take AND
         if self.verbose:
             print("Making graph symmetric...")
-        sym_graph = (np.multiply(knn_graph, knn_graph.T) > 0).astype(float)
+        sym_graph = ((knn_graph + knn_graph.T) > 0).astype(float)
         row_sums = np.sum(sym_graph, axis=1)
 
         if self.verbose:
             print("Computing Jaccard similarity...")
 
         with Parallel(n_jobs=self.num_cores, backend="threading") as parallel:
-            similarity_matrix_rows = parallel(delayed(self.jaccard_for_row)(sym_graph, row_sums, i) for i in tqdm.tqdm(range(self.n)))
+            similarity_matrix_rows = parallel(delayed(jaccard_for_row)(sym_graph, row_sums, i) for i in tqdm.tqdm(range(self.n)))
 
         if self.verbose:
             print("Building similarity LIL matrix...")
@@ -169,6 +178,96 @@ class pam:
 
         self.M = similarity_matrix.tocsr()
         self.G = (self.M > 0).astype(float)
+
+    def initialize_kernel_rbf_parallel(self, k:int):
+        """Initialize adaptive bandwith RBF kernel (as described in C-isomap)"""
+
+        if self.verbose:
+            print("Computing kNN graph...")
+
+        # compute kNN and the distance from each point to its nearest neighbors
+        knn_graph = kneighbors_graph(self.Y, k, mode="connectivity", include_self=True)
+        knn_graph_distances = kneighbors_graph(self.Y, k, mode="distance", include_self=True)
+
+        if self.verbose:
+            print("Computing radius for adaptive bandwidth kernel...")
+
+        # compute median distance for each point amongst k-nearest neighbors
+        with Parallel(n_jobs=self.num_cores, backend="threading") as parallel:
+            median_distances = parallel(delayed(kth_neighbor_distance)(knn_graph_distances, k//2, i) for i in tqdm.tqdm(range(self.n)))
+
+        # convert to numpy array
+        median_distances = np.array(median_distances)
+
+        # take AND
+
+        if self.verbose:
+            print("Making graph symmetric...")
+        sym_graph = (knn_graph + knn_graph.T > 0).astype(float)
+
+        if self.verbose:
+            print("Computing RBF kernel...")
+
+        with Parallel(n_jobs=self.num_cores, backend="threading") as parallel:
+            similarity_matrix_rows = parallel(delayed(rbf_for_row)(sym_graph, self.Y, median_distances, i) for i in tqdm.tqdm(range(self.n)))
+
+        if self.verbose:
+            print("Building similarity LIL matrix...")
+
+        similarity_matrix = lil_matrix((self.n, self.n))
+        for i in tqdm.tqdm(range(self.n)):
+            similarity_matrix[i] = similarity_matrix_rows[i]
+
+        if self.verbose:
+            print("Constructing CSR matrix...")
+
+        self.M = similarity_matrix.tocsr()
+        self.G = (self.M > 0).astype(float)
+
+    def compute_transition_probabilities(self):
+        """Normalize similarity matrix so that it represents transition probabilities"""
+
+        # check to make sure there's a G and M
+        if self.G is None or self.M is None:
+            print("Need to initialize kernel first")
+            return
+
+        # compute row sums
+        logM = self.M.copy()
+        logM.data = np.log(logM.data)
+
+        # compute sum in log space
+        log_row_sums = logsumexp_row_nonzeros(logM)
+
+        # normalize rows using logprobs and log sums
+        logM = normalize_row_nonzeros(logM, log_row_sums)
+
+        # save probabilities
+        self.T = logM
+
+    def compute_diffusion_map(self, k:int, t:int):
+        """ diffusion embedding
+        k: number of components for SVD
+        t: number of time steps for random walk"""
+        if self.T is None:
+            print("Need to initialize transition matrix first!")
+            return
+
+        if self.verbose:
+            print("Computing eigendecomposition")
+
+        # right eigenvectors
+        w, v = eigs(self.T, k=k, which="LM")
+
+        order = np.argsort(-(np.real(w)))
+
+        w = w[order]
+        v = v[:,order]
+
+        # set embedding
+        lamb = np.power(np.real(w), t)
+        self.embedding = np.real(v) @ np.diag(lamb)
+
 
     def set_distances(self, d):
         self.G = d
@@ -280,8 +379,14 @@ class pam:
         # boolean
         self.assignments_bool = (dist_mtx == dist_mtx.min(axis=1)[:,None]).astype(int)
 
-    def assign_clusters_euclidean(self):
-        dist_mtx = cdist(self.Y, self.Y[self.centers,:], metric="euclidean")
+    def assign_clusters_euclidean(self, coordinates=None):
+        if coordinates is None:
+            if self.embedding is None:
+                coordinates = self.Y
+            else:
+                coordinates = self.embedding
+
+        dist_mtx = cdist(coordinates, coordinates[self.centers,:], metric="euclidean")
 
         # assign points to closest
         self.assignments = np.argmin(dist_mtx, axis=1)
@@ -408,6 +513,12 @@ class pam:
         it=1
         converged=False
 
+        # coordinate system to use for k medoids
+        if self.embedding is None:
+            data = self.Y
+        else:
+            data = self.embedding
+
         with Parallel(n_jobs=self.num_cores, backend="threading") as parallel:
 
             while not converged and it <= max_iter:
@@ -420,7 +531,7 @@ class pam:
                 # iterable
                 cluster_it = tqdm.tqdm(range(k))
 
-                new_centers = parallel(delayed(update_centers_for_cluster_euclidean)(self.Y, 
+                new_centers = parallel(delayed(update_centers_for_cluster_euclidean)(data, 
                     self.assignments_bool, cluster_idx) for cluster_idx in cluster_it)
 
                 new_centers = np.array(new_centers)
