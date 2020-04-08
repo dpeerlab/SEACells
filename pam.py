@@ -335,7 +335,9 @@ class pam:
             print("Computing first %d singular vectors..." % k)
 
         # Note: per documentation, the order of singular values is not guaranteed
-        u, s, vt = svds(self.M, k=k)
+        # u, s, vt = svds(self.M, k=k)
+        w, v = eigs(self.T, k=k, which="LM")
+        vt = v.T
 
         if self.verbose:
             print("Computing leverage scores...")
