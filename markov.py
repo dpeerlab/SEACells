@@ -2,16 +2,13 @@
 import numpy as np
 from scipy.sparse import coo_matrix, csr_matrix, dok_matrix, lil_matrix, diags
 from sklearn.neighbors import kneighbors_graph
-from scipy.sparse.csgraph import johnson, dijkstra
 from scipy.sparse.linalg import svds, eigs, eigsh
 from scipy.spatial.distance import cdist
 from scipy.special import logsumexp
 
 # for parallelizing stuff
 from multiprocessing import cpu_count, Pool
-from contextlib import closing
 from joblib import Parallel, delayed
-from itertools import repeat, starmap
 import tqdm
 
 # get number of cores for multiprocessing
@@ -19,7 +16,6 @@ NUM_CORES = cpu_count()
 
 #################################################
 # Helper functions parallelization
-#
 #################################################
 
 def logsumexp_row_nonzeros(X):
@@ -120,7 +116,7 @@ def update_centers_for_cluster_euclidean(data, cluster_assignments, cluster_idx)
 
     return new_center
 
-class pam:
+class markov:
 
     def __init__(self, Y, n_cores:int=-1, verbose:bool=False):
         """Initialize model parameters"""
@@ -323,36 +319,29 @@ class pam:
             print("Selected %d columns!" % len(self.centers))
 
     def assign_clusters(self):
-        # find distance from each point to each center
-        dist_mtx = johnson(self.G, directed=False, indices = self.centers).T
+        """Assign clusters based on Markov absorption probabilities"""
+        # transition matrix for nonabsorbing states
+        nonabsorbing_states = np.array([idx not in self.centers for idx in self.indices])
+        Q = self.T[:,nonabsorbing_states][nonabsorbing_states,:]
 
-        # assign points to closest
-        self.assignments = np.argmin(dist_mtx, axis=1)
+        # compute fundamental matrix 
+        F = np.linalg.inv(np.eye(sum(nonabsorbing_states)) - Q)
 
-        # save distances
-        # self.metacell_distances = np.exp(-dist_mtx)
-        self.metacell_distances = 1. / (dist_mtx + 1.)
+        # compute absorption probabilities
+        R = self.T[nonabsorbing_states,:][:,self.centers]
+        B = F @ R
 
-        # boolean
-        self.assignments_bool = (dist_mtx == dist_mtx.min(axis=1)[:,None]).astype(int)
+        assignments_nonabsorbing = (B == B.max(axis=1)).astype(int)
 
-    def assign_clusters_euclidean(self, coordinates=None):
-        if coordinates is None:
-            if self.embedding is None:
-                coordinates = self.Y
-            else:
-                coordinates = self.embedding
+        self.assignments_bool = np.zeros((self.n, len(self.centers)))
+        self.assignments_bool[nonabsorbing_states,:] = assignments_nonabsorbing
+        self.assignments_bool[self.centers,:] = np.eye(len(self.centers))
 
-        dist_mtx = cdist(coordinates, coordinates[self.centers,:], metric="euclidean")
+        self.abs_probs = np.zeros((self.n, len(self.centers)))
+        self.abs_probs[nonabsorbing_states,:] = B
+        self.abs_probs[self.centers,:] = np.eye(len(self.centers))
 
-        # assign points to closest
-        self.assignments = np.argmin(dist_mtx, axis=1)
-
-        # save distances
-        self.metacell_distances = np.exp(-dist_mtx)
-
-        # boolean
-        self.assignments_bool = (dist_mtx == dist_mtx.min(axis=1)[:,None]).astype(int)
+        #self.assignments_bool = np.concatenate([np.eye(len(self.centers)), assignments_nonabsorbing], axis=0)
 
     def _compute_modularity_matrix(self):
         """Computes modularity matrix B to give an idea of quality of clustering
@@ -389,38 +378,6 @@ class pam:
 
         return 1./(2.*m) * np.trace(S.T @ A @ S - S.T @ k @ k.T @ S / (2.*m))
 
-
-    def update_centers(self, k):
-
-        converged = True
-
-        for clust in range(k):
-            # get current center
-            curr_center = self.centers[clust]
-
-            if self.verbose:
-                print("Processing cluster %d" % clust)
-                print("Current center: %d" % curr_center)
-            assigned_points = self.indices[self.assignments_bool[:,clust].astype(bool)]
-
-            # compute distances
-            dist_mtx = dijkstra(self.G, directed=False, indices = assigned_points)[:,assigned_points]
-
-            # pick the point with the minimum total distance to all points
-            new_center = assigned_points[np.argmin(dist_mtx.sum(axis=1))]
-
-            if self.verbose:
-                print("New center: %d" % new_center)
-
-            # check if update
-            if curr_center != new_center:
-                converged = False
-
-            # update center
-            self.centers[clust] = new_center
-
-        return converged
-
     def get_metacell_coordinates(self, coordinates=None):
         if coordinates is None:
             coordinates = self.Y
@@ -432,7 +389,8 @@ class pam:
             coordinates = self.Y
 
         #weights = np.multiply(self.assignments_bool, self.metacell_distances)
-        weights = self.assignments_bool
+        # weights = self.assignments_bool
+        weights = np.array(self.abs_probs)
         sum_weights = weights.sum(axis=0, keepdims=True)
 
         return np.array(weights.T @ coordinates / sum_weights.T)
@@ -469,13 +427,13 @@ class pam:
         return mean, expected_cov
 
     def get_metacell_sizes(self):
-        return np.sum(self.assignments_bool, axis=0)
+        return np.sum(self.abs_probs, axis=0)
 
-    def prune_small_metacells_original(self, thres:int=1):
+    def prune_small_metacells(self, thres:int=1):
         metacell_sizes = self.get_metacell_sizes()
         self.centers = self.centers[metacell_sizes >= thres]
 
-    def prune_small_metacells(self, k:int=15):
+    def prune_small_metacells_original(self, k:int=15):
         """Density-based pruning of metacells falling within adaptive bandwidth
 
         If a metacell is within certain distance of another metacell, remove it
@@ -505,55 +463,56 @@ class pam:
         """New connectivity graph for meta-cells"""
         return (self.assignments_bool.T @ self.G @ self.assignments_bool > 0).astype(float)
 
-
-    def k_medoids_parallel(self, min_size:int=20, max_iter:int=50, init_centers="cur", k=50, epsilon=1., max_centers=200):
+    def markov_clusters(self, min_size:int=20, max_iter:int=50, init_centers="cur", k=50, epsilon=1., max_centers=200):
         
         if init_centers is None:
             self.initialize_centers_uniform(max_centers)
         elif init_centers == "cur":
             self.initialize_centers_cur(k=k, epsilon=epsilon)
 
-        self.assign_clusters_euclidean()
-        #self.prune_small_metacells(thres=min_size)
-        self.prune_small_metacells(k=min_size)
+        self.assign_clusters()
+        self.prune_small_metacells(thres=min_size)
+        self.assign_clusters()
+        self.prune_small_metacells(thres=min_size)
+        self.assign_clusters()
 
-        it=1
-        converged=False
+        # it=1
+        # converged=False
 
-        # coordinate system to use for k medoids
-        if self.embedding is None:
-            data = self.Y
-        else:
-            data = self.embedding
+        # # coordinate system to use for k medoids
+        # if self.embedding is None:
+        #     data = self.Y
+        # else:
+        #     data = self.embedding
 
-        with Parallel(n_jobs=self.num_cores, backend="threading") as parallel:
+        # with Parallel(n_jobs=self.num_cores, backend="threading") as parallel:
 
-            while not converged and it <= max_iter:
+        #     while not converged and it <= max_iter:
 
-                if self.verbose:
-                    print("Iteration %d of %d" % (it, max_iter))
+        #         if self.verbose:
+        #             print("Iteration %d of %d" % (it, max_iter))
 
-                k = len(self.centers)
+        #         k = len(self.centers)
 
-                # iterable
-                cluster_it = tqdm.tqdm(range(k))
+        #         # iterable
+        #         cluster_it = tqdm.tqdm(range(k))
 
-                new_centers = parallel(delayed(update_centers_for_cluster_euclidean)(data, 
-                    self.assignments_bool, cluster_idx) for cluster_idx in cluster_it)
+        #         new_centers = parallel(delayed(update_centers_for_cluster_euclidean)(data, 
+        #             self.assignments_bool, cluster_idx) for cluster_idx in cluster_it)
 
-                new_centers = np.array(new_centers)
+        #         new_centers = np.array(new_centers)
 
-                if np.all(new_centers == self.centers):
-                    converged=True
-                    print("Converged after %d iterations(s)!" % it)
+        #         if np.all(new_centers == self.centers):
+        #             converged=True
+        #             print("Converged after %d iterations(s)!" % it)
 
-                self.centers = new_centers
+        #         self.centers = new_centers
 
-                # assign clusters
-                self.assign_clusters_euclidean()
-                #self.prune_small_metacells(thres=min_size)
-                self.prune_small_metacells(k=min_size)
-                self.assign_clusters_euclidean()
+        #         # assign clusters
+        #         self.assign_clusters_euclidean()
+        #         #self.prune_small_metacells(thres=min_size)
+        #         self.prune_small_metacells(k=min_size)
+        #         self.assign_clusters_euclidean()
 
-                it += 1
+        #         it += 1
 
