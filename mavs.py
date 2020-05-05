@@ -2,7 +2,7 @@
 # Then uses Markov random walk absorption probabilities to assign cells.
 
 import numpy as np
-from scipy.sparse import coo_matrix, csr_matrix, dok_matrix, lil_matrix, diags
+from scipy.sparse import coo_matrix, csr_matrix, dok_matrix, lil_matrix, diags, eye
 from sklearn.neighbors import kneighbors_graph
 from scipy.sparse.linalg import svds, eigs, eigsh, norm
 from scipy.spatial.distance import cdist
@@ -479,8 +479,6 @@ class mavs:
             #print(np.linalg.norm(E[row_idx,:]))
         self.centers = np.array(list(S))
 
-            
-
     def assign_clusters(self):
         """Assign clusters based on Markov absorption probabilities
 
@@ -509,14 +507,54 @@ class mavs:
         self.abs_probs[self.centers,:] = np.eye(len(self.centers))
 
         # square
-        self.W = self.abs_probs**2
-        self.W = self.W / self.W.sum(axis=1, keepdims=True)
+        self.W = self.abs_probs
+        #self.W = self.W / self.W.sum(axis=1, keepdims=True)
+
+    def assign_clusters_approximate(self, n_components=200):
+        """Assign clusters based on Markov absorption probabilities
+        Approximate inverse using top 100 singular vectors
+        https://www.cse.unr.edu/~bebis/CS791E/Notes/SVD.pdf
+
+        """
+        # transition matrix for nonabsorbing states
+        nonabsorbing_states = np.array([idx not in self.centers for idx in self.indices])
+        Q = self.T[:,nonabsorbing_states][nonabsorbing_states,:]
+
+        # compute eigendecomposition of the fundamental matrix to get the smallest eigenvalues
+        u, s, vt = svds(eye(Q.shape[0]) - Q, k=n_components, which="SM")
+
+        # compute approximate inverse
+        F = vt.T @ np.diag(1./s) @ u.T
+
+        # F = np.linalg.inv(np.eye(sum(nonabsorbing_states)) - Q)
+
+        # compute absorption probabilities
+        R = self.T[nonabsorbing_states,:][:,self.centers]
+        B = F @ R
+
+        assignments_nonabsorbing = np.zeros_like(B)
+        assignments_nonabsorbing[np.arange(len(B)), B.argmax(1)] = 1
+
+        # compute boolean assignments
+        self.assignments_bool = np.zeros((self.n, len(self.centers)))
+        self.assignments_bool[nonabsorbing_states,:] = assignments_nonabsorbing
+        self.assignments_bool[self.centers,:] = np.eye(len(self.centers))
+
+        # compute absorption probabilities for each point (soft assignment)
+        self.abs_probs = np.zeros((self.n, len(self.centers)))
+        self.abs_probs[nonabsorbing_states,:] = B / B.sum(axis=1, keepdims=True)
+        self.abs_probs[self.centers,:] = np.eye(len(self.centers))
+
+        # square
+        self.W = self.abs_probs
+        self.W[np.where(self.W<0)] = 0.
+        #self.W = self.W / self.W.sum(axis=1, keepdims=True)
 
     def cluster(self, k:int):
         """Wrapper for running adaptive volume sampling, then assigning each cluster.
         """
         self.adaptive_volume_sampling(k)
-        self.assign_clusters()
+        self.assign_clusters_approximate()
 
     def cluster_original(self, k:int):
         """Wrapper for running adaptive volume sampling, then assigning each cluster.
