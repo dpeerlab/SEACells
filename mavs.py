@@ -4,7 +4,7 @@
 import numpy as np
 from scipy.sparse import coo_matrix, csr_matrix, dok_matrix, lil_matrix, diags, eye
 from sklearn.neighbors import kneighbors_graph
-from scipy.sparse.linalg import svds, eigs, eigsh, norm
+from scipy.sparse.linalg import svds, eigs, eigsh, norm, spsolve
 from scipy.spatial.distance import cdist
 from scipy.special import logsumexp
 
@@ -486,11 +486,13 @@ class mavs:
         Q = self.T[:,nonabsorbing_states][nonabsorbing_states,:]
 
         # compute fundamental matrix 
-        F = np.linalg.inv(np.eye(sum(nonabsorbing_states)) - Q)
+        F_inverse = eye(sum(nonabsorbing_states)) - Q
 
-        # compute absorption probabilities
+        # get matrix of nonabsorbing states
         R = self.T[nonabsorbing_states,:][:,self.centers]
-        B = F @ R
+
+        # compute absorption probabilities with spsolve
+        B = spsolve(F_inverse, R)
 
         assignments_nonabsorbing = (B == B.max(axis=1)).astype(int)
 
