@@ -347,23 +347,11 @@ class mavs:
             # select point
             score = f/g
             p = np.argmax(score)
-            #print(score[p])
 
-            # update delta
-            #start = time.time()
-            #delta_term1 = (A.T @ A[:,p]).toarray().ravel()
             delta_term1 = (ATA[:,p]).toarray().ravel()
             delta_term2 = np.multiply(omega[:,p].reshape(-1,1), omega).sum(axis=0)
             delta = delta_term1 - delta_term2
-            #end = time.time()
-            #print("Time to compute delta: %.4f" % (end-start))
-            #print(delta)
-            
-            # update omega
-            # print(delta_term1)
-            # print(delta_term2)
-            # print(delta[p])
-            #start = time.time()
+
             o = delta / np.sqrt(delta[p])
             # update f (term1)
             omega_square_norm = np.linalg.norm(o)**2
@@ -376,26 +364,13 @@ class mavs:
             for r in range(j):
                 omega_r = omega[r,:]
                 pl += np.dot(omega_r, o) * omega_r
-            #print(pl.shape)
-            #end = time.time()
-            #print("Time to compute term 1: %f" % (end-start))
 
             start = time.time()
             ATAo = (ATA @ o.reshape(-1,1)).ravel()
-            #end = time.time()
             term2 = np.multiply(o, ATAo - pl)
-            #end = time.time()
-            #print("Time to compute term 2: %f" % (end-start))
 
             # update f
             f = (f - 2 * term2 + term1)
-            #print(f[p])
-            #print(f)
-
-            # update g
-            g = g #- np.multiply(o, o)
-            #print(g[q])
-            #print(g)
 
             # store omega and delta
             d[j,:] = delta
@@ -406,81 +381,11 @@ class mavs:
 
         self.centers = np.array(list(S))
 
-
-    def adaptive_volume_sampling_slow(self, k:int, thres:float=1e-15):
-        """Adaptive volume sampling step
-
-        Right now sampling the similarity matrix, but maybe we want to change this to something else.
-
-        Inputs:
-            k (int): how many centers do you want to deal with?
-        """
-        # keep a running list of selected centers
-        S = set([])
-        # this doesn't get mutated. It's the original matrix that we want to apprximate
-        # this is the residual matrix
-        E = self.embedding.copy()
-        
-        for it in tqdm(range(k)):
-
-            if np.linalg.norm(E) < thres:
-                continue
-
-            if self.verbose:
-                print("Beginning iteration %d" % it)
-                print("Computing row probabilities...")
-
-
-            #row_probabilities_raw = np.linalg.norm(E, axis=1) / np.linalg.norm(E)
-            #nums = np.zeros(self.n)
-            #for i in range(self.n):
-                #nums[i] = np.linalg.norm(E @ E[i,:].reshape(-1,1))
-            nums = np.linalg.norm(E @ E.T, axis=0)
-            denoms = np.linalg.norm(E, axis=1)
-            scores = nums / denoms
-            #row_probabilities_norm = row_probabilities_raw / sum(row_probabilities_raw)
-
-            # sample new row index
-            # row_idx = np.random.choice(range(self.n), 1, p=row_probabilities_norm)
-            #print(row_probabilities_raw[:100])
-
-            #row_idx = np.argmax(row_probabilities_raw)
-            row_idx = np.argmax(scores)
-            print(scores[row_idx])
-            #print(row_probabilities_raw[row_idx])
-            #print(row_idx)
-
-            if self.verbose:
-                print("Selected index %d" % row_idx)
-
-            # add selected index
-            S.add(row_idx)
-
-            if self.verbose:
-                print("Computing projection matrix...")
-
-            # compute projection matrix for subspace
-            #start = time.time()
-            #print(E[row_idx,:])
-            P = projection_matrix_dense(E[row_idx,:])
-            #print(P.shape)
-            #end = time.time()
-            #print("Time to compute projection matrix: %d" % (end-start))
-
-            # update E by subtracting its projection
-            #print(E.shape)
-            #print(P.shape)
-            #E = E - P @ E
-
-            E = E - E @ P.T
-            #print("Time to subtract projection: %d" % (end-start))
-            #print(np.linalg.norm(E[row_idx,:]))
-        self.centers = np.array(list(S))
-
     def assign_clusters(self):
         """Assign clusters based on Markov absorption probabilities
 
         """
+        print("Assigning clusters...")
         # transition matrix for nonabsorbing states
         nonabsorbing_states = np.array([idx not in self.centers for idx in self.indices])
         Q = self.T[:,nonabsorbing_states][nonabsorbing_states,:]
@@ -516,7 +421,7 @@ class mavs:
     def cluster(self, k:int):
         """Wrapper for running adaptive volume sampling, then assigning each cluster.
         """
-        self.adaptive_volume_sampling_original(k)
+        self.adaptive_volume_sampling(k)
         self.assign_clusters()
 
     ##############################################################
