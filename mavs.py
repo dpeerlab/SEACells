@@ -2,7 +2,7 @@
 # Then uses Markov random walk absorption probabilities to assign cells.
 
 import numpy as np
-from scipy.sparse import coo_matrix, csr_matrix, dok_matrix, lil_matrix, diags, eye
+from scipy.sparse import coo_matrix, csr_matrix, dok_matrix, lil_matrix, diags, eye, csc_matrix
 from sklearn.neighbors import kneighbors_graph
 from scipy.sparse.linalg import svds, eigs, eigsh, norm, spsolve
 from scipy.spatial.distance import cdist
@@ -486,15 +486,18 @@ class mavs:
         Q = self.T[:,nonabsorbing_states][nonabsorbing_states,:]
 
         # compute fundamental matrix 
-        F_inverse = eye(sum(nonabsorbing_states)) - Q
+        F_inverse = (eye(sum(nonabsorbing_states)) - Q).tocsc()
 
         # get matrix of nonabsorbing states
-        R = self.T[nonabsorbing_states,:][:,self.centers]
+        R = self.T[nonabsorbing_states,:][:,self.centers].tocsc()
 
         # compute absorption probabilities with spsolve
         B = spsolve(F_inverse, R)
 
-        assignments_nonabsorbing = (B == B.max(axis=1)).astype(int)
+        assignments_nonabsorbing = np.zeros(B.shape)
+        max_idx = np.array(np.argmax(B, axis=1)).ravel()
+        row_idx = np.arange(B.shape[0])
+        assignments_nonabsorbing[row_idx, max_idx] = 1
 
         # compute boolean assignments
         self.assignments_bool = np.zeros((self.n, len(self.centers)))
@@ -504,18 +507,13 @@ class mavs:
         # compute absorption probabilities for each point (soft assignment)
         self.abs_probs = np.zeros((self.n, len(self.centers)))
         self.abs_probs[nonabsorbing_states,:] = B / B.sum(axis=1)
+
         self.abs_probs[self.centers,:] = np.eye(len(self.centers))
 
-        # square
+        # get weights
         self.W = self.abs_probs
 
     def cluster(self, k:int):
-        """Wrapper for running adaptive volume sampling, then assigning each cluster.
-        """
-        self.adaptive_volume_sampling(k)
-        self.assign_clusters_approximate()
-
-    def cluster_original(self, k:int):
         """Wrapper for running adaptive volume sampling, then assigning each cluster.
         """
         self.adaptive_volume_sampling_original(k)
