@@ -7,7 +7,7 @@ from sklearn.neighbors import kneighbors_graph
 from scipy.sparse.linalg import svds, eigs, eigsh, norm, spsolve
 from scipy.spatial.distance import cdist
 from scipy.special import logsumexp
-from scipy.stats import t
+from scipy.stats import t, entropy
 
 # for parallelizing stuff
 from multiprocessing import cpu_count, Pool
@@ -464,24 +464,28 @@ class mavs:
         # get degrees of freedom
         df = self.get_soft_metacell_sizes()[idx]
 
-        # test off-diagonal entries
-        corr_tril = np.tril(corr, k=-1)
-
         # compute p values
-        num = corr_tril * np.sqrt(df - 2)
-        denom = np.sqrt(1 - corr_tril)
-        t = np.divide(num, denom)
+        num = corr * np.sqrt(df - 2)
+        denom = np.sqrt(1 - corr + 1e-12) # add small jitter for now...
+        t_statistic = np.divide(num, denom)
 
         # get pearson r
-        one_minus_p = t.cdf(corr_tril.ravel(), df)
-        p = (1 - one_minus_p) * 2
+        one_minus_p = t.cdf(t_statistic, df)
+        p = (1 - one_minus_p)
 
         # check if below  thres
         below_thres = p < thres
 
-        return np.any(below_thres)
+        # set all diagonal entries to True
+        for i in range(p.shape[0]):
+            below_thres[i,i] = False
 
-    def f_test(self, coordinates, threshold:float=0.05):
+        # count the number of violations
+        prop = np.sum(below_thres) / (corr.shape[0]**2)
+
+        return prop, p
+
+    def f_test(self, coordinates, threshold:float=0.05, max_prop:float=0.1):
         """Identify clusters with variance not satisfying multinomial assumption with F-test
 
         Input
@@ -491,11 +495,19 @@ class mavs:
         Returns: indices of bad clusters
         """
         # TODO: parallelize cluster checking
-        out = np.zeros(len(self.centers))
-        for cluster in tqdm(len(self.centers)):
-            out[cluster] = self.f_test_for_cluster(coordinates, cluster, threshold)
+        out = np.zeros(len(self.centers), dtype=bool)
+        for cluster in tqdm(range(len(self.centers))):
+            prop, p = self.f_test_for_cluster(coordinates, cluster, threshold)
+            out[cluster] = prop > max_prop
 
         return np.arange(len(self.centers))[out]
+
+    ##############################################################
+    # Entropy
+    ##############################################################
+
+    def get_entropy(self):
+        return entropy(self.W.T)
 
     ##############################################################
     # Analysis
