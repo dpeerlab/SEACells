@@ -7,6 +7,7 @@ from sklearn.neighbors import kneighbors_graph
 from scipy.sparse.linalg import svds, eigs, eigsh, norm, spsolve
 from scipy.spatial.distance import cdist
 from scipy.special import logsumexp
+from scipy.stats import t
 
 # for parallelizing stuff
 from multiprocessing import cpu_count, Pool
@@ -413,6 +414,88 @@ class mavs:
         W = np.power(self.W, exponent)
         W = W / W.sum(axis=0, keepdims=True)
         return W.T @ coordinates
+
+    ##############################################################
+    # Identifying bad clusters
+    ##############################################################
+
+    def cluster_correlation(self, coordinates, idx:int):
+        """Given coordinates and cluster index, get correlation
+        Correlation is weighted by fractional membership
+
+        Returns:
+            correlation (d x d)
+        """
+        # get dimensions
+        n, d = coordinates.shape
+
+        # get empirical mean and covariance
+        m, cov = self.get_cluster_mean_and_cov(coordinates, idx)
+
+        # divide by square root of diagonal entries
+        diags = np.diag(cov).reshape(-1, 1)
+
+        # sqrt_diags
+        sqrt_diags = np.sqrt(diags @ diags.T)
+
+        # compute correlation
+        corr = np.divide(cov, sqrt_diags)
+        return corr
+
+
+    def f_test_for_cluster(self, coordinates, idx:int, thres:float=0.05):
+        """F test for a specific cluster
+        Gets expected covariance and empirical covariance, using a weighted sum
+
+        Inputs:
+            coordinates (size_cluster * d)
+            idx (int): cluster index
+            thres (float): p-value threshold
+
+        Returns:
+            (bool) indicates whether or not one of the covariances is below threshold
+        """
+        # get expected mean and covariance
+        # exp_mean, exp_cov = self.get_expected_mean_and_cov(coordinates, idx)
+
+        # get correlation coefficients
+        corr = self.cluster_correlation(coordinates, idx)
+
+        # get degrees of freedom
+        df = self.get_soft_metacell_sizes()[idx]
+
+        # test off-diagonal entries
+        corr_tril = np.tril(corr, k=-1)
+
+        # compute p values
+        num = corr_tril * np.sqrt(df - 2)
+        denom = np.sqrt(1 - corr_tril)
+        t = np.divide(num, denom)
+
+        # get pearson r
+        one_minus_p = t.cdf(corr_tril.ravel(), df)
+        p = (1 - one_minus_p) * 2
+
+        # check if below  thres
+        below_thres = p < thres
+
+        return np.any(below_thres)
+
+    def f_test(self, coordinates, threshold:float=0.05):
+        """Identify clusters with variance not satisfying multinomial assumption with F-test
+
+        Input
+            coordinates: (n x d)
+            threshold: p value threshold
+
+        Returns: indices of bad clusters
+        """
+        # TODO: parallelize cluster checking
+        out = np.zeros(len(self.centers))
+        for cluster in tqdm(len(self.centers)):
+            out[cluster] = self.f_test_for_cluster(coordinates, cluster, threshold)
+
+        return np.arange(len(self.centers))[out]
 
     ##############################################################
     # Analysis
