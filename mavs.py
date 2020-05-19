@@ -20,25 +20,6 @@ import time
 NUM_CORES = cpu_count()
 
 ##########################################################
-# Helper functions for AVS
-##########################################################
-
-def projection_matrix(A):
-    """Returns projection matrix P for subspace A (A is sparse)"""
-    if np.ndim(A) == 1:
-        A = A.reshape(1,-1)
-    return csr_matrix(A @ np.linalg.inv((A.T @ A).toarray()) @ A.T)
-
-def projection_matrix_dense(A):
-    """Returns projection matrix P for subspace A (A is dense)"""
-    if np.ndim(A) == 1:
-        A = A.reshape(-1,1)
-    try:
-        return A @ np.linalg.inv(A.T @ A) @ A.T
-    except:
-        print(A)
-
-##########################################################
 # Helper functions for parallelizing kernel construction
 ##########################################################
 
@@ -272,52 +253,6 @@ class mavs:
     ##############################################################
     # Clustering and sampling
     ##############################################################
-
-    def adaptive_volume_sampling_original(self, k:int):
-        """Adaptive volume sampling step
-
-        Right now sampling the similarity matrix, but maybe we want to change this to something else.
-
-        Inputs:
-            k (int): how many centers do you want to deal with?
-        """
-        # keep a running list of selected centers
-        S = set([])
-        E = self.M.copy()
-        
-        for it in tqdm(range(k)):
-
-            if self.verbose:
-                print("Beginning iteration %d" % it)
-                print("Computing row probabilities...")
-
-            # compute probability of selecting each row
-            row_probabilities_raw = norm(E, axis=1) / norm(E)
-
-            if self.verbose:
-                print("Sampling new index...")
-
-            # sample new row index
-            # row_idx = np.random.choice(range(self.n), 1, p=row_probabilities_norm)
-            #print(row_probabilities_raw[:100])
-
-            row_idx = np.argmax(row_probabilities_raw)
-
-            if self.verbose:
-                print("Selected index %d" % row_idx)
-
-            # add selected index
-            S.add(row_idx)
-
-            if self.verbose:
-                print("Computing projection matrix...")
-
-            P = projection_matrix(E[row_idx,:].T)
-
-            E = E - E @ P.T
-            #print("Time to subtract projection: %d" % (end-start))
-            #print(np.linalg.norm(E[row_idx,:]))
-        self.centers = np.array(list(S))
 
     def adaptive_volume_sampling(self, k:int):
         """Fast greedy adaptive CSSP
