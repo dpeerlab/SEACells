@@ -1,5 +1,6 @@
 .*
-
+guttube/*
+.gitignore
 # local old code files
 old/
 
