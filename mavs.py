@@ -408,7 +408,7 @@ class mavs:
 
         return 1./(2*m) * np.trace(S.T @ A @ S - S.T @ k @ k.T @ S / (2*m))
 
-    def get_metacell_coordinates(self, coordinates=None, exponent:float=2.):
+    def get_metacell_coordinates(self, coordinates=None, exponent:float=1.):
         if coordinates is None:
             coordinates = self.Y
         W = np.power(self.W, exponent)
