@@ -7,7 +7,7 @@ from sklearn.neighbors import kneighbors_graph
 from scipy.sparse.linalg import svds, eigs, eigsh, norm, spsolve
 from scipy.spatial.distance import cdist
 from scipy.special import logsumexp
-from scipy.stats import t, entropy
+from scipy.stats import t, entropy, multinomial
 
 # for parallelizing stuff
 from multiprocessing import cpu_count, Pool
@@ -495,19 +495,79 @@ class mavs:
         Returns: indices of bad clusters
         """
         # TODO: parallelize cluster checking
+        props = []
         out = np.zeros(len(self.centers), dtype=bool)
         for cluster in tqdm(range(len(self.centers))):
             prop, p = self.f_test_for_cluster(coordinates, cluster, threshold)
             out[cluster] = prop > max_prop
+            props.append(prop)
 
-        return np.arange(len(self.centers))[out]
+        return np.arange(len(self.centers))[out], props
+
+    ##############################################################
+    # Likelihoods and BIC
+    ##############################################################
+
+    def compute_cluster_likelihood(self, coordinates, cluster_idx):
+        """Compute cluster likelihood under multinomial distribution"""
+
+        # get library sizes
+        lib_sizes = np.array(np.sum(coordinates, axis=1)).ravel()
+        #print(lib_sizes.shape)
+
+        # get mean and covariance
+        mean, cov = self.get_cluster_mean_and_cov(coordinates, cluster_idx)
+        mean = np.array(mean).ravel()
+        #print(mean.shape)
+
+        coords = coordinates.toarray()
+        #print(coords.shape)
+
+        # get  likelihood
+        logp = multinomial.logpmf(coords, lib_sizes, mean)
+
+        weighted_logp = np.multiply(self.W[:,cluster_idx], logp)
+        #print(logp.shape)
+        return np.sum(weighted_logp)
+
+    def compute_total_likelihood(self, coordinates):
+        """Compute total likelihood of data under multinomial sampling """
+
+        logp = 0.
+        for cluster_idx in tqdm(range(len(self.centers))):
+            logp += self.compute_cluster_likelihood(coordinates, cluster_idx)
+
+        return logp
+
+    def bic(self, coordinates):
+        """Compute Bayesian information criterion under multinomial model"""
+
+        logp = self.compute_total_likelihood(coordinates)
+        k = len(self.centers) * coordinates.shape[1]
+        n = coordinates.shape[0]
+
+        print("Number of parameters: ", k)
+        print("Number of points: ", n)
+        print("Log likelihood: ", logp)
+
+        bic = k * np.log(n) - 2 * logp
+
+        print("BIC: ", bic)
+        return bic
 
     ##############################################################
     # Entropy
     ##############################################################
 
-    def get_entropy(self):
+    def compute_cell_entropy(self):
+        """Compute entropy of each cell for cluster assignment
+        """
         return entropy(self.W.T)
+
+    def compute_total_entropy(self):
+        """Compute total entropy of all cells
+        """
+        return np.sum(entropy(self.W.T))
 
     ##############################################################
     # Analysis
