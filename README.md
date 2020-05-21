@@ -45,7 +45,7 @@ plt.scatter(ad.obsm["X_umap"][model.centers,0], ad.obsm["X_umap"][model.centers,
 ```
 for example.
 ## computing metacell gene/peak expressions
-To get average gene expression corresponding to each metacell
+To get average gene expression corresponding to each metacell. The result will be a (m x d) matrix, where m is the number of metacells and d is the number of genes (or peaks).
 ```
 average_expression = model.get_metacell_coordinates(ad.X)
 ```
