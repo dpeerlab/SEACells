@@ -7,6 +7,7 @@ from sklearn.neighbors import kneighbors_graph
 from scipy.sparse.linalg import svds, eigs, eigsh, norm, spsolve
 from scipy.spatial.distance import cdist
 from scipy.special import logsumexp
+from scipy.stats import t, entropy, multinomial
 
 # for parallelizing stuff
 from multiprocessing import cpu_count, Pool
@@ -18,25 +19,6 @@ import time
 
 # get number of cores for multiprocessing
 NUM_CORES = cpu_count()
-
-##########################################################
-# Helper functions for AVS
-##########################################################
-
-def projection_matrix(A):
-    """Returns projection matrix P for subspace A (A is sparse)"""
-    if np.ndim(A) == 1:
-        A = A.reshape(1,-1)
-    return csr_matrix(A @ np.linalg.inv((A.T @ A).toarray()) @ A.T)
-
-def projection_matrix_dense(A):
-    """Returns projection matrix P for subspace A (A is dense)"""
-    if np.ndim(A) == 1:
-        A = A.reshape(-1,1)
-    try:
-        return A @ np.linalg.inv(A.T @ A) @ A.T
-    except:
-        print(A)
 
 ##########################################################
 # Helper functions for parallelizing kernel construction
@@ -273,52 +255,6 @@ class mavs:
     # Clustering and sampling
     ##############################################################
 
-    def adaptive_volume_sampling_original(self, k:int):
-        """Adaptive volume sampling step
-
-        Right now sampling the similarity matrix, but maybe we want to change this to something else.
-
-        Inputs:
-            k (int): how many centers do you want to deal with?
-        """
-        # keep a running list of selected centers
-        S = set([])
-        E = self.M.copy()
-        
-        for it in tqdm(range(k)):
-
-            if self.verbose:
-                print("Beginning iteration %d" % it)
-                print("Computing row probabilities...")
-
-            # compute probability of selecting each row
-            row_probabilities_raw = norm(E, axis=1) / norm(E)
-
-            if self.verbose:
-                print("Sampling new index...")
-
-            # sample new row index
-            # row_idx = np.random.choice(range(self.n), 1, p=row_probabilities_norm)
-            #print(row_probabilities_raw[:100])
-
-            row_idx = np.argmax(row_probabilities_raw)
-
-            if self.verbose:
-                print("Selected index %d" % row_idx)
-
-            # add selected index
-            S.add(row_idx)
-
-            if self.verbose:
-                print("Computing projection matrix...")
-
-            P = projection_matrix(E[row_idx,:].T)
-
-            E = E - E @ P.T
-            #print("Time to subtract projection: %d" % (end-start))
-            #print(np.linalg.norm(E[row_idx,:]))
-        self.centers = np.array(list(S))
-
     def adaptive_volume_sampling(self, k:int):
         """Fast greedy adaptive CSSP
 
@@ -472,12 +408,166 @@ class mavs:
 
         return 1./(2*m) * np.trace(S.T @ A @ S - S.T @ k @ k.T @ S / (2*m))
 
-    def get_metacell_coordinates(self, coordinates=None, exponent:float=2.):
+    def get_metacell_coordinates(self, coordinates=None, exponent:float=1.):
         if coordinates is None:
             coordinates = self.Y
         W = np.power(self.W, exponent)
         W = W / W.sum(axis=0, keepdims=True)
         return W.T @ coordinates
+
+    ##############################################################
+    # Identifying bad clusters
+    ##############################################################
+
+    def cluster_correlation(self, coordinates, idx:int):
+        """Given coordinates and cluster index, get correlation
+        Correlation is weighted by fractional membership
+
+        Returns:
+            correlation (d x d)
+        """
+        # get dimensions
+        n, d = coordinates.shape
+
+        # get empirical mean and covariance
+        m, cov = self.get_cluster_mean_and_cov(coordinates, idx)
+
+        # divide by square root of diagonal entries
+        diags = np.diag(cov).reshape(-1, 1)
+
+        # sqrt_diags
+        sqrt_diags = np.sqrt(diags @ diags.T)
+
+        # compute correlation
+        corr = np.divide(cov, sqrt_diags)
+        return corr
+
+
+    def f_test_for_cluster(self, coordinates, idx:int, thres:float=0.05):
+        """F test for a specific cluster
+        Gets expected covariance and empirical covariance, using a weighted sum
+
+        Inputs:
+            coordinates (size_cluster * d)
+            idx (int): cluster index
+            thres (float): p-value threshold
+
+        Returns:
+            (bool) indicates whether or not one of the covariances is below threshold
+        """
+        # get expected mean and covariance
+        # exp_mean, exp_cov = self.get_expected_mean_and_cov(coordinates, idx)
+
+        # get correlation coefficients
+        corr = self.cluster_correlation(coordinates, idx)
+
+        # get degrees of freedom
+        df = self.get_soft_metacell_sizes()[idx]
+
+        # compute p values
+        num = corr * np.sqrt(df - 2)
+        denom = np.sqrt(1 - corr + 1e-12) # add small jitter for now...
+        t_statistic = np.divide(num, denom)
+
+        # get pearson r
+        one_minus_p = t.cdf(t_statistic, df)
+        p = (1 - one_minus_p)
+
+        # check if below  thres
+        below_thres = p < thres
+
+        # set all diagonal entries to True
+        for i in range(p.shape[0]):
+            below_thres[i,i] = False
+
+        # count the number of violations
+        prop = np.sum(below_thres) / (corr.shape[0]**2)
+
+        return prop, p
+
+    def f_test(self, coordinates, threshold:float=0.05, max_prop:float=0.1):
+        """Identify clusters with variance not satisfying multinomial assumption with F-test
+
+        Input
+            coordinates: (n x d)
+            threshold: p value threshold
+
+        Returns: indices of bad clusters
+        """
+        # TODO: parallelize cluster checking
+        props = []
+        out = np.zeros(len(self.centers), dtype=bool)
+        for cluster in tqdm(range(len(self.centers))):
+            prop, p = self.f_test_for_cluster(coordinates, cluster, threshold)
+            out[cluster] = prop > max_prop
+            props.append(prop)
+
+        return np.arange(len(self.centers))[out], props
+
+    ##############################################################
+    # Likelihoods and BIC
+    ##############################################################
+
+    def compute_cluster_likelihood(self, coordinates, cluster_idx):
+        """Compute cluster likelihood under multinomial distribution"""
+
+        # get library sizes
+        lib_sizes = np.array(np.sum(coordinates, axis=1)).ravel()
+        #print(lib_sizes.shape)
+
+        # get mean and covariance
+        mean, cov = self.get_cluster_mean_and_cov(coordinates, cluster_idx)
+        mean = np.array(mean).ravel()
+        #print(mean.shape)
+
+        coords = coordinates.toarray()
+        #print(coords.shape)
+
+        # get  likelihood
+        logp = multinomial.logpmf(coords, lib_sizes, mean)
+
+        weighted_logp = np.multiply(self.W[:,cluster_idx], logp)
+        #print(logp.shape)
+        return np.sum(weighted_logp)
+
+    def compute_total_likelihood(self, coordinates):
+        """Compute total likelihood of data under multinomial sampling """
+
+        logp = 0.
+        for cluster_idx in tqdm(range(len(self.centers))):
+            logp += self.compute_cluster_likelihood(coordinates, cluster_idx)
+
+        return logp
+
+    def bic(self, coordinates):
+        """Compute Bayesian information criterion under multinomial model"""
+
+        logp = self.compute_total_likelihood(coordinates)
+        k = len(self.centers) * coordinates.shape[1]
+        n = coordinates.shape[0]
+
+        print("Number of parameters: ", k)
+        print("Number of points: ", n)
+        print("Log likelihood: ", logp)
+
+        bic = k * np.log(n) - 2 * logp
+
+        print("BIC: ", bic)
+        return bic
+
+    ##############################################################
+    # Entropy
+    ##############################################################
+
+    def compute_cell_entropy(self):
+        """Compute entropy of each cell for cluster assignment
+        """
+        return entropy(self.W.T)
+
+    def compute_total_entropy(self):
+        """Compute total entropy of all cells
+        """
+        return np.sum(entropy(self.W.T))
 
     ##############################################################
     # Analysis
