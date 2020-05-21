@@ -33,10 +33,11 @@ c = 300 # number of metacells
 model.cluster(c)
 ```
 ## size distribution
-sometimes it is useful to look at size distribution of each metacell to make sure nothing weird is happening. you get access this as follows:
+sometimes it is useful to look at size distribution of each metacell to make sure nothing weird is happening. you can compute metacell sizes as follows:
 ```
 metacell_sizes = model.get_soft_metacell_sizes()
 ```
+The result will be a length c array, where c is the number of metacell centers.
 ## accessing selected centers
 It is helpful to visualise selected centers on a low-dim embedding to make sure that all of your cell types are covered. The indices of selected centers are stored as a NumPy array in the attribute ```model.centers```. To plot the UMAP embedding, you can run
 ```
@@ -45,7 +46,7 @@ plt.scatter(ad.obsm["X_umap"][model.centers,0], ad.obsm["X_umap"][model.centers,
 ```
 for example.
 ## computing metacell gene/peak expressions
-To get average gene expression corresponding to each metacell. The result will be a (m x d) matrix, where m is the number of metacells and d is the number of genes (or peaks).
+To get average gene expression corresponding to each metacell. The result will be a (c x d) matrix, where c is the number of metacells and d is the number of genes (or peaks).
 ```
 average_expression = model.get_metacell_coordinates(ad.X)
 ```
