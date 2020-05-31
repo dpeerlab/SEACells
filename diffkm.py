@@ -24,20 +24,20 @@ NUM_CORES = cpu_count()
 # Helper functions for clustering
 ##########################################################
 
-def get_new_center_for_cluster(embedding, assignments):
+def get_new_center_for_cluster(embedding, assignments, cluster_idx):
         """Update the cluster center to medoid
         """
-        cluster_members = assignments == cluster_idx
+        cluster_members = np.arange(assignments.shape[0])[assignments == cluster_idx]
         cluster_coordinates = embedding[cluster_members, :]
 
         # get pairwise distances for points in this cluster
         distance_mtx = cdist(cluster_coordinates, cluster_coordinates, metric="euclidean")
 
         # medoid: point with minimum maximum distance to other points
-        medoid_idx = np.argmin(np.argmax(distance_mtx, axis=1))
+        medoid_idx = np.argmin(np.sum(distance_mtx, axis=1))
 
         # return index of the new cluster center
-        return medoid_idx
+        return cluster_members[medoid_idx]
 
 ##########################################################
 # Helper functions for parallelizing kernel construction
@@ -233,7 +233,7 @@ class diffkm:
             return
 
         # compute row sums
-        logM = self.M.copy()
+        logM = self.G.copy()
         logM.data = np.log(logM.data)
 
         # compute sum in log space
@@ -279,28 +279,92 @@ class diffkm:
         k: number of centroids
         """
         # array for storing centroids
-        self.centers = np.zeros(k)
+        self.centers = np.zeros(k, dtype=int)
 
         # select initial point randomly
         new_point = np.random.choice(range(self.n), 1)
         self.centers[0] = new_point
 
         # initialize min distances
-        distances = cdist(self.embedding, self.embedding[new_point, :], metric="euclidean").ravel()
+        distances = cdist(self.embedding, self.embedding[new_point, :].reshape(1,-1), metric="euclidean")
 
         # assign rest of points
         for ix in range(1, k):
-            new_point = np.argmax(distances)
+            new_point = np.argmax(distances.ravel())
             self.centers[ix] = new_point
 
             # get distance from all poitns to new points
-            new_point_distances = cdist(self.embedding, self.embedding[new_point, :], metric="euclidean").ravel()
+            new_point_distances = cdist(self.embedding, self.embedding[new_point, :].reshape(1,-1), metric="euclidean")
 
             # update min distances
-            combined_distances = np.vstack([distances, new_point_distances])
-            distances = np.argmin(combined_distances, axis=0)
+            combined_distances = np.hstack([distances, new_point_distances])
 
-    def assign_hard_clusters(self, k):
+            distances = np.min(combined_distances, axis=1, keepdims=True)
+
+
+    def adaptive_volume_sampling(self, k:int):
+        """Fast greedy adaptive CSSP
+
+        From https://arxiv.org/pdf/1312.6838.pdf
+        """
+        A = self.T.copy()
+
+        print("Initializing residual matrix...")
+
+        # precomute ATA
+        ATA = A.T.dot(A)
+
+        # initialization
+        f = np.power(norm(A.T @ A, axis=0), 2)
+        g = np.power(norm(A, axis=0), 2)
+
+        d = np.zeros((k, self.n))
+        omega = np.zeros((k, self.n))
+
+        # keep track of selected indices
+        S = set([])
+
+        # sampling
+        for j in tqdm(range(k)):
+
+            # select point
+            score = f/g
+            p = np.argmax(score)
+
+            delta_term1 = (ATA[:,p]).toarray().ravel()
+            delta_term2 = np.multiply(omega[:,p].reshape(-1,1), omega).sum(axis=0)
+            delta = delta_term1 - delta_term2
+
+            o = delta / np.sqrt(delta[p])
+            # update f (term1)
+            omega_square_norm = np.linalg.norm(o)**2
+            #print(omega_square_norm)
+            omega_hadamard = np.multiply(o, o)
+            term1 = omega_square_norm * omega_hadamard
+
+            # update f (term2)
+            pl = np.zeros(self.n)
+            for r in range(j):
+                omega_r = omega[r,:]
+                pl += np.dot(omega_r, o) * omega_r
+
+            start = time.time()
+            ATAo = (ATA @ o.reshape(-1,1)).ravel()
+            term2 = np.multiply(o, ATAo - pl)
+
+            # update f
+            f = (f - 2 * term2 + term1)
+
+            # store omega and delta
+            d[j,:] = delta
+            omega[j,:] = o
+
+            # add index
+            S.add(p)
+
+        self.centers = np.array(list(S))
+
+    def assign_hard_clusters(self):
         """Use k-medoids to assign hard cluster labels"""
         distances = cdist(self.embedding, self.embedding[self.centers,:], metric="euclidean")
         self.assignments = np.argmin(distances, axis=1)
@@ -308,9 +372,9 @@ class diffkm:
     def get_new_centers(self):
         """Wrapper for updating all cluster centers in parallel"""
         with Parallel(n_jobs=self.num_cores, backend="threading") as parallel:
-            new_centers = parallel(delayed(get_new_center_for_cluster)(self.embedding, self.assignments) for i in tqdm(range(len(self.centers))))
+            new_centers = parallel(delayed(get_new_center_for_cluster)(self.embedding, self.assignments, i) for i in tqdm(range(len(self.centers))))
         
-        return new_centers
+        return np.array(new_centers, dtype=int)
 
     def assign_soft_clusters(self):
         """Assign clusters based on Markov absorption probabilities
@@ -349,26 +413,45 @@ class diffkm:
         # get weights
         self.W = self.abs_probs
 
-    def cluster(self, k:int):
+    def cluster(self, k:int, max_iter:int=200):
         """Wrapper for running adaptive volume sampling, then assigning each cluster.
         """
         # initialize with km++
-        self.kmpp(k)
+        # self.kmpp(k)
+
+        # initialize with random points...
+        #self.centers = np.random.choice(range(self.n), k, replace=False)
+
+        # initialize with AVS
+        self.adaptive_volume_sampling(k)
 
         # assign clusters
         self.assign_hard_clusters()
 
         converged=False
-        while not converged:
+        it = 0
+        while not converged and it < max_iter:
+            # update iteration count
+            it += 1
+
+            current_assignments = self.assignments.copy()
+
             # update centers
             new_centers = self.get_new_centers()
 
             # update assignments
             self.assign_hard_clusters()
 
-            # check convergence (no centers updated --> objectve local max)
+            # check convergence (no assignments updated --> objectve local max)
+            print(self.centers)
+            print(new_centers)
             if np.all(np.equal(self.centers, new_centers)):
                 converged=True
+                print("Converged after %d iterations!" % it)
+            else:
+                self.centers = new_centers.copy()
+
+
 
         self.assign_soft_clusters()
 
