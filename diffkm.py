@@ -443,8 +443,8 @@ class diffkm:
             self.assign_hard_clusters()
 
             # check convergence (no assignments updated --> objectve local max)
-            print(self.centers)
-            print(new_centers)
+            #print(self.centers)
+            #print(new_centers)
             if np.all(np.equal(self.centers, new_centers)):
                 converged=True
                 print("Converged after %d iterations!" % it)
