@@ -315,11 +315,15 @@ class diffkm:
         ATA = A.T.dot(A)
 
         # initialization
-        f = np.power(norm(A.T @ A, axis=0), 2)
-        g = np.power(norm(A, axis=0), 2)
+        f = np.power(norm(ATA, axis=0), 2)
+        g = ATA.diagonal()
 
         d = np.zeros((k, self.n))
         omega = np.zeros((k, self.n))
+
+        # initially best score?
+        initial_best = np.max(f/g)
+        print("Initial best score: ", initial_best)
 
         # keep track of selected indices
         S = set([])
@@ -330,6 +334,10 @@ class diffkm:
             # select point
             score = f/g
             p = np.argmax(score)
+
+            # print residuals
+            residual = np.sum(f)
+            print("Current best: ", score[p])
 
             delta_term1 = (ATA[:,p]).toarray().ravel()
             delta_term2 = np.multiply(omega[:,p].reshape(-1,1), omega).sum(axis=0)
@@ -348,12 +356,14 @@ class diffkm:
                 omega_r = omega[r,:]
                 pl += np.dot(omega_r, o) * omega_r
 
-            start = time.time()
             ATAo = (ATA @ o.reshape(-1,1)).ravel()
             term2 = np.multiply(o, ATAo - pl)
 
             # update f
             f = (f - 2 * term2 + term1)
+
+            # update g
+            g = g + omega_hadamard
 
             # store omega and delta
             d[j,:] = delta
@@ -504,11 +514,48 @@ class diffkm:
         return 1./(2*m) * np.trace(S.T @ A @ S - S.T @ k @ k.T @ S / (2*m))
 
     def get_metacell_coordinates(self, coordinates=None, exponent:float=1.):
+        """Exponent parameter is for softmax tempering..."""
         if coordinates is None:
             coordinates = self.Y
         W = np.power(self.W, exponent)
         W = W / W.sum(axis=0, keepdims=True)
         return W.T @ coordinates
+
+    ##############################################################
+    # Label transfer
+    ##############################################################
+
+    def get_metacell_labels(self, labels):
+        """Given labels of original cells, transfer labels
+        """
+        # get onehot encoding of labels
+        unique_labels = set(labels)
+        label2idx = {label:idx for idx, label in enumerate(unique_labels)}
+        idx2label = {idx:label for label,idx in label2idx.items()}
+
+        # print(label2idx)
+
+        # onehot labels
+        onehot_labels = np.zeros((self.n, len(unique_labels)))
+        label_indices = np.array([label2idx[label] for label in labels])
+        onehot_labels[np.arange(self.n), label_indices] = 1.
+
+        # print(onehot_labels)
+
+        # get soft label assignments
+        metacell_labels = self.W.T @ onehot_labels /self.W.sum(axis=0, keepdims=True).T
+
+        # print(metacell_labels)
+
+        # get hard labels
+        metacell_hard_labels = np.argmax(metacell_labels, axis=1)
+
+        # print(metacell_hard_labels)
+
+        # get actual word labels
+        return [idx2label[idx] for idx in metacell_hard_labels]
+
+
 
     ##############################################################
     # Identifying bad clusters
