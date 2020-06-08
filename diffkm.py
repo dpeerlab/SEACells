@@ -21,23 +21,41 @@ import time
 NUM_CORES = cpu_count()
 
 ##########################################################
+# Projection matrix for error approximation
+##########################################################
+
+def get_projection(mat, cols):
+    """
+    mat is n x n
+    cols n x d, project onto H
+
+    both inputs should be sparse matrices
+    also returns a csr matrix (supposedly, at least)
+
+    result will be n x n"""
+    print("Computing denominator...")
+    denom = csr_matrix(np.linalg.pinv(cols.T.dot(cols).toarray()))
+    print("Computing full matrix...")
+    return (cols @ denom) @ (cols.T @ mat)
+
+##########################################################
 # Helper functions for clustering
 ##########################################################
 
 def get_new_center_for_cluster(embedding, assignments, cluster_idx):
-        """Update the cluster center to medoid
-        """
-        cluster_members = np.arange(assignments.shape[0])[assignments == cluster_idx]
-        cluster_coordinates = embedding[cluster_members, :]
+    """Update the cluster center to medoid
+    """
+    cluster_members = np.arange(assignments.shape[0])[assignments == cluster_idx]
+    cluster_coordinates = embedding[cluster_members, :]
 
-        # get pairwise distances for points in this cluster
-        distance_mtx = cdist(cluster_coordinates, cluster_coordinates, metric="euclidean")
+    # get pairwise distances for points in this cluster
+    distance_mtx = cdist(embedding, cluster_coordinates, metric="euclidean")
 
-        # medoid: point with minimum maximum distance to other points
-        medoid_idx = np.argmin(np.sum(distance_mtx, axis=1))
+    # medoid: point with minimum maximum distance to other points
+    medoid_idx = np.argmin(np.sum(distance_mtx, axis=1))
 
-        # return index of the new cluster center
-        return cluster_members[medoid_idx]
+    # return index of the new cluster center
+    return medoid_idx
 
 ##########################################################
 # Helper functions for parallelizing kernel construction
@@ -269,6 +287,10 @@ class diffkm:
         lamb = np.power(np.real(w), t)
         self.embedding = np.real(v) @ np.diag(lamb)
 
+        # store eigenvalues and eigenvectors
+        self.eigenvalues = w
+        self.eigenvectors = v
+
     ##############################################################
     # Clustering and sampling
     ##############################################################
@@ -302,28 +324,51 @@ class diffkm:
             distances = np.min(combined_distances, axis=1, keepdims=True)
 
 
-    def adaptive_volume_sampling(self, k:int):
+    def adaptive_volume_sampling(self, k:int, t:int=0):
         """Fast greedy adaptive CSSP
 
         From https://arxiv.org/pdf/1312.6838.pdf
         """
         A = self.T.copy()
+        #A = A.dot(A.dot(A))
 
         print("Initializing residual matrix...")
 
-        # precomute ATA
-        ATA = A.T.dot(A)
+        # exponentiate
+        for _ in range(t):
+            print("Exponent: %d" % _)
+            A = A.dot(self.T)
+
+        # save A
+        self.A = A
+
+        # precomute ATA (this is actually bad idea, results in very dense matrix)
+        # solution is just to compute f and g directly
+        # ATA = A.T.dot(A)
+        # can probably parallelize this
+        print("Initializing f and g...")
+        Acsc = A.tocsc()
+        f = np.zeros(self.n)
+        g = np.zeros(self.n)
+        for ix in tqdm(range(self.n)):
+            #print(ix)
+            f[ix] = norm(A.T @ Acsc[:,ix].tocsr())**2
+            #print(ix)
+            g[ix] = norm(Acsc[:,ix].T @ Acsc[:,ix])**2
+
+        print(f)
+        print(g)
 
         # initialization
-        f = np.power(norm(ATA, axis=0), 2)
-        g = ATA.diagonal()
+        # f = np.power(norm(ATA, axis=0), 2)
+        # g = ATA.diagonal()
 
         d = np.zeros((k, self.n))
         omega = np.zeros((k, self.n))
 
         # initially best score?
         initial_best = np.max(f/g)
-        print("Initial best score: ", initial_best)
+        #print("Initial best score: ", initial_best)
 
         # keep track of selected indices
         S = set([])
@@ -337,9 +382,10 @@ class diffkm:
 
             # print residuals
             residual = np.sum(f)
-            print("Current best: ", score[p])
+            #print("Current best: ", score[p])
 
-            delta_term1 = (ATA[:,p]).toarray().ravel()
+            # delta_term1 = (ATA[:,p]).toarray().ravel()
+            delta_term1 = (A.T @ Acsc[:,p]).toarray().ravel()
             delta_term2 = np.multiply(omega[:,p].reshape(-1,1), omega).sum(axis=0)
             delta = delta_term1 - delta_term2
 
@@ -356,7 +402,8 @@ class diffkm:
                 omega_r = omega[r,:]
                 pl += np.dot(omega_r, o) * omega_r
 
-            ATAo = (ATA @ o.reshape(-1,1)).ravel()
+            # ATAo = (ATA @ o.reshape(-1,1)).ravel()
+            ATAo = A.T @ (A @ o.reshape(-1,1)).ravel()
             term2 = np.multiply(o, ATAo - pl)
 
             # update f
@@ -373,6 +420,10 @@ class diffkm:
             S.add(p)
 
         self.centers = np.array(list(S))
+
+    def sum_sq_distances(self):
+        distances = cdist(self.embedding, self.embedding[self.centers,:], metric="euclidean")
+        return np.sum(np.min(distances**2, axis=1))
 
     def assign_hard_clusters(self):
         """Use k-medoids to assign hard cluster labels"""
@@ -423,47 +474,51 @@ class diffkm:
         # get weights
         self.W = self.abs_probs
 
-    def cluster(self, k:int, max_iter:int=200):
+    def cluster(self, k:int, t:int, max_iter:int=200, epsilon:float=0.01):
         """Wrapper for running adaptive volume sampling, then assigning each cluster.
         """
         # initialize with km++
         # self.kmpp(k)
 
         # initialize with random points...
-        #self.centers = np.random.choice(range(self.n), k, replace=False)
+        # self.centers = np.random.choice(range(self.n), k, replace=False)
 
         # initialize with AVS
-        self.adaptive_volume_sampling(k)
+        self.adaptive_volume_sampling(k, t)
+        # self.centers = np.random.choice(range)
 
         # assign clusters
-        self.assign_hard_clusters()
+        # self.assign_hard_clusters()
 
-        converged=False
-        it = 0
-        while not converged and it < max_iter:
-            # update iteration count
-            it += 1
+        # converged=False
+        # it = 0
+        # while not converged and it < max_iter:
+        #     # update iteration count
+        #     it += 1
 
-            current_assignments = self.assignments.copy()
+        #     # update centers
+        #     new_centers = self.get_new_centers()
+        #     #print(self.centers)
+        #     #print(new_centers)
 
-            # update centers
-            new_centers = self.get_new_centers()
+        #     # update assignments
+        #     self.assign_hard_clusters()
 
-            # update assignments
-            self.assign_hard_clusters()
+        #     # check convergence (no assignments updated --> objectve local max)
+        #     #print(self.centers)
+        #     #print(new_centers)
+        #     if np.all(np.equal(self.centers, new_centers)):
+        #         converged=True
+        #         print("Converged after %d iterations!" % it)
+        #     else:
+        #         self.centers = new_centers.copy()
 
-            # check convergence (no assignments updated --> objectve local max)
-            #print(self.centers)
-            #print(new_centers)
-            if np.all(np.equal(self.centers, new_centers)):
-                converged=True
-                print("Converged after %d iterations!" % it)
-            else:
-                self.centers = new_centers.copy()
+        # print("Sum of squared distances: ", self.sum_sq_distances())
 
+        # self.assign_soft_clusters()
 
-
-        self.assign_soft_clusters()
+        # self.W = self.A[:,self.centers]
+        self.W = np.array(self.A[:,self.centers] / self.A[:,self.centers].sum(axis=1))
 
     ##############################################################
     # Utils
@@ -525,8 +580,9 @@ class diffkm:
     # Label transfer
     ##############################################################
 
-    def get_metacell_labels(self, labels):
+    def get_metacell_labels(self, labels, exponent=1.):
         """Given labels of original cells, transfer labels
+        Exponent: optional softmax tempering
         """
         # get onehot encoding of labels
         unique_labels = set(labels)
@@ -543,7 +599,9 @@ class diffkm:
         # print(onehot_labels)
 
         # get soft label assignments
-        metacell_labels = self.W.T @ onehot_labels /self.W.sum(axis=0, keepdims=True).T
+        W = np.power(self.W, exponent)
+        W = W / W.sum(axis=0, keepdims=True)
+        metacell_labels = self.W.T @ onehot_labels
 
         # print(metacell_labels)
 
