@@ -1,3 +1,6 @@
+# ignore data files
+data/*
+
 .*
 guttube/*
 .gitignore

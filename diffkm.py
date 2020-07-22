@@ -2,8 +2,8 @@
 # Then uses Markov random walk absorption probabilities to assign cells.
 
 import numpy as np
-from scipy.sparse import coo_matrix, csr_matrix, dok_matrix, lil_matrix, diags, eye, csc_matrix
-from sklearn.neighbors import kneighbors_graph
+from scipy.sparse import coo_matrix, csr_matrix, dok_matrix, lil_matrix, diags, eye, csc_matrix, kron, vstack
+from sklearn.neighbors import kneighbors_graph, radius_neighbors_graph
 from scipy.sparse.linalg import svds, eigs, eigsh, norm, spsolve
 from scipy.spatial.distance import cdist
 from scipy.special import logsumexp
@@ -37,6 +37,13 @@ def get_projection(mat, cols):
     denom = csr_matrix(np.linalg.pinv(cols.T.dot(cols).toarray()))
     print("Computing full matrix...")
     return (cols @ denom) @ (cols.T @ mat)
+
+def projection_w(mat, cols):
+    """Return n x d matrix, giving fractional membership"""
+    print("Computing denominator...")
+    denom = csr_matrix(np.linalg.pinv(cols.T.dot(cols).toarray()))
+    print("Computing full matrix...")
+    return (denom @ (cols.T @ mat)).T
 
 ##########################################################
 # Helper functions for clustering
@@ -114,6 +121,25 @@ def jaccard_for_row(G, row_sums, i):
     subset_sizes = row_sums[i] + row_sums
     return lil_matrix(intersection / (subset_sizes.reshape(1,-1) - intersection))
 
+def weighted_jaccard_for_row(G, i):
+    Gikron = kron(np.ones((G.shape[0], 1)), G[i,:])
+    abs_of_diff = (G - Gikron).tocsr()
+    abs_of_diff.data = np.abs(abs_of_diff.data)
+    
+    row_min = 0.5 * (G + Gikron - abs_of_diff)
+
+    sum_row_min = coo_matrix(row_min.sum(axis=1).T)
+    #print(sum_row_min.col)
+    row_max = 0.5 * (G[sum_row_min.col] + Gikron[sum_row_min.col] + abs_of_diff[sum_row_min.col])
+    row_max_sums = np.array(row_max.sum(axis=1)).ravel()
+    #sum_row_max = coo_matrix(row_max.sum(axis=1).T)
+    #print(sum_row_min)
+    #print(sum_row_max)
+    sum_row_min.data = sum_row_min.data / row_max_sums
+
+    out = sum_row_min#sum_row_min.multiply(sum_row_max)
+    return out
+
 ##########################################################
 # AVS + Markov
 ##########################################################
@@ -173,14 +199,25 @@ class diffkm:
 
         # compute kNN and the distance from each point to its nearest neighbors
         knn_graph = kneighbors_graph(self.Y, k, mode="connectivity", include_self=True)
+        
         knn_graph_distances = kneighbors_graph(self.Y, k, mode="distance", include_self=True)
+        #one_nn_graph_distances = kneighbors_graph(self.Y, 1, mode="distance", include_self=False)
+
+        # mean distance (smallest thing possible so that the graph remains connected)
+        #max_distance = -np.min(-one_nn_graph_distances.max(axis=1).toarray())
+
+        # radius neighbors - distances
+        #rn_graph = radius_neighbors_graph(self.Y, mode="connectivity", include_self=True, radius=max_distance, n_jobs=-1)
+        #rn_graph = rn_model.fit_transform(self.Y)
 
         if self.verbose:
             print("Computing radius for adaptive bandwidth kernel...")
 
         # compute median distance for each point amongst k-nearest neighbors
         with Parallel(n_jobs=self.num_cores, backend="threading") as parallel:
-            median_distances = parallel(delayed(kth_neighbor_distance)(knn_graph_distances, k//2, i) for i in tqdm(range(self.n)))
+            # median = k // 2
+            median = k // 3
+            median_distances = parallel(delayed(kth_neighbor_distance)(knn_graph_distances, median, i) for i in tqdm(range(self.n)))
 
         # convert to numpy array
         median_distances = np.array(median_distances)
@@ -190,6 +227,7 @@ class diffkm:
         if self.verbose:
             print("Making graph symmetric...")
         sym_graph = (knn_graph + knn_graph.T > 0).astype(float)
+        # sym_graph = knn_graph
 
         if self.verbose:
             print("Computing RBF kernel...")
@@ -207,8 +245,9 @@ class diffkm:
         if self.verbose:
             print("Constructing CSR matrix...")
 
-        self.M = similarity_matrix.tocsr()
+        self.M = (similarity_matrix).tocsr()
         self.G = (self.M > 0).astype(float)
+        return self.M
 
     def initialize_kernel_jaccard_parallel(self, k:int):
         """Uses Jaccard similarity between nearest neighbor sets as PSD kernel"""
@@ -220,7 +259,7 @@ class diffkm:
         # take AND
         if self.verbose:
             print("Making graph symmetric...")
-        sym_graph = ((knn_graph + knn_graph.T) > 0).astype(float)
+        sym_graph = ((knn_graph.multiply(knn_graph.T)) > 0).astype(float)
         row_sums = np.sum(sym_graph, axis=1)
 
         if self.verbose:
@@ -240,6 +279,32 @@ class diffkm:
             print("Constructing CSR matrix...")
 
         self.M = similarity_matrix.tocsr()
+        self.G = (self.M > 0).astype(float)
+
+    def initialize_kernel_weighted_jaccard_parallel(self, k:int):
+        """Uses Jaccard similarity between nearest neighbor sets as PSD kernel"""
+        
+        sym_graph = self.initialize_kernel_rbf_parallel(k)
+        row_sums = np.sum(sym_graph, axis=1)
+
+        if self.verbose:
+            print("Computing Jaccard similarity...")
+
+        with Parallel(n_jobs=self.num_cores, backend="threading") as parallel:
+            similarity_matrix_rows = parallel(delayed(weighted_jaccard_for_row)(sym_graph, i) for i in tqdm(range(self.n)))
+
+        self.M = vstack(similarity_matrix_rows).tocsr()
+        # if self.verbose:
+        #     print("Building similarity LIL matrix...")
+
+        # similarity_matrix = lil_matrix((self.n, self.n))
+        # for i in tqdm(range(self.n)):
+        #     similarity_matrix[i] = similarity_matrix_rows[i]
+
+        # if self.verbose:
+        #     print("Constructing CSR matrix...")
+
+        # self.M = similarity_matrix.tocsr()
         self.G = (self.M > 0).astype(float)
 
     def compute_transition_probabilities(self):
@@ -323,8 +388,141 @@ class diffkm:
 
             distances = np.min(combined_distances, axis=1, keepdims=True)
 
+    def adaptive_volume_sampling(self, t:int=0, max_cols:int=1000):
+        """Fast greedy adaptive CSSP
 
-    def adaptive_volume_sampling(self, k:int, t:int=0):
+        From https://arxiv.org/pdf/1312.6838.pdf
+        """
+        A = self.T.copy()
+        #A = A.dot(A.dot(A))
+
+        print("Initializing residual matrix...")
+
+        # exponentiate
+        for _ in range(t):
+            print("Exponent: %d" % _)
+            A = A.dot(self.T)
+
+        # save A
+        self.A = A
+
+        # precomute ATA (this is actually bad idea, results in very dense matrix)
+        # solution is just to compute f and g directly
+        # ATA = A.T.dot(A)
+        # can probably parallelize this
+        print("Initializing f and g...")
+        #At = A.T.tocsr()
+        Acsc = A.tocsc()
+        f = np.zeros(self.n)
+        #g = np.zeros(self.n)
+        for ix in tqdm(range(self.n)):
+            #print(ix)
+            f[ix] = np.sum((A.T.dot(Acsc[:,ix])).data**2)
+            #print(ix)
+            #g[ix] = norm(Acsc[:,ix])**2
+
+        #print(f)
+        g = np.array(norm(Acsc, axis=0)**2).ravel()
+        #print(g)
+
+
+        k = max_cols
+
+        d = np.zeros((k, self.n))
+        omega = np.zeros((k, self.n))
+
+        # initially best score?
+        initial_best = np.max(f/g)
+        #print("Initial best score: ", initial_best)
+
+        # keep track of selected indices
+        S = np.zeros(k, dtype=int)
+
+        # sampling
+        for j in tqdm(range(k)):
+
+            # select point
+            score = f/g
+            p = np.argmax(score)
+
+            # print residuals
+            residual = np.sum(f)
+            #print("Current best: ", score[p])
+
+            # delta_term1 = (ATA[:,p]).toarray().ravel()
+            delta_term1 = (A.T @ Acsc[:,p]).toarray().ravel()
+            delta_term2 = np.multiply(omega[:,p].reshape(-1,1), omega).sum(axis=0)
+            delta = delta_term1 - delta_term2
+
+            o = delta / np.sqrt(delta[p])
+            # update f (term1)
+            omega_square_norm = np.linalg.norm(o)**2
+            #print(omega_square_norm)
+            omega_hadamard = np.multiply(o, o)
+            term1 = omega_square_norm * omega_hadamard
+
+            # update f (term2)
+            pl = np.zeros(self.n)
+            for r in range(j):
+                omega_r = omega[r,:]
+                pl += np.dot(omega_r, o) * omega_r
+
+            # ATAo = (ATA @ o.reshape(-1,1)).ravel()
+            ATAo = A.T.dot(A.dot(o.reshape(-1,1))).ravel()
+            term2 = np.multiply(o, ATAo - pl)
+
+            # update f
+            f = (f - 2 * term2 + term1)
+
+            # update g
+            g = g + omega_hadamard
+
+            # store omega and delta
+            d[j,:] = delta
+            omega[j,:] = o
+
+            # add index
+            S[j] = p
+
+        # store everything...
+        self.S = S
+
+    def binary_search(self, epsilon):
+
+        max_cols = len(self.S)
+        S = self.S.copy()
+
+        # find centers by checking approximation error (use binary search)
+        min_ix = 0
+        max_ix = max_cols
+
+        # get original matrix norm
+        original_norm = norm(self.A)
+        Acsc = self.A.tocsc()
+        
+        while max_ix - min_ix > 1:
+
+            # current is midpoint of max and min
+            curr = (max_ix - min_ix) // 2 + min_ix
+            centers = S[:curr]
+            proj = get_projection(self.A, Acsc[:, centers].tocsr())
+
+            # get projection error
+            err = norm(self.A - proj)
+
+            print("Current midpoint: ", curr)
+            print("Error: ", err / original_norm)
+
+            if err/original_norm >= epsilon:
+                min_ix = curr
+            else:
+                max_ix = curr
+
+        print("Search complete. Required metacells: ", curr)
+
+        self.centers = S[:curr]
+
+    def adaptive_volume_sampling_original(self, k:int, t:int=0):
         """Fast greedy adaptive CSSP
 
         From https://arxiv.org/pdf/1312.6838.pdf
@@ -352,9 +550,9 @@ class diffkm:
         g = np.zeros(self.n)
         for ix in tqdm(range(self.n)):
             #print(ix)
-            f[ix] = norm(A.T @ Acsc[:,ix].tocsr())**2
+            f[ix] = norm(A.T.dot(Acsc[:,ix].tocsr()))**2
             #print(ix)
-            g[ix] = norm(Acsc[:,ix].T @ Acsc[:,ix])**2
+            g[ix] = norm(Acsc[:,ix])**2
 
         print(f)
         print(g)
@@ -403,7 +601,7 @@ class diffkm:
                 pl += np.dot(omega_r, o) * omega_r
 
             # ATAo = (ATA @ o.reshape(-1,1)).ravel()
-            ATAo = A.T @ (A @ o.reshape(-1,1)).ravel()
+            ATAo = A.T.dot(A.dot(o.reshape(-1,1))).ravel()
             term2 = np.multiply(o, ATAo - pl)
 
             # update f
@@ -484,7 +682,12 @@ class diffkm:
         # self.centers = np.random.choice(range(self.n), k, replace=False)
 
         # initialize with AVS
-        self.adaptive_volume_sampling(k, t)
+        if hasattr(self, "S"):
+            self.binary_search(epsilon)
+        else:
+            self.adaptive_volume_sampling(t, k)
+            self.binary_search(epsilon)
+        
         # self.centers = np.random.choice(range)
 
         # assign clusters
@@ -519,6 +722,9 @@ class diffkm:
 
         # self.W = self.A[:,self.centers]
         self.W = np.array(self.A[:,self.centers] / self.A[:,self.centers].sum(axis=1))
+        # self.W = np.array(self.A[self.centers,:])
+        #self.W = np.abs(projection_w(self.A, self.Acsc[:, self.centers]))
+        #self.W = self.W / self.W.sum(axis=1, keepdims=True)
 
     ##############################################################
     # Utils
@@ -573,7 +779,8 @@ class diffkm:
         if coordinates is None:
             coordinates = self.Y
         W = np.power(self.W, exponent)
-        W = W / W.sum(axis=0, keepdims=True)
+        #W = W / W.sum(axis=0, keepdims=True)
+        W = self.A[self.centers,:].toarray()
         return W.T @ coordinates
 
     ##############################################################
