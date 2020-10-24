@@ -1,52 +1,75 @@
 # metacells
-working implementation of metacell tool for developing fine-grained, homogeneous clusters of single cell data
+working implementation of metacells
 
 # dependencies
+
 ```
 numpy
 scipy
+sklearn
 tqdm
 ```
+
 # Usage
-## initialisation
-Initialize a model with an (n x d) matrix representing the PCA embedding of your data. If using scanpy, you can run
+
+For a demo, see the notebook ```guttube_aa.ipynb```.
+
+The gut endoderm single cell RNA-seq data used to prepare the demo is available on S3:
+
+```s3://dp-lab-home/znchoo/gut_endoderm/data/E85_endoderm_processed.h5ad```
+
+# Inputs
+
+The input to the the clustering alg is a similarity matrix, which requires a low-dimensional representation of the data to compute. Usually I use PCA on HVGs and truncated SVD on either peaks or ArchR bins for RNA and ATAC, respectively.
+
+## Building similarity graph
+
+The following code assumes that you have an ```AnnData``` named ```ad``` and the low-dim representation mentioned above stored in ```obsm``` with key ```"X_pca"```.
+
 ```
-import mavs
-model = mavs.mavs(ad.obsm["X_pca"])
+import build_graph
+
+graph_model = build_graph.MetacellGraph(ad.obsm["X_pca"], verbose=True)
+G = graph_model.rbf()
 ```
-## similarity matrix construction
-The Jaccard similarity matrix as follows:
+
+## Finding metacells
+
+To find metacells you just need to input the graph ```G``` from above, plus the number of metacells that you want to find. I find that a good rule of thumb is the number of cells in your data set divided by 30, or so.
+
 ```
-k = 15 # degree of kNN graph
-model.initialize_kernel_jaccard_parallel(k)
+reload(metacells)
+
+# set number of metacells
+N_METACELLS = 700
+metacell_model = metacells.Metacells(n_metacells=N_METACELLS)
+
+# use the graph G from above
+metacell_model.fit(G);
 ```
-## compute transition probabilities
-Before clustering, the Markov transition matrix needs to be computed 
+
+## Downstream
+
+### Size distribution
+
+To get an array of the sizes of the metacells, run the following
+
 ```
-model.compute_transition_probabilities()
+sizes = metacell_model.get_sizes()
 ```
-## clustering
-The following will produce c clusters:
-As a warning, this can take a while for data sets with more than 15K cells.
+
+### Coordinates
+
+To get metacell-level UMI counts:
+
 ```
-c = 300 # number of metacells
-model.cluster(c)
+metacell_coords = metacell_model.get_coordinates(self, X)
 ```
-## size distribution
-sometimes it is useful to look at size distribution of each metacell to make sure nothing weird is happening. you can compute metacell sizes as follows:
+
+### Get metacell assignments
+
+For each single cell in your data set, get the (numerical) index of the corresponding metacell
+
 ```
-metacell_sizes = model.get_soft_metacell_sizes()
-```
-The result will be a length c array, where c is the number of metacell centers.
-## accessing selected centers
-It is helpful to visualise selected centers on a low-dim embedding to make sure that all of your cell types are covered. The indices of selected centers are stored as a NumPy array in the attribute ```model.centers```. To plot the UMAP embedding, you can run
-```
-import matplotlib.pyplot as plt
-plt.scatter(ad.obsm["X_umap"][model.centers,0], ad.obsm["X_umap"][model.centers,1])
-```
-for example.
-## computing metacell gene/peak expressions
-To get average gene expression corresponding to each metacell. The result will be a (c x d) matrix, where c is the number of metacells and d is the number of genes (or peaks).
-```
-average_expression = model.get_metacell_coordinates(ad.X)
+assgts = metacell_model.get_assignments()
 ```
