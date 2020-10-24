@@ -5,7 +5,7 @@ http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.710.1085&rep=rep1&type=
 To do: initialize B from greedily-selected columns from RRQR (seems unnecessary)
 How to determine convergence?
 """
-
+from collections import Counter
 import numpy as np
 from tqdm.notebook import tqdm
 from sklearn.metrics import pairwise_distances as cdist
@@ -250,7 +250,7 @@ class Metacells:
             # compute error
             # error = self._residuals(K, A, B)
 
-            print("Completed iteration %d of %d." % (it, n_iter,))
+            print("Completed iteration %d of %d." % (it+1, n_iter,))
 
             # print("Iteration %d of %d. Error: %.8f" % (it, n_iter, error))
 
@@ -291,6 +291,18 @@ class Metacells:
         """
         return self.A_.T
 
+    def get_sizes(self):
+        """Return size of each metacell as array
+        """
+
+        return Counter(np.argmax(self.A_, axis=0))
+
     def get_coordinates(self, X):
         """Return cluster centers"""
-        return np.array(self.A_ @ X) #/ self.A_.sum(axis=1, keepdims=True)
+        # get binarized A
+        A_bin = np.zeros_like(self.A_)
+        A_amax = np.argmax(self.A_, axis=0)
+
+        A_bin[A_amax, np.arange(self.A_.shape[1])] = 1
+
+        return np.array(A_bin @ X)
