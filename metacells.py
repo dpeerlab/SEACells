@@ -10,7 +10,7 @@ import numpy as np
 from tqdm.notebook import tqdm
 from sklearn.metrics import pairwise_distances as cdist
 
-class ArchetypalAnalysis:
+class Metacells:
     """
     Fast kernel archetypal analysis.
     Finds archetypes and weights given precomputed kernel matrix.
@@ -21,8 +21,8 @@ class ArchetypalAnalysis:
         verbose: verbosity
     """
 
-    def __init__(self, k:int, max_iter:int=50, verbose:bool=True):
-        self.k = k
+    def __init__(self, n_metacells:int, max_iter:int=50, verbose:bool=True):
+        self.k = n_metacells
         self.max_iter = max_iter
         self.verbose = verbose
 
@@ -184,35 +184,6 @@ class ArchetypalAnalysis:
             # add index
             centers[j] = int(p)
 
-        # create matrix B
-
-        # #centers = np.random.choice(range(n), k, replace=False)
-        # centers = np.zeros(k, dtype=int)
-
-        # # select initial point randomly
-        # new_point = np.random.choice(range(n), 1)
-        # centers[0] = new_point
-
-        # # initialize min distances
-        # distances = cdist(X, X[new_point, :], metric="euclidean")
-
-        # # assign rest of points
-        # for ix in tqdm(range(1, k)):
-        #     new_point = np.argmax(distances.ravel())
-        #     centers[ix] = new_point
-        #     #print(new_point)
-
-        #     # get distance from all poitns to new points
-        #     new_point_distances = cdist(X, X[new_point, :], metric="euclidean")
-
-        #     # update min distances
-        #     combined_distances = np.hstack([distances, new_point_distances])
-
-        #     distances = np.min(combined_distances, axis=1, keepdims=True)
-
-        #     # make sure that the distance of already added points is zero to prevent duplicates
-        #     distances[centers,0] = 0
-
         B = np.zeros((n, k))
         B[centers, np.arange(k)] = 1.
         B = np.zeros((n, k))
@@ -222,6 +193,7 @@ class ArchetypalAnalysis:
 
     def _residuals(self, K, A, B):
         """Use trace trick to compute residual squared error
+        (only works for Jaccard metric)
 
         Actual formula for the error is
             E = ||X - XBA||^2
@@ -247,7 +219,7 @@ class ArchetypalAnalysis:
 
         return term1 - 2. * term2 + term3
 
-    def _fit(self, K, n_iter:int, B0=None):
+    def _fit(self, K, n_iter:int=50, B0=None):
         """Compute archetypes and loadings given kernel matrix K
 
         Input:
@@ -271,13 +243,16 @@ class ArchetypalAnalysis:
         A[0,:] = 1.
 
         for it in range(n_iter):
+            print("Starting iteration %d of %d" % (it+1, n_iter))
             A = self._updateA(K, A, B)
             B = self._updateB(K, A, B)
 
             # compute error
-            error = self._residuals(K, A, B)
+            # error = self._residuals(K, A, B)
 
-            print("Iteration %d of %d. Error: %.8f" % (it, n_iter, error))
+            print("Completed iteration %d of %d." % (it, n_iter,))
+
+            # print("Iteration %d of %d. Error: %.8f" % (it, n_iter, error))
 
         self.A_ = A
         self.B_ = B
@@ -285,7 +260,7 @@ class ArchetypalAnalysis:
 
     def fit(self, K, n_iter:int=8, B0=None):
         """Wrapper to fit model given kernel matrix and max number of iterations
-        
+
         Inputs:
             K: kernel matrix
             n_iter (int): number of optimization iterations
@@ -319,4 +294,3 @@ class ArchetypalAnalysis:
     def get_coordinates(self, X):
         """Return cluster centers"""
         return np.array(self.A_ @ X) #/ self.A_.sum(axis=1, keepdims=True)
-
