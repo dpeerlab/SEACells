@@ -5,10 +5,10 @@ http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.710.1085&rep=rep1&type=
 To do: initialize B from greedily-selected columns from RRQR (seems unnecessary)
 How to determine convergence?
 """
-
 import numpy as np
 from tqdm.notebook import tqdm
 from sklearn.metrics import pairwise_distances as cdist
+from scipy.stats import multinomial
 
 class ArchetypalAnalysis:
     """
@@ -120,15 +120,12 @@ class ArchetypalAnalysis:
         k = self.k
         X=K
 
-        if self.verbose:
-            print("Initializing residual matrix")
-
         # precompute A.T * A
         #ATA = K.T @ K
         ATA = K
 
         if self.verbose:
-            print("Initializing f and g...")
+            print("Initializing archetypes")
 
         f = np.array((ATA.multiply(ATA)).sum(axis=0)).ravel()
         #f = np.array((ATA * ATA).sum(axis=0)).ravel()
@@ -311,12 +308,74 @@ class ArchetypalAnalysis:
         """Return closest point to each archetype"""
         return np.argmax(self.B_, axis=0)
 
-    def get_assignments(self):
-        """Return archetype assignments for each point (n x k)
+    def set_assignments(self, assgts):
+        """Given integer-encoded assignments, set archetype matrix A"""
+        n_archetypes = len(set(assgts))
+        self.n = len(assgts)
+        self.k = n_archetypes
+
+        self.A_ = np.zeros((self.k, self.n))
+        self.A_[np.array(assgts), np.arange(self.n)] = 1.
+
+    def loo_cluster(self, data, ps=None):
+        """Compute LOO log likelihood for cluster
+
+        data: counts for each cell
+        ps: pseudocount
         """
-        return self.A_.T
+        ncells, dim = data.shape
+        lib_sizes = data.sum(axis=1)
+        if ps is None:
+            ps = 1e-8
+            data_plus_ps = data + ps
+        else:
+            data_plus_ps = data + ps
+        total_counts = data.sum(axis=0)
+        
+        cluster_logprob = 0.
+        for i in range(ncells):
+            p = total_counts - data[i,:]
+            p = p / np.sum(p)
+            p += ps #1./1500 #ps.ravel()
+            p = p / np.sum(p)
+            logprob = multinomial.logpmf(data[i,:], lib_sizes[i], p)
+            cluster_logprob += logprob
+        return cluster_logprob
+
+    def loo_likelihood(self, data, ps=1e-8):
+        """Compute log likelihood with leave-one-out"""
+
+        # iterate over clusters
+        assgts = self.get_assignments()
+        total_logprob = 0.
+        #ps = data.sum(axis=0, keepdims=True)
+        #ps = ps / np.sum(ps)
+        for cluster_idx in tqdm(range(self.k)):
+            sel = (assgts == cluster_idx)
+            cluster_data = data[sel,:]
+            total_logprob += self.loo_cluster(cluster_data, ps=ps)
+        return total_logprob
+
+
+    def get_assignments(self):
+        """Return archetype assignments for each point (n,)
+        """
+        return np.argmax(self.A_, axis=0)
+
+    def get_sizes(self):
+        """Get the size of each metacell"""
+        # use hard assgts
+        assgts = self.get_assignments()
+        A = np.zeros_like(self.A_)
+        A[assgts, np.arange(self.A_.shape[1])] = 1.
+        return A.sum(axis=1)
 
     def get_coordinates(self, X):
-        """Return cluster centers"""
-        return np.array(self.A_ @ X) #/ self.A_.sum(axis=1, keepdims=True)
+        """Return cluster centers
+        """
+        # use hard assignments
+        assgts = self.get_assignments()
+        A = np.zeros_like(self.A_)
+        A[assgts, np.arange(self.A_.shape[1])] = 1.
+        return np.array(A @ X) #/ self.A_.sum(axis=1, keepdims=True)
 
