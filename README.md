@@ -63,8 +63,10 @@ sizes = metacell_model.get_sizes()
 To get metacell-level UMI counts:
 
 ```
-metacell_coords = metacell_model.get_coordinates(self, X)
+metacell_coords = metacell_model.get_coordinates(ad.X)
 ```
+
+The above assumes that ```X``` represents the raw (integer-valued) counts of each gene per cell in your AnnData.
 
 ### Get metacell assignments
 
@@ -72,4 +74,12 @@ For each single cell in your data set, get the (numerical) index of the correspo
 
 ```
 assgts = metacell_model.get_assignments()
+```
+
+### Get centers
+
+Get the index (integer) of the closest cell in the data to the average of each metacell.
+
+```
+cx = metacell_model.get_centers()
 ```
