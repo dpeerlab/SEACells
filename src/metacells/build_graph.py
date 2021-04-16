@@ -138,13 +138,14 @@ class MetacellScanpyGraph:
     def __init__(self, ad, build_on='X_pca', n_cores: int = -1, verbose: bool = False):
         """Initialize model parameters"""
         # data parameters
-        self.n, self.d = ad.obsm[build_on]
+        self.n, self.d = ad.obsm[build_on].shape
 
         # indices of each point
         self.indices = np.array(range(self.n))
 
         # save data
         self.ad = ad
+        self.build_on = build_on
 
         # number of cores for parallelization
         if n_cores != -1:
@@ -169,17 +170,25 @@ class MetacellScanpyGraph:
         Inputs:
             k (int): number of nearest neighbors for RBF kernel
         """
-
+        import scanpy as sc
+        
         if self.verbose:
             print("Computing kNN graph using scanpy NN ...")
 
         # compute kNN and the distance from each point to its nearest neighbors
-        knn_graph = kneighbors_graph(self.Y, k, mode="connectivity", include_self=True)
-        knn_graph_distances = kneighbors_graph(self.Y, k, mode="distance", include_self=True)
+        sc.pp.neighbors(self.ad, use_rep=self.build_on, n_neighbors=k, knn=True)
+        knn_graph_distances = self.ad.obsp['distances']
+        
+        # Binarize distances to get connectivity
+        knn_graph = knn_graph_distances.copy()
+        knn_graph[knn_graph!=0]=1
+        # Include self as neighbour
+        knn_graph.setdiag(1)
 
+            
         if self.verbose:
-            print("Computing radius for adaptive bandwidth kernel...")
-
+            print("Computing radius for adaptive bandwidth kernel...")        
+        
         # compute median distance for each point amongst k-nearest neighbors
         with Parallel(n_jobs=self.num_cores, backend="threading") as parallel:
             median = k // 2
@@ -200,7 +209,7 @@ class MetacellScanpyGraph:
 
         with Parallel(n_jobs=self.num_cores, backend="threading") as parallel:
             similarity_matrix_rows = parallel(
-                delayed(rbf_for_row)(sym_graph, self.Y, median_distances, i) for i in tqdm(range(self.n)))
+                delayed(rbf_for_row)(sym_graph, self.ad.obsm[self.build_on], median_distances, i) for i in tqdm(range(self.n)))
 
         if self.verbose:
             print("Building similarity LIL matrix...")
@@ -274,13 +283,13 @@ class MetacellGraph:
 
         if self.verbose:
             print("Computing radius for adaptive bandwidth kernel...")
-
+        
         # compute median distance for each point amongst k-nearest neighbors
         with Parallel(n_jobs=self.num_cores, backend="threading") as parallel:
             median = k // 2
             median_distances = parallel(
                 delayed(kth_neighbor_distance)(knn_graph_distances, median, i) for i in tqdm(range(self.n)))
-
+        
         # convert to numpy array
         median_distances = np.array(median_distances)
 
@@ -310,6 +319,9 @@ class MetacellGraph:
         self.M = (similarity_matrix).tocsr()
         return self.M @ self.M.T
 
+    
+    
+    
     def jaccard(self, k: int):
         """Uses Jaccard similarity between nearest neighbor sets as PSD kernel"""
         if self.verbose:

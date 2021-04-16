@@ -6,7 +6,7 @@ sns.set_style("white")
 import pandas as pd
 
 
-def plot_2D(ad, key='X_umap', colour_metacells=True, cmap='Set2'):
+def plot_2D(ad, key='X_umap', colour_metacells=True, cmap='Set2', title='Metacell Assignments'):
     """
     Plot 2D visualization of metacells.
     :param ad: annData containing 'Metacells' label in .obs
@@ -51,11 +51,11 @@ def plot_2D(ad, key='X_umap', colour_metacells=True, cmap='Set2'):
 
     plt.xlabel(f'{key}-0')
     plt.ylabel(f'{key}-1')
-    plt.title(f'Metacell Assignments')
+    plt.title(title)
     plt.show()
     plt.close()
 
-def plot_metacell_sizes(ad, save_as=None):
+def plot_metacell_sizes(ad, save_as=None, title='Distribution of Metacell Sizes'):
     """
     Plot distribution of cells contained per metacell.
     :param ad: annData containing 'Metacells' label in .obs
@@ -67,7 +67,7 @@ def plot_metacell_sizes(ad, save_as=None):
     plt.figure(figsize=(10, 10))
     sns.distplot(label_df.groupby('Metacell').count().iloc[:, 0])
     plt.xlabel('Number of Cells per Metacell')
-    plt.title('Distribution of Metacell Sizes')
+    plt.title(title)
     plt.show()
     if save_as is not None:
         plt.savefig(save_as)

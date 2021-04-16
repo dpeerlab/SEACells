@@ -328,7 +328,7 @@ class Metacells:
             print('Building kernel...')
 
         # input to graph construction is PCA/SVD
-        kernel_model = build_graph.MetacellGraph(self.ad.obsm[self.build_kernel_on], verbose=True)
+        kernel_model = build_graph.MetacellScanpyGraph(self.ad, self.build_kernel_on, verbose=True)
 
         # K is a sparse matrix representing input to metacell alg
         K = kernel_model.rbf(self.n_neighbors)
