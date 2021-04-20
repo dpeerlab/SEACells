@@ -115,7 +115,10 @@ def get_NLLs(ad,
     nbr_dists.columns += 1
 
     # Check if MC neighbour matches cluster type of metacell
-    df = clusters_nbrs.join(ad.obs.groupby('Metacell').agg(lambda x:x.value_counts().index[0])[cluster])
+    true_clusters = ad.obs.groupby('Metacell').agg(lambda x:x.value_counts().index[0])[cluster]
+    true_clusters.index = true_clusters.index.astype(str)
+
+    df = clusters_nbrs.join(true_clusters)
     nbr_match = df.eq(df[cluster], axis=0).drop(cluster, axis=1)
 
     neighbours = pd.concat({'Metacell':metacells_nbrs, f'{cluster}':clusters_nbrs, 'Distance':nbr_dists, f'{cluster}_match':nbr_match}, axis=1)

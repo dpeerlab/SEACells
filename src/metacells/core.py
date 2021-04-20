@@ -28,7 +28,8 @@ class Metacells:
                  true_A=None,
                  n_waypoint_eigs:int = 10,
                  waypt_proportion:float = 1,
-                 n_neighbors:int = 15):
+                 n_neighbors:int = 15,
+                 convergence_epsilon = 1e-5):
         """
 
         :param ad: AnnData object containing observations matrix to use for computing metacells
@@ -56,7 +57,11 @@ class Metacells:
         self.waypoint_proportion = waypt_proportion
 
         self.n_neighbors = n_neighbors
-
+        
+        self.RSS_iters = []
+        self.convergence_epsilon = convergence_epsilon
+        self.convergence_threshold = None 
+        
     def _initialize_archetypes(self):
         """
 
@@ -295,26 +300,56 @@ class Metacells:
 
         return B
 
-    def _compute_reconstruction(self):
+    def compute_reconstruction(self, A=None, B=None):
         """
 
         :return:
             reconstruction - (np.array) reconstruction of original data matrix
         """
-        raise NotImplementedError
-        return
+        if A is None:
+            A = self.A_
+        if B is None:
+            B = self.B_
+            
+            
+        return np.dot(np.dot(self.ad.obsm[self.build_kernel_on].T, B), A)
 
-    def _compute_RSS(self):
+
+    def compute_RSS(self, A=None, B=None):
         """
         Compute residual sum of squares error in difference between reconstruction and true data matrix
         :return:
             ||X-XBA||^2 - (float) square difference between true data and reconstruction
         """
-
-        raise NotImplementedError
+        if A is None:
+            A = self.A_
+        if B is None:
+            B = self.B_
+            
+        reconstruction = self.compute_reconstruction(A, B)
+        return np.linalg.norm(self.ad.obsm[self.build_kernel_on].T - reconstruction)
+        
         return
+    
+    def plot_convergence(self, save_as=None):
+        """
+        Plot behaviour of squared error over iterations.
+        """
+        import matplotlib.pyplot as plt
+        import seaborn as sns
+        sns.set()
+        
+        plt.figure()
+        plt.plot(self.RSS_iters)
+        plt.title('Reconstruction Error over Iterations')
+        plt.xlabel('Iterations')
+        plt.ylabel("Squared Error")
+        if save_as is not None:
+            plt.savefig(save_as, dpi=150)
+        plt.show()
+        plt.close()
 
-    def _fit(self, n_iter: int = 50, B0=None):
+    def _fit(self, max_iter: int = 50, B0=None):
         """Compute archetypes and loadings given kernel matrix K
 
         Input:
@@ -354,9 +389,24 @@ class Metacells:
 
         A = np.eye(k, n)
         A[0, :] = 1.
-
-        for it in range(n_iter):
-            print("Starting iteration %d of %d" % (it + 1, n_iter))
+        
+        # Create convergence threshold
+        RSS = self.compute_RSS(A,B)
+        self.RSS_iters.append(RSS)
+        
+        if self.convergence_threshold is None:
+            self.convergence_threshold = self.convergence_epsilon * RSS 
+            if self.verbose:
+                print(f'Setting convergence threshold at {self.convergence_threshold}')
+                
+        converged = False
+        n_iter = 0
+        while (not converged and n_iter < max_iter) or n_iter<10:
+            
+            n_iter += 1
+            
+            if n_iter==1 or (n_iter)%10 == 0:
+                print(f"Starting iteration {n_iter}.")
             if self.true_A is None:
                 A = self._updateA(A, B)
             else:
@@ -367,9 +417,17 @@ class Metacells:
                 B = self._updateB(A, B)
             else:
                 print('Not updating B, true B provided')
-
-            print("Completed iteration %d of %d." % (it + 1, n_iter,))
-
+            
+            if n_iter==1 or (n_iter)%10 == 0:
+                print(f"Completed iteration {n_iter}.")
+        
+            self.RSS_iters.append(self.compute_RSS(A,B))
+            
+            # Check for convergence 
+            if np.abs(self.RSS_iters[-2] - self.RSS_iters[-1]) < self.convergence_threshold:                   
+                converged = True 
+        
+        print(f'Converged after {n_iter} iterations.')
         self.A_ = A
         self.B_ = B
         self.Z_ = B.T @ self.K
