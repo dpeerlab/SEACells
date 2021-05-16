@@ -4,13 +4,10 @@ Metacells
 todo
 
 #### Installation and dependencies
-1. Metacells has been implemented in Python3 and can be installed from source by running :
-
+1. Metacells has been implemented in Python3 and can be installed from source: 
         $> git clone https://github.com/dpeerlab/metacells.git
- 	then navigating to the installation folder `metacells` and running:
- 
  	$> python setup.py install
- 
+  from the metacells directory
 2. Metacells depends on a number of `python3` packages available on pypi and these dependencies are listed in `setup.py`
 
     All the dependencies will be automatically installed using the above commands
