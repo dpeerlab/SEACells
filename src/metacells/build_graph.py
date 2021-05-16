@@ -20,72 +20,9 @@ import time
 # get number of cores for multiprocessing
 NUM_CORES = cpu_count()
 
-
-##########################################################
-# Projection matrix for error approximation
-##########################################################
-
-def get_projection(mat, cols):
-    """
-    mat is n x n
-    cols n x d, project onto H
-
-    both inputs should be sparse matrices
-    also returns a csr matrix (supposedly, at least)
-
-    result will be n x n"""
-    print("Computing denominator...")
-    denom = csr_matrix(np.linalg.pinv(cols.T.dot(cols).toarray()))
-    print("Computing full matrix...")
-    return (cols @ denom) @ (cols.T @ mat)
-
-
-def projection_w(mat, cols):
-    """Return n x d matrix, giving fractional membership"""
-    print("Computing denominator...")
-    denom = csr_matrix(np.linalg.pinv(cols.T.dot(cols).toarray()))
-    print("Computing full matrix...")
-    return (denom @ (cols.T @ mat)).T
-
-
-##########################################################
-# Helper functions for clustering
-##########################################################
-
-def get_new_center_for_cluster(embedding, assignments, cluster_idx):
-    """Update the cluster center to medoid
-    """
-    cluster_members = np.arange(assignments.shape[0])[assignments == cluster_idx]
-    cluster_coordinates = embedding[cluster_members, :]
-
-    # get pairwise distances for points in this cluster
-    distance_mtx = cdist(embedding, cluster_coordinates, metric="euclidean")
-
-    # medoid: point with minimum maximum distance to other points
-    medoid_idx = np.argmin(np.sum(distance_mtx, axis=1))
-
-    # return index of the new cluster center
-    return medoid_idx
-
-
 ##########################################################
 # Helper functions for parallelizing kernel construction
 ##########################################################
-
-def logsumexp_row_nonzeros(X):
-    """Sparse logsumexp"""
-    result = np.empty(X.shape[0])
-    for i in range(X.shape[0]):
-        result[i] = logsumexp(X.data[X.indptr[i]:X.indptr[i + 1]])
-    return result
-
-
-def normalize_row_nonzeros(X, logsum):
-    """Sparse logsumexp"""
-    for i in range(X.shape[0]):
-        X.data[X.indptr[i]:X.indptr[i + 1]] = np.exp(X.data[X.indptr[i]:X.indptr[i + 1]] - logsum[i])
-    return X
-
 
 def kth_neighbor_distance(distances, k, i):
     """Returns distance to kth nearest neighbor
@@ -105,6 +42,15 @@ def kth_neighbor_distance(distances, k, i):
 
 
 def rbf_for_row(G, data, median_distances, i):
+    """
+    Helper function for computing radial basis function kernel for each row of the data matrix
+
+    :param G: (array) KNN graph representing nearest neighbour connections between cells
+    :param data: (array) data matrix between which euclidean distances are computed for RBF
+    :param median_distances: (array) radius for RBF - the median distance between cell and k nearest-neighbours
+    :param i: (int) data row index for which RBF is calculated
+    :return: sparse matrix containing computed RBF for row
+    """
     # convert row to binary numpy array
     row_as_array = G[i, :].toarray().ravel()
 
@@ -122,20 +68,24 @@ def rbf_for_row(G, data, median_distances, i):
 
     return lil_matrix(masked_row)
 
-
-def jaccard_for_row(G, row_sums, i):
-    intersection = G[i, :].dot(G.T)
-    subset_sizes = row_sums[i] + row_sums
-    return lil_matrix(intersection / (subset_sizes.reshape(1, -1) - intersection))
-
-
 ##########################################################
-# AVS + Markov
+# Archetypal Analysis Metacell Graph
 ##########################################################
 
-class MetacellScanpyGraph:
+class MetacellGraph:
 
     def __init__(self, ad, build_on='X_pca', n_cores: int = -1, verbose: bool = False):
+        """
+
+        :param ad: (anndata.AnnData) object containing data for which metacells are computed
+        :param build_on: (str) key corresponding to matrix in ad.obsm which is used to compute kernel for metacells
+                        Typically 'X_pca' for scRNA or 'X_svd' for scATAC
+        :param n_cores: (int) number of cores for multiprocessing. If unspecified, computed automatically as
+                        number of CPU cores
+        :param verbose: (bool) whether or not to suppress verbose program logging
+        """
+
+
         """Initialize model parameters"""
         # data parameters
         self.n, self.d = ad.obsm[build_on].shape
@@ -165,11 +115,13 @@ class MetacellScanpyGraph:
     ##############################################################
 
     def rbf(self, k: int = 15):
-        """Initialize adaptive bandwith RBF kernel (as described in C-isomap)
-
-        Inputs:
-            k (int): number of nearest neighbors for RBF kernel
         """
+        Initialize adaptive bandwith RBF kernel (as described in C-isomap)
+
+        :param k: (int) number of nearest neighbors for RBF kernel
+        :return: (sparse matrix) constructed RBF kernel
+        """
+
         import scanpy as sc
         
         if self.verbose:
@@ -225,180 +177,3 @@ class MetacellScanpyGraph:
         return self.M @ self.M.T
 
 
-class MetacellGraph:
-    """ Model that uses adaptive volume sampling to select representative cell types
-    Then assigns cells to representative clusters using Markov random walk absorption probabilities
-
-    Attributes:
-        n (int): number of samples
-        d (int): dimensionality of input (usually # PCA components)
-        Y (numpy ndarray): input data (PCA components, shape n x d)
-        M (CSR. matrix): similarity matrix
-        G (CSR matrix): (binary) graph of connectivities
-        T (CSR matrix): Markov (row-normalized) transition matrix
-        verbose (bool):
-    """
-
-    def __init__(self, Y, n_cores: int = -1, verbose: bool = False):
-        """Initialize model parameters"""
-        # data parameters
-        self.n, self.d = Y.shape
-
-        # indices of each point
-        self.indices = np.array(range(self.n))
-
-        # save data
-        self.Y = Y
-
-        # number of cores for parallelization
-        if n_cores != -1:
-            self.num_cores = n_cores
-        else:
-            self.num_cores = NUM_CORES
-
-        self.M = None  # similarity matrix
-        self.G = None  # graph
-        self.T = None  # transition matrix
-
-        # model params
-        self.verbose = verbose
-
-    ##############################################################
-    # Methods related to kernel + sim matrix construction
-    ##############################################################
-
-    def rbf(self, k: int = 15):
-        """Initialize adaptive bandwith RBF kernel (as described in C-isomap)
-
-        Inputs:
-            k (int): number of nearest neighbors for RBF kernel
-        """
-
-        if self.verbose:
-            print("Computing kNN graph...")
-
-        # compute kNN and the distance from each point to its nearest neighbors
-        knn_graph = kneighbors_graph(self.Y, k, mode="connectivity", include_self=True)
-        knn_graph_distances = kneighbors_graph(self.Y, k, mode="distance", include_self=True)
-
-        if self.verbose:
-            print("Computing radius for adaptive bandwidth kernel...")
-        
-        # compute median distance for each point amongst k-nearest neighbors
-        with Parallel(n_jobs=self.num_cores, backend="threading") as parallel:
-            median = k // 2
-            median_distances = parallel(
-                delayed(kth_neighbor_distance)(knn_graph_distances, median, i) for i in tqdm(range(self.n)))
-        
-        # convert to numpy array
-        median_distances = np.array(median_distances)
-
-        # take AND
-
-        if self.verbose:
-            print("Making graph symmetric...")
-        sym_graph = (knn_graph + knn_graph.T > 0).astype(float)
-
-        if self.verbose:
-            print("Computing RBF kernel...")
-
-        with Parallel(n_jobs=self.num_cores, backend="threading") as parallel:
-            similarity_matrix_rows = parallel(
-                delayed(rbf_for_row)(sym_graph, self.Y, median_distances, i) for i in tqdm(range(self.n)))
-
-        if self.verbose:
-            print("Building similarity LIL matrix...")
-
-        similarity_matrix = lil_matrix((self.n, self.n))
-        for i in tqdm(range(self.n)):
-            similarity_matrix[i] = similarity_matrix_rows[i]
-
-        if self.verbose:
-            print("Constructing CSR matrix...")
-
-        self.M = (similarity_matrix).tocsr()
-        return self.M @ self.M.T
-
-    
-    
-    
-    def jaccard(self, k: int):
-        """Uses Jaccard similarity between nearest neighbor sets as PSD kernel"""
-        if self.verbose:
-            print("Computing kNN graph...")
-
-        knn_graph = kneighbors_graph(self.Y, k, include_self=True)
-
-        # take AND
-        if self.verbose:
-            print("Making graph symmetric...")
-        sym_graph = ((knn_graph.multiply(knn_graph.T)) > 0).astype(float)
-        row_sums = np.sum(sym_graph, axis=1)
-
-        if self.verbose:
-            print("Computing Jaccard similarity...")
-
-        with Parallel(n_jobs=self.num_cores, backend="threading") as parallel:
-            similarity_matrix_rows = parallel(
-                delayed(jaccard_for_row)(sym_graph, row_sums, i) for i in tqdm(range(self.n)))
-
-        if self.verbose:
-            print("Building similarity LIL matrix...")
-
-        similarity_matrix = lil_matrix((self.n, self.n))
-        for i in tqdm(range(self.n)):
-            similarity_matrix[i] = similarity_matrix_rows[i]
-
-        if self.verbose:
-            print("Constructing CSR matrix...")
-
-        self.M = similarity_matrix.tocsr()
-        self.G = (self.M > 0).astype(float)
-
-    def compute_transition_probabilities(self):
-        """Normalize similarity matrix so that it represents transition probabilities"""
-
-        # check to make sure there's a G and M
-        if self.G is None or self.M is None:
-            print("Need to initialize kernel first")
-            return
-
-        # compute row sums
-        logM = self.G.copy()
-        logM.data = np.log(logM.data)
-
-        # compute sum in log space
-        log_row_sums = logsumexp_row_nonzeros(logM)
-
-        # normalize rows using logprobs and log sums
-        logM = normalize_row_nonzeros(logM, log_row_sums)
-
-        # save probabilities
-        self.T = logM
-
-    def compute_diffusion_map(self, k: int, t: int):
-        """ diffusion embedding
-        k: number of components for SVD
-        t: number of time steps for random walk"""
-        if self.T is None:
-            print("Need to initialize transition matrix first!")
-            return
-
-        if self.verbose:
-            print("Computing eigendecomposition")
-
-        # right eigenvectors
-        w, v = eigs(self.T, k=k, which="LM")
-        # u, s, v = svds(self.T, k=k)
-
-        order = np.argsort(-(np.real(w)))
-
-        w = w[order]
-        v = v[:, order]
-
-        # set embedding
-        lamb = np.power(np.real(w), t)
-        self.embedding = np.real(v) @ np.diag(lamb)
-
-        # store eigenvalues and eigenvectors
-        self.eigenvalues = w

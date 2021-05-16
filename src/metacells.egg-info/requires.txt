@@ -1,3 +1,4 @@
 palantir
 scanpy
 anndata
+numba==0.46

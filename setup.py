@@ -17,7 +17,8 @@ setuptools.setup(
     install_requires=[
         "palantir",
         "scanpy",
-        "anndata"
+        "anndata",
+        "numba==0.46"
         ],
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -26,6 +27,6 @@ setuptools.setup(
     ],
     python_requires='>=3.0',
     include_package_data=True,
-    package_data={'': ['src/metacells/data/*', '*.r', '*.R']},
+    package_data={'': ['src/metacells/data/*','src/metacells/Rscripts/*', '*.r', '*.R']},
     zip_safe=False
 )

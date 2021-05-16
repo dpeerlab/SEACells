@@ -1,34 +1,8 @@
 .DS_Store
-.gitignore
 LICENSE.txt
 README.md
+pyproject.toml
 setup.py
-.idea/aws.xml
-.idea/metacells.iml
-.idea/misc.xml
-.idea/modules.xml
-.idea/other.xml
-.idea/vcs.xml
-.idea/workspace.xml
-.idea/inspectionProfiles/profiles_settings.xml
-.ipynb_checkpoints/PC_reconstruction-checkpoint.ipynb
-.ipynb_checkpoints/analyse_multiome-checkpoint.ipynb
-.ipynb_checkpoints/choosing_K-checkpoint.ipynb
-.ipynb_checkpoints/choosing_K_with_validation_set-checkpoint.ipynb
-.ipynb_checkpoints/data_to_10x-checkpoint.ipynb
-.ipynb_checkpoints/evaluating_tanay-checkpoint.ipynb
-.ipynb_checkpoints/gaussian_assignment_likelihood-checkpoint.ipynb
-.ipynb_checkpoints/guttube_aa-checkpoint.ipynb
-.ipynb_checkpoints/h5_to_AnnData-checkpoint.ipynb
-.ipynb_checkpoints/hard v soft assignment-checkpoint.ipynb
-.ipynb_checkpoints/manu_example_nb-checkpoint.ipynb
-.ipynb_checkpoints/manu_example_pca-checkpoint.ipynb
-.ipynb_checkpoints/preprocessing-checkpoint.ipynb
-.ipynb_checkpoints/reformat_ATAC_to_gexp_matrix-checkpoint.ipynb
-.ipynb_checkpoints/run_metacells_example-checkpoint.ipynb
-.ipynb_checkpoints/silhouette score - number of metacells-checkpoint.ipynb
-.ipynb_checkpoints/unimodality_test-Copy1-checkpoint.ipynb
-__pycache__/benchmark_utils.cpython-37.pyc
 notebooks/.DS_Store
 notebooks/example_notebook.ipynb
 notebooks/.ipynb_checkpoints/Fig_3-checkpoint.ipynb
@@ -36,7 +10,6 @@ notebooks/.ipynb_checkpoints/example_notebook-checkpoint.ipynb
 notebooks/.ipynb_checkpoints/robustness-checkpoint.ipynb
 src/.DS_Store
 src/metacells/.DS_Store
-src/metacells/Untitled.ipynb
 src/metacells/__init__.py
 src/metacells/build_graph.py
 src/metacells/core.py
