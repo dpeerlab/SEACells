@@ -1,8 +1,12 @@
 .DS_Store
+.gitignore
 LICENSE.txt
 README.md
 pyproject.toml
 setup.py
+dist/metacells-0.0.1-py3-none-any.whl
+dist/metacells-0.0.1-py3.7.egg
+dist/metacells-0.0.1.tar.gz
 notebooks/.DS_Store
 notebooks/example_notebook.ipynb
 notebooks/.ipynb_checkpoints/Fig_3-checkpoint.ipynb
@@ -25,6 +29,8 @@ src/metacells.egg-info/not-zip-safe
 src/metacells.egg-info/requires.txt
 src/metacells.egg-info/top_level.txt
 src/metacells/.ipynb_checkpoints/Untitled-checkpoint.ipynb
+src/metacells/Rscripts/chromVAR.R
+src/metacells/Rscripts/tanay.R
 src/metacells/__pycache__/__init__.cpython-37.pyc
 src/metacells/__pycache__/build_graph.cpython-37.pyc
 src/metacells/__pycache__/core.cpython-37.pyc

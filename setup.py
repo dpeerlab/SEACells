@@ -18,7 +18,8 @@ setuptools.setup(
         "palantir",
         "scanpy",
         "anndata",
-        "numba==0.46"
+        "numba==0.50",
+        "scipy==1.6"
         ],
     classifiers=[
         "Programming Language :: Python :: 3",
