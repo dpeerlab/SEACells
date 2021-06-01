@@ -18,7 +18,7 @@ setuptools.setup(
         "palantir",
         "scanpy",
         "anndata",
-        "numba==0.52",
+        "numba>=0.51.2",
         "scipy==1.6"
         ],
     classifiers=[
