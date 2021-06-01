@@ -109,6 +109,7 @@ def get_NLLs(ad,
              key = 'X_pca',
              n_neighbours = 5,
              train_split = 1,
+             cluster = 'celltype', 
              verbose = True):
     """
     Compute the NLL of each cell under the Gaussian defined by cells belonging to (1) its own metacell
@@ -122,6 +123,7 @@ def get_NLLs(ad,
     :param key: (str) key in ad.obs used to define Multivariate Gaussian for each metacell
     :param n_neighbours: (int) number of nearest neighbours for which NLL is computing
     :param train_split: (float) proportion of cells to use as training data
+    :param cluster: (str)
     :param verbose:
     :return: pd.DataFrame containing the following columns:
             'self' - NLL of each cell under assigned metacell
@@ -141,7 +143,6 @@ def get_NLLs(ad,
         if verbose:
             print(f'Clipping to metacells with at least {1/(1-train_split)} cells')
         sufficient = cts[cts.iloc[:, 0]>1/(1-train_split)].index
-    else:
         if verbose:
             print(f'Clipping to metacells with at least 3 cells.')
         # Require at least 3 cells per metacell
@@ -179,6 +180,7 @@ def get_NLLs(ad,
     metacells_nbrs.index = metacells_dcs.index
     metacells_nbrs.columns += 1
 
+
     from scipy.spatial.distance import pdist, squareform
 
     mc_components_mean = components.merge(label_df['Metacell'], left_index=True, right_index=True).groupby('Metacell').mean()
@@ -193,7 +195,6 @@ def get_NLLs(ad,
 
     nbr_dists = pd.DataFrame(dists).set_index(metacells_nbrs.index)
     nbr_dists.columns += 1
-
     neighbours = pd.concat({'Metacell':metacells_nbrs, 'Distance':nbr_dists}, axis=1)
 
     from scipy.stats import multivariate_normal as mv_g

@@ -78,7 +78,6 @@ class Metacells:
             from_greedy = self.k - len(waypt_ix)
             if self.verbose:
                 print(f'Selecting {len(waypt_ix)} cells from waypoint initialization.')
-
         else:
             from_greedy = self.k
 
