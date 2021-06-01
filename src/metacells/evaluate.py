@@ -109,7 +109,6 @@ def get_NLLs(ad,
              key = 'X_pca',
              n_neighbours = 5,
              train_split = 1,
-             cluster = 'celltype', 
              verbose = True):
     """
     Compute the NLL of each cell under the Gaussian defined by cells belonging to (1) its own metacell
@@ -123,7 +122,6 @@ def get_NLLs(ad,
     :param key: (str) key in ad.obs used to define Multivariate Gaussian for each metacell
     :param n_neighbours: (int) number of nearest neighbours for which NLL is computing
     :param train_split: (float) proportion of cells to use as training data
-    :param cluster: (str)
     :param verbose:
     :return: pd.DataFrame containing the following columns:
             'self' - NLL of each cell under assigned metacell
@@ -135,46 +133,19 @@ def get_NLLs(ad,
 
     assert train_split <=1 and train_split >=0, 'train_split must lie in range [0,1] inclusive.'
 
-    label_df = ad.obs[['Metacell', cluster]]
-
-    # Compute neighbours in diffusion component space
-    if verbose:
-        print(f'Computing {n_neighbours} neighbours in diffusion component space and Gaussian from {key} space.')
-    components = pd.DataFrame(ad.obsm[key]).set_index(ad.obs_names)
-    dm_res = palantir.utils.run_diffusion_maps(components)
-    dc = palantir.utils.determine_multiscale_space(dm_res, n_eigs=10)
-
+    label_df = ad.obs[['Metacell']]
+    label_df.loc[:, 'count_assist'] = 1
     cts = label_df.groupby('Metacell').count()
+    
     if train_split < 1:
         if verbose:
             print(f'Clipping to metacells with at least {1/(1-train_split)} cells')
-        sufficient = cts[cts[cluster]>1/(1-train_split)].index
+        sufficient = cts[cts.iloc[:, 0]>1/(1-train_split)].index
     else:
         if verbose:
             print(f'Clipping to metacells with at least 3 cells.')
         # Require at least 3 cells per metacell
-        sufficient = cts[cts[cluster]>=3].index
-    
-    clip_label_df = label_df[label_df['Metacell'].isin(sufficient)]
-    
-    if verbose:
-        print(f'Dropping {len(label_df.Metacell.unique())-len(sufficient)} metacell(s) due to insufficient size.')
-
-    # Subset to only metacells
-    metacells_dcs = dc.merge(clip_label_df.Metacell, left_index=True, right_index=True).groupby('Metacell').mean()
-    labeled_dcs = dc.merge(clip_label_df.Metacell, left_index=True, right_index=True).set_index('Metacell')
-
-    label_df = ad.obs[['Metacell', cluster]]
-    cts = label_df.groupby('Metacell').count()
-    if train_split < 1:
-        if verbose:
-            print(f'Clipping to metacells with at least {1/(1-train_split)} cells')
-        sufficient = cts[cts[cluster]>1/(1-train_split)].index
-    else:
-        if verbose:
-            print(f'Clipping to metacells with at least 3 cells.')
-        # Require at least 3 cells per metacell
-        sufficient = cts[cts[cluster]>=3].index
+        sufficient = cts[cts.iloc[:, 0]>=3].index
 
     if verbose:
         print(f'Dropping {len(label_df.Metacell.unique())-len(sufficient)} metacell(s) due to insufficient size.')
@@ -208,12 +179,6 @@ def get_NLLs(ad,
     metacells_nbrs.index = metacells_dcs.index
     metacells_nbrs.columns += 1
 
-    # Get cluster type of neighbors to ensure they match the metacell cluster
-    metacells_with_cluster = metacells_dcs.join(label_df.groupby('Metacell').first(), how='inner')
-    clusters_nbrs = pd.DataFrame(np.array(metacells_with_cluster[cluster].values)[nbrs])
-    clusters_nbrs.index = metacells_with_cluster.index
-    clusters_nbrs.columns += 1
-
     from scipy.spatial.distance import pdist, squareform
 
     mc_components_mean = components.merge(label_df['Metacell'], left_index=True, right_index=True).groupby('Metacell').mean()
@@ -229,14 +194,7 @@ def get_NLLs(ad,
     nbr_dists = pd.DataFrame(dists).set_index(metacells_nbrs.index)
     nbr_dists.columns += 1
 
-    # Check if MC neighbour matches cluster type of metacell
-    true_clusters = ad.obs.groupby('Metacell').agg(lambda x:x.value_counts().index[0])[cluster]
-    true_clusters.index = true_clusters.index.astype(str)
-
-    df = clusters_nbrs.join(true_clusters)
-    nbr_match = df.eq(df[cluster], axis=0).drop(cluster, axis=1)
-
-    neighbours = pd.concat({'Metacell':metacells_nbrs, f'{cluster}':clusters_nbrs, 'Distance':nbr_dists, f'{cluster}_match':nbr_match}, axis=1)
+    neighbours = pd.concat({'Metacell':metacells_nbrs, 'Distance':nbr_dists}, axis=1)
 
     from scipy.stats import multivariate_normal as mv_g
     mc_params = {}

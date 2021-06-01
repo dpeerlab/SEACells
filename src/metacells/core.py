@@ -76,15 +76,21 @@ class Metacells:
             waypt_ix = self._get_waypoint_centers(k)
             waypt_ix = np.random.choice(waypt_ix, int(len(waypt_ix) * self.waypoint_proportion))
             from_greedy = self.k - len(waypt_ix)
+            if self.verbose:
+                print(f'Selecting {len(waypt_ix)} cells from waypoint initialization.')
+
         else:
             from_greedy = self.k
 
         greedy_ix = self._get_greedy_centers(n_mcs=from_greedy + 10)
         if self.verbose:
-            print(f'Selecting {len(waypt_ix)} cells from waypoint initialization.')
             print(f'Selecting {from_greedy} cells from greedy initialization.')
 
-        all_ix = np.hstack([waypt_ix, greedy_ix])
+        if self.waypoint_proportion > 0:
+            all_ix = np.hstack([waypt_ix, greedy_ix])
+        else:
+            all_ix = np.hstack([greedy_ix])
+
         unique_ix, ind = np.unique(all_ix, return_index=True)
         all_ix = unique_ix[np.argsort(ind)][:k]
 
