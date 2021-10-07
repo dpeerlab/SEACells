@@ -1,6 +1,3 @@
-# Uses adaptive sampling to pick rows of input matrix.
-# Then uses Markov random walk absorption probabilities to assign cells.
-
 import numpy as np
 from scipy.sparse import coo_matrix, csr_matrix, dok_matrix, lil_matrix, diags, eye, csc_matrix, kron, vstack
 from sklearn.neighbors import kneighbors_graph, radius_neighbors_graph

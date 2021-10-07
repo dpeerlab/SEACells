@@ -1,8 +1,5 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
-sns.set(font_scale=2)
-sns.set_style("white")
-
 import pandas as pd
 
 def plot_assignment_entropy(ad,

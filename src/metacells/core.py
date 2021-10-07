@@ -123,8 +123,9 @@ class Metacells:
             # Compute PCA components from ad object
             pca_components = pd.DataFrame(ad.obsm['X_svd']).set_index(ad.obs_names)
         else:
-            raise ValueError(f'{self.build_kernel_on} is not a value input upon which kernel is built')
-
+            pca_components = pd.DataFrame(ad.obsm[self.build_kernel_on]).set_index(ad.obs_names)
+        print(f'Building kernel on {self.build_kernel_on}')
+        
         if self.verbose:
             print(f'Computing diffusion components from {self.build_kernel_on} for waypoint initialization ... ')
 
@@ -229,7 +230,8 @@ class Metacells:
 
         return centers
 
-    def _updateA(self, B):
+
+    def _updateA(self, B, A_prev):
         """
         Given archetype matrix B and using kernel matrix K, compute assignment matrix A using gradient descent.
 
@@ -238,9 +240,7 @@ class Metacells:
         """
         n, k = B.shape
 
-        # initialize matrix A (don't reinitialize?)
-        A = np.zeros((k, n))
-        A[0, :] = 1.
+        A = A_prev
 
         t = 0  # current iteration (determine multiplicative update)
 
@@ -265,7 +265,8 @@ class Metacells:
 
         return A
 
-    def _updateB(self, A):
+
+    def _updateB(self, A, B_prev):
         """
         Given assignment matrix A and using kernel matrix K, compute archetype matrix B
 
@@ -276,9 +277,7 @@ class Metacells:
         K = self.K
         k, n = A.shape
 
-        # initialize matrix B (don't re-initialize?)
-        B = np.zeros((n, k))
-        B[0, :] = 1.
+        B = B_prev
 
         # keep track of error
         t = 0
@@ -400,9 +399,11 @@ class Metacells:
                 print('Using fixed B matrix as provided.')
             B = self.true_B
 
-        A = np.eye(k, n)
-        A[0, :] = 1.
+        A = np.random.random((k,n))
+        A /= A.sum(0)
         
+        print('Randomly initialized A matrix.')
+
         # Create convergence threshold
         RSS = self.compute_RSS(A,B)
         self.RSS_iters.append(RSS)
@@ -421,7 +422,7 @@ class Metacells:
             if n_iter==1 or (n_iter)%10 == 0:
                 print(f"Starting iteration {n_iter}.")
             if self.true_A is None:
-                A = self._updateA(B)
+                A = self._updateA(B, A)
             else:
                 print('Not updating A, true A provided')
                 A = self.true_A
@@ -439,7 +440,13 @@ class Metacells:
             # Check for convergence 
             if np.abs(self.RSS_iters[-2] - self.RSS_iters[-1]) < self.convergence_threshold:                   
                 converged = True 
-        
+            
+            self.A_ = A
+            self.B_ = B
+            n_metacells = self.get_assignments()['Metacell'].unique().shape[0]
+            print(f'Contains {n_metacells} metacells after {n_iter} iterations.')
+            
+
         print(f'Converged after {n_iter} iterations.')
         self.A_ = A
         self.B_ = B
@@ -514,44 +521,5 @@ class Metacells:
         df['Metacell'] = df['Metacell'].map(di)
 
         return pd.DataFrame(df['Metacell'])
-
-    def summarize_by_metacell(self, aggregate_by='sum'):
-        """
-        Compute a new n_metacells x n_features anndata object where counts are aggregate either by summing
-        or by computing the mean and re-normalizing.
-
-        :param aggregate_by: (str) Method by which counts are aggregated - either 'sum' (for ATAC counts') or 'mean'
-                            followed by re-normalization (for RNA counts)
-        :return: anndata.AnnData object with dimenion n_metacells x n_features
-        """
-        import anndata
-
-        assert aggregate_by in ['sum', 'mean'], 'aggregate_by must be either sum or mean'
-
-        features = pd.DataFrame(self.ad.raw.X.todense()).set_index(self.ad.obs_names)
-        features = features.join(self.ad.obs[['Metacell']])
-
-        if aggregate_by == 'sum':
-            if self.verbose:
-                print('Summing features for each metacell.')
-            df = features.groupby('Metacell').sum()
-        else:
-            if self.verbose:
-                print('Averaging features for each metacell.')
-            df = features.groupby('Metacell').mean()
-
-        # Create anndata object from summarized features
-        ad = anndata.AnnData(df)
-        ad.raw = ad
-
-        if aggregate_by == 'mean':
-            if self.verbose:
-                print('Re-normalizing per metacell.')
-                import scanpy as sc
-                sc.pp.normalize_per_cell(ad)
-
-        # Copy over all attributes from .obs matrix
-        ad.obs = self.ad.obs.loc[ad.obs_names]
-        return ad
 
 
