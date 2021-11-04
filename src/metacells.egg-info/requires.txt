@@ -1,5 +1,0 @@
-palantir
-scanpy
-anndata
-numba==0.50
-scipy==1.6

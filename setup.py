@@ -4,16 +4,15 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="metacells", # Replace with your own username
-    version="0.0.1",
+    name="SEACells",
+    version="0.1.0",
     author="Pe'er Lab",
     author_email="scp2152@columbia.edu",
     description=" ",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/pypa/sampleproject",
-    package_dir={'':'src'},
-    packages=setuptools.find_packages('src'),
+    url="https://github.com/dpeerlab/SEACells",
+    packages=setuptools.find_packages(),
     install_requires=[
         "palantir",
         "scanpy",
@@ -28,6 +27,6 @@ setuptools.setup(
     ],
     python_requires='>=3.0',
     include_package_data=True,
-    package_data={'': ['src/metacells/data/*','src/metacells/Rscripts/*', '*.r', '*.R']},
+    package_data={'': ['SEACells/data/*','SEACells/Rscripts/*', '*.r', '*.R']},
     zip_safe=False
 )
