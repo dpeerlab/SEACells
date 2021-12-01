@@ -359,7 +359,7 @@ class SEACells:
         plt.show()
         plt.close()
 
-    def _fit(self, max_iter: int = 50, B0=None):
+    def _fit(self, max_iter: int = 50, min_iter:int=10, B0=None):
         """
         Compute archetypes and loadings given kernel matrix K. Iteratively updates A and B matrices until maximum
         number of iterations or convergence has been achieved.
@@ -400,7 +400,8 @@ class SEACells:
 
         A = np.random.random((k, n))
         A /= A.sum(0)
-
+        A = self._updateA(B, A)
+        
         print('Randomly initialized A matrix.')
 
         # Create convergence threshold
@@ -414,7 +415,7 @@ class SEACells:
 
         converged = False
         n_iter = 0
-        while (not converged and n_iter < max_iter) or n_iter < 10:
+        while (not converged and n_iter < max_iter) or n_iter < min_iter:
 
             n_iter += 1
 
@@ -427,7 +428,7 @@ class SEACells:
                 A = self.true_A
 
             if self.true_B is None:
-                B = self._updateB(A)
+                B = self._updateB(A, B)
             else:
                 print('Not updating B, true B provided')
 
