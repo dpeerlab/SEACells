@@ -522,4 +522,29 @@ class SEACells:
 
         return pd.DataFrame(df['SEACell'])
 
+    def summarize_by_SEACell(self):
+        """
+        Aggregates cells within each SEACell, summing over all raw data for all cells belonging to a SEACell.
+        Data is unnormalized and raw aggregated counts are stored .layers['raw'].
+        Attributes associated with variables (.var) are copied over, but relevant per SEACell attributes must be
+        manually copied, since certain attributes may need to be summed, or averaged etc, depending on the attribute.
+        The output of this function is an anndata object of shape n_metacells x original_data_dimension.
+        :return: anndata.AnnData containing aggregated counts.
 
+        """
+        import scipy
+        import anndata
+
+
+        groupby_SEACells =  self.ad.to_df(layer='raw').join(self.ad.obs['SEACell']).groupby('SEACell')
+        agg_counts =groupby_SEACells.sum()
+        SEACell_ad = anndata.AnnData(agg_counts)
+        SEACell_ad.var = self.ad.var
+
+
+        SEACell_ad.layers['raw'] = scipy.sparse.csr_matrix(agg_counts.values)
+
+        SEACell_sizes = groupby_SEACells.count().iloc[:, 0]
+        SEACell_ad.obs['SEACell_size'] = SEACell_sizes.loc[SEACell_ad.obs_names]
+
+        return SEACell_ad

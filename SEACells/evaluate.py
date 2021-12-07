@@ -15,7 +15,7 @@ def diffusion_component_variance(ad, low_dim_embedding):
     dm_res = palantir.utils.run_diffusion_maps(components)
     dc = palantir.utils.determine_multiscale_space(dm_res, n_eigs=10)
 
-    return pd.DataFrame(dc.join(ad.obs["SEACell"]).groupby("SEACell").var().mean(1))
+    return pd.DataFrame(dc.join(ad.obs["SEACell"]).groupby("SEACell").var().mean(1)).rename(columns={0:'compactness'})
 
 
 def diffusion_component_dist_to_NN(ad,
@@ -51,9 +51,9 @@ def diffusion_component_dist_to_NN(ad,
         nbr_clusters = nbr_clusters.join(pd.DataFrame(clusters))
 
         clusters_match = nbr_clusters.eq(nbr_clusters[cluster], axis=0)
-        return dists[nth_nbr][clusters_match[nth_nbr]]
+        return pd.DataFrame(dists[nth_nbr][clusters_match[nth_nbr]]).rename(columns={1:'separation'})
     else:
-        return dists[nth_nbr]
+        return pd.DataFrame(dists[nth_nbr]).rename(columns={1:'separation'})
 
 
 def get_density(ad, key, nth_neighbor=150):

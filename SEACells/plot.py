@@ -36,6 +36,8 @@ def plot_2D(ad, key='X_umap',
             save_as = None,
             cmap='Set2',
             figsize=(5,5),
+            SEACell_size = 20,
+            cell_size=10
             ):
     """
     Plot 2D visualization of metacells using the embedding provided in 'key'.
@@ -48,19 +50,19 @@ def plot_2D(ad, key='X_umap',
     :param cmap: (str) matplotlib colormap for metacells. Default: 'Set2'
     :param figsize: (int,int) tuple of integers representing figure size
     """
-    umap = pd.DataFrame(ad.obsm[key]).set_index(ad.obs_names).join(ad.obs['Metacell'])
-    mcs = umap.loc[ad.obs['Metacell'].unique()]
+    umap = pd.DataFrame(ad.obsm[key]).set_index(ad.obs_names).join(ad.obs['SEACell'])
+    mcs = umap.loc[ad.obs['SEACell'].unique()]
 
     plt.figure(figsize=figsize)
     if colour_metacells:
         sns.scatterplot(x=0, y=1,
-                        hue='Metacell',
+                        hue='SEACell',
                         data=umap,
-                        s=5,
+                        s=cell_size,
                         cmap=cmap,
                         legend=None)
-        sns.scatterplot(x=0, y=1, s=20,
-                        hue='Metacell',
+        sns.scatterplot(x=0, y=1, s=SEACell_size,
+                        hue='SEACell',
                         data=mcs,
                         cmap=cmap,
                         edgecolor='black', linewidth=1.25,
@@ -69,10 +71,10 @@ def plot_2D(ad, key='X_umap',
         sns.scatterplot(x=0, y=1,
                         color='grey',
                         data=umap,
-                        s=5,
+                        s=cell_size,
                         cmap=cmap,
                         legend=None)
-        sns.scatterplot(x=0, y=1, s=20,
+        sns.scatterplot(x=0, y=1, s=SEACell_size,
                         color='red',
                         data=mcs,
                         cmap=cmap,
@@ -89,7 +91,7 @@ def plot_2D(ad, key='X_umap',
         plt.savefig(save_as, dpi=150, transparent=True)
     plt.close()
 
-def plot_metacell_sizes(ad,
+def plot_SEACell_sizes(ad,
                         save_as=None,
                         title='Distribution of Metacell Sizes',
                         bins = None,
@@ -105,15 +107,15 @@ def plot_metacell_sizes(ad,
     :return: None
     """
 
-    assert 'Metacell' in ad.obs, 'AnnData must contain "Metacell" in obs DataFrame.'
-    label_df = ad.obs[['Metacell']].reset_index()
+    assert 'SEACell' in ad.obs, 'AnnData must contain "SEACell" in obs DataFrame.'
+    label_df = ad.obs[['SEACell']].reset_index()
     plt.figure(figsize=figsize)
-    sns.distplot(label_df.groupby('Metacell').count().iloc[:, 0], bins=bins)
+    sns.distplot(label_df.groupby('SEACell').count().iloc[:, 0], bins=bins)
     sns.despine()
-    plt.xlabel('Number of Cells per Metacell')
+    plt.xlabel('Number of Cells per SEACell')
     plt.title(title)
     plt.show()
     if save_as is not None:
         plt.savefig(save_as)
     plt.close()
-    return label_df.groupby('Metacell').count().iloc[:, 0]
+    return pd.DataFrame(label_df.groupby('SEACell').count().iloc[:, 0]).rename(columns={'index':'size'})
