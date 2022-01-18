@@ -18,6 +18,8 @@ def prepare_multiome_anndata(atac_ad, rna_ad, SEACell_label='SEACell', n_bins_fo
 
     # Subset of cells common to ATAC and RNA
     common_cells = atac_ad.obs_names.intersection(rna_ad.obs_names)
+    if len(common_cells) != atac_ad.shape[0]:
+        print('Warning: The number of cells in RNA and ATAC objects are different. Only the common cells will be used.')
     atac_mod_ad = atac_ad[common_cells, :]
     rna_mod_ad = rna_ad[common_cells, :]
 
@@ -71,11 +73,11 @@ def prepare_multiome_anndata(atac_ad, rna_ad, SEACell_label='SEACell', n_bins_fo
     rna_meta_ad.X = csr_matrix(rna_meta_ad.X)
     rna_meta_ad.obs_names, rna_meta_ad.var_names = summ_matrix.index.astype(
         str), rna_meta_ad.var_names
-    rna_meta_ad.var['highly_variable'] = rna_ad.var['highly_variable']
+
 
     # #################################################################################
     # Update ATAC meta ad with GC content information
-    atac_meta_ad.obs['log_n_counts'] = np.ravel(
+    atac_mod_ad.var['log_n_counts'] = np.ravel(
         np.log10(atac_mod_ad.X.sum(axis=0)))
     atac_meta_ad.var['GC_bin'] = np.digitize(
         atac_mod_ad.var['GC'], np.linspace(0, 1, n_bins_for_gc))
@@ -86,7 +88,7 @@ def prepare_multiome_anndata(atac_ad, rna_ad, SEACell_label='SEACell', n_bins_fo
     return atac_meta_ad, rna_meta_ad
 
 
-def pyranges_from_strings(pos_list):
+def _pyranges_from_strings(pos_list):
     """
     TODO: Documentation
     """
@@ -102,7 +104,7 @@ def pyranges_from_strings(pos_list):
     return gr
 
 
-def pyranges_to_strings(peaks):
+def _pyranges_to_strings(peaks):
     """
     TODO: Documentation
     """
@@ -149,7 +151,7 @@ def _peaks_correlations_per_gene(gene,
     gene_peaks = peaks_pr.overlap(gene_pr)
     if len(gene_peaks) == 0:
         return 0
-    gene_peaks_str = pyranges_to_strings(gene_peaks)
+    gene_peaks_str = _pyranges_to_strings(gene_peaks)
 
     # Compute correlations
     X = atac_exprs.loc[:, gene_peaks_str].T
@@ -196,6 +198,7 @@ def get_gene_peak_correlations(atac_meta_ad,
                                rna_meta_ad,
                                path_to_gtf,
                                span=100000,
+                               n_jobs=1,
                                gene_set=None):
     """
     TODO: Documentation
@@ -211,7 +214,7 @@ def get_gene_peak_correlations(atac_meta_ad,
                               index=atac_meta_ad.obs_names, columns=atac_meta_ad.var_names)
     rna_exprs = pd.DataFrame(rna_meta_ad.X.todense(),
                              index=rna_meta_ad.obs_names, columns=rna_meta_ad.var_names)
-    peaks_pr = pyranges_from_strings(atac_meta_ad.var_names)
+    peaks_pr = _pyranges_from_strings(atac_meta_ad.var_names)
 
     print('Computing peak-gene correlations')
     if gene_set is None:
@@ -219,7 +222,7 @@ def get_gene_peak_correlations(atac_meta_ad,
     else:
         use_genes = gene_set
     from joblib import Parallel, delayed
-    gene_peak_correlations = Parallel(n_jobs=1)(delayed(_peaks_correlations_per_gene)(gene,
+    gene_peak_correlations = Parallel(n_jobs=n_jobs)(delayed(_peaks_correlations_per_gene)(gene,
                                                                                       atac_exprs,
                                                                                       rna_exprs,
                                                                                       atac_meta_ad,
@@ -247,7 +250,7 @@ def get_gene_peak_assocations(gene_peak_correlations, pval_cutoff=1e-1, cor_cuto
     return peak_counts
 
 
-def get_gene_scores(gene_peak_correlations, atac_meta_ad, pval_cutoff=1e-1, cor_cutoff=0.1):
+def get_gene_scores(atac_meta_ad, gene_peak_correlations, pval_cutoff=1e-1, cor_cutoff=0.1):
     """
     TODO: Documentation
 

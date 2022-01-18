@@ -3,5 +3,5 @@ dist
 pyproject.toml
 SEACells.egg-info
 **/__pycache__
-**/.ipynb_checkpoints
+**/.ipynb_checkpoints/
 **/.DS_Store
