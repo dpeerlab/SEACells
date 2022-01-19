@@ -347,7 +347,6 @@ class SEACells:
         """
         import matplotlib.pyplot as plt
         import seaborn as sns
-        sns.set()
 
         plt.figure()
         plt.plot(self.RSS_iters)
@@ -444,7 +443,6 @@ class SEACells:
             self.A_ = A
             self.B_ = B
             n_SEACells = self.get_assignments()['SEACell'].unique().shape[0]
-            print(f'Contains {n_SEACells} SEACells after {n_iter} iterations.')
 
         print(f'Converged after {n_iter} iterations.')
         self.A_ = A
@@ -455,9 +453,6 @@ class SEACells:
         labels = self.get_assignments()
         self.ad.obs['SEACell'] = labels['SEACell']
 
-        print('TODO: ENTROPY NOT THE BEST MEASURE.')
-        from scipy.stats import entropy
-        self.ad.obs['SEACell_Entropy'] = entropy(self.A_, axis=0)
 
     def fit(self, n_iter: int = 8, waypoint_proportion: float = None, B0=None):
         """
@@ -522,29 +517,36 @@ class SEACells:
 
         return pd.DataFrame(df['SEACell'])
 
-    def summarize_by_SEACell(self):
-        """
-        Aggregates cells within each SEACell, summing over all raw data for all cells belonging to a SEACell.
-        Data is unnormalized and raw aggregated counts are stored .layers['raw'].
-        Attributes associated with variables (.var) are copied over, but relevant per SEACell attributes must be
-        manually copied, since certain attributes may need to be summed, or averaged etc, depending on the attribute.
-        The output of this function is an anndata object of shape n_metacells x original_data_dimension.
-        :return: anndata.AnnData containing aggregated counts.
 
-        """
-        import scipy
-        import anndata
+def summarize_by_SEACell(ad, SEACells_label='SEACell', summarize_layer='raw'):
+    """
+    Aggregates cells within each SEACell, summing over all raw data for all cells belonging to a SEACell.
+    Data is unnormalized and raw aggregated counts are stored .layers['raw'].
+    Attributes associated with variables (.var) are copied over, but relevant per SEACell attributes must be
+    manually copied, since certain attributes may need to be summed, or averaged etc, depending on the attribute.
+    The output of this function is an anndata object of shape n_metacells x original_data_dimension.
+    :return: anndata.AnnData containing aggregated counts.
 
+    """
+    from scipy.sparse import csr_matrix
+    import scanpy as sc
 
-        groupby_SEACells =  self.ad.to_df(layer='raw').join(self.ad.obs['SEACell']).groupby('SEACell')
-        agg_counts =groupby_SEACells.sum()
-        SEACell_ad = anndata.AnnData(agg_counts)
-        SEACell_ad.var = self.ad.var
+    # Set of metacells
+    metacells = ad.obs[SEACells_label].unique()
 
+    # Summary matrix
+    summ_matrix = pd.DataFrame(0.0, index=metacells, columns=ad.var_names)
 
-        SEACell_ad.layers['raw'] = scipy.sparse.csr_matrix(agg_counts.values)
+    for m in tqdm(summ_matrix.index):
+        cells = ad.obs_names[ad.obs[SEACells_label] == m]
+        if summarize_layer == 'raw':
+            summ_matrix.loc[m, :] = np.ravel(ad[cells, :].raw.X.sum(axis=0))
+        else:
+            summ_matrix.loc[m, :] = np.ravel(ad[cells, :].layers[summarize_layer].sum(axis=0))
 
-        SEACell_sizes = groupby_SEACells.count().iloc[:, 0]
-        SEACell_ad.obs['SEACell_size'] = SEACell_sizes.loc[SEACell_ad.obs_names]
+    # Ann data
+    # Counts
+    meta_ad = sc.AnnData(csr_matrix(summ_matrix))
+    meta_ad.obs_names, meta_ad.var_names = summ_matrix.index.astype(str), ad.var_names
 
-        return SEACell_ad
+    return meta_ad
