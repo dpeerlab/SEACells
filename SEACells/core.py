@@ -518,7 +518,7 @@ class SEACells:
         return pd.DataFrame(df['SEACell'])
 
 
-def summarize_by_SEACell(ad, SEACells_label='SEACell'):
+def summarize_by_SEACell(ad, SEACells_label='SEACell', summarize_layer='raw'):
     """
     Aggregates cells within each SEACell, summing over all raw data for all cells belonging to a SEACell.
     Data is unnormalized and raw aggregated counts are stored .layers['raw'].
@@ -539,7 +539,10 @@ def summarize_by_SEACell(ad, SEACells_label='SEACell'):
 
     for m in tqdm(summ_matrix.index):
         cells = ad.obs_names[ad.obs[SEACells_label] == m]
-        summ_matrix.loc[m, :] = np.ravel(ad[cells, :].raw.X.sum(axis=0))
+        if summarize_layer == 'raw':
+            summ_matrix.loc[m, :] = np.ravel(ad[cells, :].raw.X.sum(axis=0))
+        else:
+            summ_matrix.loc[m, :] = np.ravel(ad[cells, :].layers[summarize_layer].sum(axis=0))
 
     # Ann data
     # Counts
