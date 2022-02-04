@@ -4,21 +4,28 @@ SEACells:
 **S**ingle-c**E**ll **A**ggregation for High Resolution **Cell S**tates 
 
 #### Installation and dependencies
-1. SEACells has been implemented in Python3 and can be installed using 
-
-		$> pip install SEACells
-
-	or can be installed from source: 
+1. SEACells has been implemented in Python3 can be installed from source: 
 		
 		$> git clone https://github.com/dpeerlab/SEACells.git
 		$> cd SEACells
 		$> python setup.py install
-  
-2. SEACells depends on a number of `python3` packages available on pypi and these dependencies are listed in `setup.py`.
+ 
+2. If you are using `conda`, the following commands can be used to solve any issues with MultiCoreTSNE
+```
+conda create --name seacells -c conda-forge -c bioconda cython python=3.8
+conda activate seacells
+pip install git+https://github.com/settylab/Palantir@removeTSNE
+git clone https://github.com/dpeerlab/SEACells.git
+cd SEACells 
+python setup.py install
+```
+
+
+3. SEACells depends on a number of `python3` packages available on pypi and these dependencies are listed in `setup.py`.
 
     All the dependencies will be automatically installed using the above commands
 
-3. To uninstall:
+4. To uninstall:
 		
 		$> pip uninstall SEACells
 
