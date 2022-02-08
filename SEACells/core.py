@@ -539,7 +539,7 @@ def summarize_by_SEACell(ad, SEACells_label='SEACell', summarize_layer='raw'):
 
     for m in tqdm(summ_matrix.index):
         cells = ad.obs_names[ad.obs[SEACells_label] == m]
-        if summarize_layer == 'raw':
+        if summarize_layer == 'raw' and ad.raw != None:
             summ_matrix.loc[m, :] = np.ravel(ad[cells, :].raw.X.sum(axis=0))
         else:
             summ_matrix.loc[m, :] = np.ravel(ad[cells, :].layers[summarize_layer].sum(axis=0))
