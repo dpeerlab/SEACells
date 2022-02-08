@@ -74,7 +74,7 @@ class SEACells:
 
         if self.waypoint_proportion > 0:
             waypt_ix = self._get_waypoint_centers(k)
-            waypt_ix = np.random.choice(waypt_ix, int(len(waypt_ix) * self.waypoint_proportion))
+            waypt_ix = np.random.choice(waypt_ix, int(len(waypt_ix) * self.waypoint_proportion), replace=False)
             from_greedy = self.k - len(waypt_ix)
             if self.verbose:
                 print(f'Selecting {len(waypt_ix)} cells from waypoint initialization.')
@@ -539,7 +539,7 @@ def summarize_by_SEACell(ad, SEACells_label='SEACell', summarize_layer='raw'):
 
     for m in tqdm(summ_matrix.index):
         cells = ad.obs_names[ad.obs[SEACells_label] == m]
-        if summarize_layer == 'raw':
+        if summarize_layer == 'raw' and ad.raw != None:
             summ_matrix.loc[m, :] = np.ravel(ad[cells, :].raw.X.sum(axis=0))
         else:
             summ_matrix.loc[m, :] = np.ravel(ad[cells, :].layers[summarize_layer].sum(axis=0))
