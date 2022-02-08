@@ -130,7 +130,7 @@ class SEACells:
         if self.verbose:
             print(f'Computing diffusion components from {self.build_kernel_on} for waypoint initialization ... ')
 
-        dm_res = palantir.utils.run_diffusion_maps(pca_components)
+        dm_res = palantir.utils.run_diffusion_maps(pca_components, n_components=self.n_neighbors)
         dc_components = palantir.utils.determine_multiscale_space(dm_res, n_eigs=self.n_waypoint_eigs)
         if self.verbose:
             print('Done.')
