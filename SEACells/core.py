@@ -74,7 +74,7 @@ class SEACells:
 
         if self.waypoint_proportion > 0:
             waypt_ix = self._get_waypoint_centers(k)
-            waypt_ix = np.random.choice(waypt_ix, int(len(waypt_ix) * self.waypoint_proportion))
+            waypt_ix = np.random.choice(waypt_ix, int(len(waypt_ix) * self.waypoint_proportion), replace=False)
             from_greedy = self.k - len(waypt_ix)
             if self.verbose:
                 print(f'Selecting {len(waypt_ix)} cells from waypoint initialization.')
