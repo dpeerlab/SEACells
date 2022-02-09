@@ -24,9 +24,10 @@ def plot_assignment_entropy(ad,
     sns.distplot(ad.obs['Metacell_Entropy'], bins=bins)
     plt.title(title)
     sns.despine()
-    plt.show()
+    
     if save_as is not None:
         plt.savefig(save_as, dpi=150, transparent=True)
+    plt.show()
     plt.close()
 
 
@@ -86,9 +87,10 @@ def plot_2D(ad, key='X_umap',
     plt.title(title)
     ax = plt.gca()
     ax.set_axis_off()
-    plt.show()
+    
     if save_as is not None:
         plt.savefig(save_as, dpi=150, transparent=True)
+    plt.show()
     plt.close()
 
 def plot_SEACell_sizes(ad,
@@ -114,8 +116,9 @@ def plot_SEACell_sizes(ad,
     sns.despine()
     plt.xlabel('Number of Cells per SEACell')
     plt.title(title)
-    plt.show()
+    
     if save_as is not None:
         plt.savefig(save_as)
+    plt.show()
     plt.close()
     return pd.DataFrame(label_df.groupby('SEACell').count().iloc[:, 0]).rename(columns={'index':'size'})
