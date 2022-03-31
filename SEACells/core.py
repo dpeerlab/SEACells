@@ -548,5 +548,5 @@ def summarize_by_SEACell(ad, SEACells_label='SEACell', summarize_layer='raw'):
     # Counts
     meta_ad = sc.AnnData(csr_matrix(summ_matrix))
     meta_ad.obs_names, meta_ad.var_names = summ_matrix.index.astype(str), ad.var_names
-
+    meta_ad.layers['raw'] = csr_matrix(summ_matrix)
     return meta_ad
