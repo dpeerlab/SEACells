@@ -15,7 +15,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=[
         "palantir",
-        "scanpy",
+        "scanpy==1.8.2",
         "anndata",
         "numba>=0.51.2",
         "scipy==1.6",
@@ -26,7 +26,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.0',
+    python_requires='>=3.8.0',
     include_package_data=True,
     package_data={'': ['SEACells/Rscripts/*', '*.r', '*.R']},
     zip_safe=False

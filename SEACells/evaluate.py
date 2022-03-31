@@ -7,7 +7,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-def diffusion_component_variance(ad, low_dim_embedding):
+def compactness(ad, low_dim_embedding='X_pca', SEACells_label='SEACell'):
+    """
+    Compute compactness of each metacell. Compactness is defined is the average variance of diffusion components 
+    across cells that constitute a metcell
+
+    :param ad: (Anndata) Anndata object
+    :param low_dim_embedding: (str) `ad.obsm` field for constructing diffusion components
+    :param SEACell_label: (str) `ad.obs` field for computing diffusion component variances
+
+    :return: `pd.DataFrame` with a dataframe of compactness per metacell
+
+    """
 
     import palantir
 
@@ -15,19 +26,31 @@ def diffusion_component_variance(ad, low_dim_embedding):
     dm_res = palantir.utils.run_diffusion_maps(components)
     dc = palantir.utils.determine_multiscale_space(dm_res, n_eigs=10)
 
-    return pd.DataFrame(dc.join(ad.obs["SEACell"]).groupby("SEACell").var().mean(1)).rename(columns={0:'compactness'})
+    return pd.DataFrame(dc.join(ad.obs[SEACells_label]).groupby(SEACells_label).var().mean(1)).rename(columns={0:'compactness'})
 
 
-def diffusion_component_dist_to_NN(ad,
-                                   low_dim_embedding,
+def separation(ad,
+                                   low_dim_embedding='X_pca',
                                    nth_nbr=1,
-                                   cluster=None):
+                                   cluster=None,
+                                   SEACells_label='SEACell'):
+    """
+    Compute separation of each metacell. Separation is defined is the distance to the nearest neighboring metacell
+
+    :param ad: (Anndata) Anndata object
+    :param low_dim_embedding: (str) `ad.obsm` field for constructing diffusion components
+    :param nth_nbr: (int) Which neighbor to use for computing separation
+    :param SEACell_label: (str) `ad.obs` field for computing diffusion component variances
+
+    :return: `pd.DataFrame` with a separation of compactness per metacell
+
+    """
     components = pd.DataFrame(ad.obsm[low_dim_embedding]).set_index(ad.obs_names)
     dm_res = palantir.utils.run_diffusion_maps(components)
     dc = palantir.utils.determine_multiscale_space(dm_res, n_eigs=10)
 
     # Compute DC per metacell
-    metacells_dcs = dc.join(ad.obs["SEACell"], how='inner').groupby("SEACell").mean()
+    metacells_dcs = dc.join(ad.obs[SEACells_label], how='inner').groupby(SEACells_label).mean()
 
     from sklearn.neighbors import NearestNeighbors
     neigh = NearestNeighbors(n_neighbors=nth_nbr)
@@ -45,7 +68,7 @@ def diffusion_component_dist_to_NN(ad,
     if cluster is not None:
 
         # Get cluster type of neighbors to ensure they match the metacell cluster
-        clusters = ad.obs.groupby("SEACell")[cluster].agg(lambda x: x.value_counts().index[0])
+        clusters = ad.obs.groupby(SEACells_label)[cluster].agg(lambda x: x.value_counts().index[0])
         nbr_clusters = pd.DataFrame(clusters.values[nbrs]).set_index(clusters.index)
         nbr_clusters.columns = metacells_nbrs.columns
         nbr_clusters = nbr_clusters.join(pd.DataFrame(clusters))
