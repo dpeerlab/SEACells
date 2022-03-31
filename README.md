@@ -44,20 +44,20 @@ python setup.py install
 #### Usage
 
 
-1. <b>ATAC preprocessing</b>
+1. <b>ATAC preprocessing</b>:
 `notebooks/ArchR` folder contains the preprocessing scripts and notebooks including peak calling using NFR fragments. See notebook [here](https://github.com/dpeerlab/SEACells/blob/main/notebooks/ArchR/ArchR-preprocessing.ipynb) to get started 
 
-2. <b>Computing SEACells</b>
+2. <b>Computing SEACells</b>:
 A tutorial on SEACells usage and results visualization for single cell data can be found in the [SEACell computation notebook] (https://github.com/dpeerlab/SEACells/blob/main/notebooks/SEACell_computation.ipynb).
 
-3. <b>Gene regulatory toolkit</b>
+3. <b>Gene regulatory toolkit</b>:
 Peak gene correlations, gene scores and gene accessibility scores can be computed using the [ATAC analysis notebook] (https://github.com/dpeerlab/SEACells/blob/main/notebooks/SEACell_ATAC_analysis.ipynb).
 
-4. <b>Large-scale data integration using SEACells </b>
+4. <b>Large-scale data integration using SEACells </b>:
 Details are avaiable in the [COVID integration notebook] (https://github.com/dpeerlab/SEACells/blob/main/notebooks/SEACell_COVID_integration.ipynb)
 
 
-5. <b>Cross-modality integration </b>
+5. <b>Cross-modality integration </b>:
 Integration between scRNA and scATAC can be performed following the [Integration notebook](https://github.com/dpeerlab/SEACells/blob/main/notebooks/SEACell_domain_adapt.ipynb)
 
 #### Citations
