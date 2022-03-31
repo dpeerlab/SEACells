@@ -60,16 +60,30 @@ class SEACells:
         self.convergence_epsilon = convergence_epsilon
         self.convergence_threshold = None
 
+        # Archtypes 
+        self.archetypes = None
+
+
+        if self.verbose:
+            print('Building kernel...')
+
+        # input to graph construction is PCA/SVD
+        kernel_model = build_graph.SEACellGraph(self.ad, self.build_kernel_on, verbose=True)
+
+        # K is a sparse matrix representing input to SEACell alg
+        K = kernel_model.rbf(self.n_neighbors)
+        self.K = K
+
+
         print
 
-    def _initialize_archetypes(self):
+    def initialize_archetypes(self):
         """
         Initialize B matrix which defines cells as SEACells. Selects waypoint_proportion from waypoint analysis,
         and the remainder by greedy selection.
-        :return: B - (array) n_datapoints x n_SEACells matrix which initial SEACell definitions
+        
+        Modifies self.archetypes in-place with the indices of cells that are used as initialization for archetypes
         """
-        K = self.K
-        n = K.shape[0]
         k = self.k
 
         if self.waypoint_proportion > 0:
@@ -93,12 +107,8 @@ class SEACells:
 
         unique_ix, ind = np.unique(all_ix, return_index=True)
         all_ix = unique_ix[np.argsort(ind)][:k]
+        self.archetypes = all_ix
 
-        B0 = np.zeros((n, k))
-        idx1 = list(zip(all_ix, np.arange(k)))
-        B0[tuple(zip(*idx1))] = 1
-
-        return B0
 
     def _get_waypoint_centers(self, n_waypts=None):
         """
@@ -368,16 +378,7 @@ class SEACells:
         :param max_iter: (int) maximum number of iterations to update A and B matrices
         :param B0: (array) n_datapoints x n_SEACells initial guess of archetype matrix
         """
-
-        if self.verbose:
-            print('Building kernel...')
-
-        # input to graph construction is PCA/SVD
-        kernel_model = build_graph.SEACellGraph(self.ad, self.build_kernel_on, verbose=True)
-
-        # K is a sparse matrix representing input to SEACell alg
-        K = kernel_model.rbf(self.n_neighbors)
-        self.K = K
+        K = self.K
 
         # initialize B (update this to allow initialization from RRQR)
         n = K.shape[0]
@@ -390,8 +391,16 @@ class SEACells:
                 B = B0
                 self.B0 = B0
             else:
-                B = self._initialize_archetypes()
-                self.B0 = B
+                if self.archetypes is None:
+                    self.initialize_archetypes()
+
+                # Construction B matrix
+                B0 = np.zeros((n, k))
+                all_ix = self.archetypes
+                idx1 = list(zip(all_ix, np.arange(k)))
+                B0[tuple(zip(*idx1))] = 1
+                self.B0 = B0
+                B = self.B0
         else:
             if self.verbose:
                 print('Using fixed B matrix as provided.')

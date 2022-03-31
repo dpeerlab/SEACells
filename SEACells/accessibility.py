@@ -6,7 +6,16 @@ from tqdm import tqdm
 def determine_metacell_open_peaks(atac_meta_ad, peak_set=None, low_dim_embedding='X_svd', pval_cutoff=1e-2,
                                   read_len=147, n_neighbors=3, n_jobs=1):
     """
-    TODO: Docstring
+    Determine the set of peaks that are open in each metacell
+
+    :param atac_meta_ad: (Anndata) ATAC metacell Anndata created using `prepare_multiome_anndata`
+    :param peak_set: (pd.Series) Subset of peaks to test. All peaks are tested by default
+    :param low_dim_embedding: (str) `atac_meta_ad.obsm` field for nearest neighbor computation
+    :param p_val_cutoff: (float) Nominal p-value cutoff for open peaks
+    :param read_len: (int) Fragment length
+    :param n_jobs: (int) number of jobs for parallel processing
+
+    :atac_meta_ad is modified inplace with `.obsm['OpenPeaks']` indicating the set of open peaks in each metacell
     """
     from sklearn.neighbors import NearestNeighbors
     from scipy.stats import poisson, multinomial
@@ -53,7 +62,15 @@ def determine_metacell_open_peaks(atac_meta_ad, peak_set=None, low_dim_embedding
 
 def get_gene_accessibility(atac_meta_ad, gene_peak_cors, gene_set=None, pval_cutoff=1e-1, cor_cutoff=0.1):
     """
-    TODO: Docstring
+    Gene accessibility scores for each. The score is defined as the fraction of significantly correlated peaks that are open in a given metacell
+
+    :param atac_meta_ad: (Anndata) ATAC metacell Anndata created using `prepare_multiome_anndata`
+    :param gene_peak_cors: (pd.Series) Output of `get_gene_peak_correlations` function
+    :param gene_set: (pd.Series) Subset of genes to compute accessibility scores. All genes are used by default.
+    :param p_val_cutoff: (float) Nominal p-value cutoff for test of significance of correlation
+    :param cor_cutoff: (float) Correlation cutoff
+
+    :atac_meta_ad is modified inplace with `.obsm['GeneAccessibility']` indicating the gene scores for each metacell
     """
 
     if 'OpenPeaks' not in atac_meta_ad.layers.keys():

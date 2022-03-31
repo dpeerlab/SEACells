@@ -122,3 +122,25 @@ def plot_SEACell_sizes(ad,
     plt.show()
     plt.close()
     return pd.DataFrame(label_df.groupby('SEACell').count().iloc[:, 0]).rename(columns={'index':'size'})
+
+
+def plot_initialization(ad, model, plot_basis='X_umap'):
+
+    """
+    Plot archetype initizlation
+    :param ad: annData containing 'Metacells' label in .obs
+    :param model: Initilized SEACells model
+    :return: None
+    """
+
+    plt.figure()
+
+    plt.scatter(ad.obsm[plot_basis][:, 0],
+        ad.obsm[plot_basis][:, 1],
+        s=1, color='lightgrey')
+    init_points = ad.obs_names[model.archetypes]
+    plt.scatter(ad[init_points].obsm[plot_basis][:, 0],
+        ad[init_points].obsm[plot_basis][:, 1],
+        s=20)
+    ax = plt.gca()
+    ax.set_axis_off()
