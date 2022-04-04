@@ -45,7 +45,7 @@ python setup.py install
 
 
 1. <b>ATAC preprocessing</b>:
-`notebooks/ArchR` folder contains the preprocessing scripts and notebooks including peak calling using NFR fragments. See notebook [here](https://github.com/dpeerlab/SEACells/blob/main/notebooks/ArchR/ArchR-preprocessing.ipynb) to get started 
+`notebooks/ArchR` folder contains the preprocessing scripts and notebooks including peak calling using NFR fragments. See notebook [here](https://github.com/dpeerlab/SEACells/blob/main/notebooks/ArchR/ArchR-preprocessing.ipynb) to get started. A version of ArchR that supports NFR peak calling is available [here](https://github.com/dpeerlab/ArchR). 
 
 2. <b>Computing SEACells</b>:
 A tutorial on SEACells usage and results visualization for single cell data can be found in the [SEACell computation notebook] (https://github.com/dpeerlab/SEACells/blob/main/notebooks/SEACell_computation.ipynb).
