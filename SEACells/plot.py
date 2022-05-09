@@ -5,6 +5,7 @@ import pandas as pd
 def plot_assignment_entropy(ad,
                             title='Entropy of Metacell Assignment',
                             save_as = None,
+                            show = True,
                             bins=None,
                             figsize=(5, 5)):
     """
@@ -27,7 +28,8 @@ def plot_assignment_entropy(ad,
     
     if save_as is not None:
         plt.savefig(save_as, dpi=150, transparent=True)
-    plt.show()
+    if show:
+        plt.show()
     plt.close()
 
 
@@ -35,6 +37,7 @@ def plot_2D(ad, key='X_umap',
             colour_metacells=True,
             title='Metacell Assignments',
             save_as = None,
+            show = True,
             cmap='Set2',
             figsize=(5,5),
             SEACell_size = 20,
@@ -90,11 +93,13 @@ def plot_2D(ad, key='X_umap',
     
     if save_as is not None:
         plt.savefig(save_as, dpi=150, transparent=True)
-    plt.show()
+    if show:
+        plt.show()
     plt.close()
 
 def plot_SEACell_sizes(ad,
                         save_as=None,
+                        show = True,
                         title='Distribution of Metacell Sizes',
                         bins = None,
                         figsize=(5,5)):
@@ -119,12 +124,17 @@ def plot_SEACell_sizes(ad,
     
     if save_as is not None:
         plt.savefig(save_as)
-    plt.show()
+    if show:
+        plt.show()
     plt.close()
     return pd.DataFrame(label_df.groupby('SEACell').count().iloc[:, 0]).rename(columns={'index':'size'})
 
 
-def plot_initialization(ad, model, plot_basis='X_umap'):
+def plot_initialization(ad,
+                        model,
+                        plot_basis='X_umap',
+                        save_as=None,
+                        show = True,):
 
     """
     Plot archetype initizlation
@@ -144,3 +154,9 @@ def plot_initialization(ad, model, plot_basis='X_umap'):
         s=20)
     ax = plt.gca()
     ax.set_axis_off()
+
+    if save_as is not None:
+        plt.savefig(save_as)
+    if show:
+        plt.show()
+    plt.close()

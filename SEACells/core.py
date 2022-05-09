@@ -74,8 +74,7 @@ class SEACells:
         K = kernel_model.rbf(self.n_neighbors)
         self.K = K
 
-
-        print
+        return
 
     def initialize_archetypes(self):
         """
@@ -350,7 +349,7 @@ class SEACells:
 
         return
 
-    def plot_convergence(self, save_as=None):
+    def plot_convergence(self, save_as=None, show=True):
         """
         Plot behaviour of squared error over iterations.
         :param save_as: (str) name of file which figure is saved as. If None, no plot is saved.
@@ -365,7 +364,8 @@ class SEACells:
         plt.ylabel("Squared Error")
         if save_as is not None:
             plt.savefig(save_as, dpi=150)
-        plt.show()
+        if show:
+            plt.show()
         plt.close()
 
     def _fit(self, max_iter: int = 50, min_iter:int=10, B0=None):
@@ -492,6 +492,8 @@ class SEACells:
     def get_sizes(self):
         """Return size of each SEACell as array
         """
+        from collections import Counter
+
         return Counter(np.argmax(self.A_, axis=0))
 
     @staticmethod
