@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import palantir
 from tqdm.notebook import tqdm
+import copy
 
 from . import build_graph
 
@@ -15,64 +16,82 @@ class SEACells:
 
     def __init__(self,
                  ad,
-                 build_kernel_on,
+                 build_kernel_on: str,
                  n_SEACells: int,
-                 max_iter: int = 50,
                  verbose: bool = True,
-                 true_B=None,
-                 true_A=None,
                  n_waypoint_eigs: int = 10,
-                 waypt_proportion: float = 1,
                  n_neighbors: int = 15,
-                 convergence_epsilon=1e-5):
+                 convergence_epsilon: float=1e-3,
+                 l2_penalty: float =0,
+                 max_franke_wolfe_iters: int=50):
         """
 
-        :param ad: AnnData object containing observations matrix to use for computing SEACells
-        :param build_kernel_on: (str) key in ad.obsm which defines matrix to build SEACells on
-        :param n_SEACells: (int) number of SEACells to use
-        :param max_iter: (int) maximum number of iterations for gradient descent optimization of assignment matrices
-        :param verbose: (bool) display additional information as program runs
-        :param true_B: (array) true matrix defining cells as SEACells, if known
-        :param true_A: (array) true matrix assigning cells to SEACells, if known
-        :param n_waypoint_eigs: (int) number of eigenvalues to use when initializing SEACells from waypoint analysis
-        :param waypt_proportion: (float) proportion of SEACells to initialize using waypoint method, remainder using greedy
-        :param n_neighbors: (int) number of neighbors to use in building kNN graph
-        :param convergence_epsilon: (float) stop optimizing when squared error is below this proportion of its original value
         """
-
         self.ad = ad
-        if build_kernel_on not in ad.obsm:
-            raise ValueError(f'Key {build_kernel_on} is not present in AnnData obsm.')
-
         self.build_kernel_on = build_kernel_on
+        self.n_cells = ad.shape[0]
+
+        if not isinstance(n_SEACells, int):
+            try:
+                n_SEACells = int(n_SEACells)
+            except:
+                raise ValueError(f'The number of SEACells specified must be an integer type, not {type(n_SEACells)}')
+
         self.k = n_SEACells
-        self.max_iter = max_iter
-        self.verbose = verbose
-        self.true_B = true_B
-        self.true_A = true_A
 
         self.n_waypoint_eigs = n_waypoint_eigs
-        self.waypoint_proportion = waypt_proportion
-
+        self.waypoint_proportion = 1
         self.n_neighbors = n_neighbors
+
+        self.max_FW_iter = max_franke_wolfe_iters
+        self.verbose = verbose
+        self.l2_penalty = l2_penalty
 
         self.RSS_iters = []
         self.convergence_epsilon = convergence_epsilon
         self.convergence_threshold = None
 
-        # Archtypes 
+        # Parameters to be initialized later in the model
+        self.kernel_matrix = None
+        self.K = None
+
+        # Archetypes as list of cell indices
         self.archetypes = None
 
+        self.A_ = None
+        self.B_ = None
+        self.B0 = None
 
-        if self.verbose:
-            print('Building kernel...')
+        return
 
+    def add_precomputed_kernel_matrix(self, K):
+        """
+
+        """
+
+        assert K.shape == (self.n_cells,
+                          self.n_cells), f'Dimension of kernel matrix must be n_cells = ({self.n_cells},{self.n_cells}), not {K.shape} '
+        self.kernel_matrix = K
+
+        # Pre-compute dot product
+        self.K = self.kernel_matrix @ self.kernel_matrix.T
+
+    def construct_kernel_matrix(self, n_neighbors: int = None):
+        """
+
+        """
         # input to graph construction is PCA/SVD
-        kernel_model = build_graph.SEACellGraph(self.ad, self.build_kernel_on, verbose=True)
+        kernel_model = build_graph.SEACellGraph(self.ad, self.build_kernel_on, verbose=self.verbose)
 
         # K is a sparse matrix representing input to SEACell alg
-        K = kernel_model.rbf(self.n_neighbors)
-        self.K = K
+        if n_neighbors is None:
+            n_neighbors = self.n_neighbors
+
+        M = kernel_model.rbf(n_neighbors)
+        self.kernel_matrix = M
+
+        # Pre-compute dot product
+        self.K = self.kernel_matrix @ self.kernel_matrix.T
 
         return
 
@@ -86,11 +105,11 @@ class SEACells:
         k = self.k
 
         if self.waypoint_proportion > 0:
-            waypt_ix = self._get_waypoint_centers(k)
-            waypt_ix = np.random.choice(waypt_ix, int(len(waypt_ix) * self.waypoint_proportion), replace=False)
-            from_greedy = self.k - len(waypt_ix)
+            waypoint_ix = self._get_waypoint_centers(k)
+            waypoint_ix = np.random.choice(waypoint_ix, int(len(waypoint_ix) * self.waypoint_proportion), replace=False)
+            from_greedy = self.k - len(waypoint_ix)
             if self.verbose:
-                print(f'Selecting {len(waypt_ix)} cells from waypoint initialization.')
+                print(f'Selecting {len(waypoint_ix)} cells from waypoint initialization.')
 
         else:
             from_greedy = self.k
@@ -100,7 +119,7 @@ class SEACells:
             print(f'Selecting {from_greedy} cells from greedy initialization.')
 
         if self.waypoint_proportion > 0:
-            all_ix = np.hstack([waypt_ix, greedy_ix])
+            all_ix = np.hstack([waypoint_ix, greedy_ix])
         else:
             all_ix = np.hstack([greedy_ix])
 
@@ -108,21 +127,66 @@ class SEACells:
         all_ix = unique_ix[np.argsort(ind)][:k]
         self.archetypes = all_ix
 
+    def initialize(self, initial_archetypes=None, initial_assignments=None):
+        """
 
-    def _get_waypoint_centers(self, n_waypts=None):
+        """
+        K = self.K
+        # initialize B (update this to allow initialization from RRQR)
+        n = K.shape[0]
+        k = self.k
+
+        if initial_archetypes is not None:
+            if self.verbose:
+                print('Using provided list of initial archetypes')
+            self.archetypes = initial_archetypes
+
+        if self.archetypes is None:
+            self.initialize_archetypes()
+
+        # Construction of B matrix
+        B0 = np.zeros((n, k))
+        all_ix = self.archetypes
+        idx1 = list(zip(all_ix, np.arange(k)))
+        B0[tuple(zip(*idx1))] = 1
+        self.B0 = B0
+        B = self.B0
+
+        if initial_assignments is not None:
+            raise NotImplementedError('Direct initialization of assignments of cells to SEACells not yet implemented.')
+        else:
+            A = np.random.random((k, n))
+            A /= A.sum(0)
+            A = self._updateA(B, A)
+
+            if self.verbose:
+                print('Randomly initialized A matrix.')
+
+        self.A_ = A
+        self.B_ = B
+        # Create convergence threshold
+        RSS = self.compute_RSS(A, B)
+        self.RSS_iters.append(RSS)
+
+        if self.convergence_threshold is None:
+            self.convergence_threshold = self.convergence_epsilon * RSS
+            if self.verbose:
+                print(f'Setting convergence threshold at {self.convergence_threshold:.5f}')
+
+    def _get_waypoint_centers(self, n_waypoints=None):
         """
         Initialize B matrix using waypoint analysis, as described in Palantir.
         From https://www.nature.com/articles/s41587-019-0068-4
 
-        :param n_waypts: (int) number of SEACells to initialize using waypoint analysis. If None specified,
+        :param n_waypoints: (int) number of SEACells to initialize using waypoint analysis. If None specified,
                         all SEACells initialized using this method.
         :return: B - (array) n_datapoints x n_SEACells matrix with initial SEACell definitions
         """
 
-        if n_waypts == None:
+        if n_waypoints == None:
             k = self.k
         else:
-            k = n_waypts
+            k = n_waypoints
 
         ad = self.ad
 
@@ -149,11 +213,11 @@ class SEACells:
             print('Sampling waypoints ...')
         waypoint_init = palantir.core._max_min_sampling(data=dc_components, num_waypoints=k)
         dc_components['iix'] = np.arange(len(dc_components))
-        waypt_ix = dc_components.loc[waypoint_init]['iix'].values
+        waypoint_ix = dc_components.loc[waypoint_init]['iix'].values
         if self.verbose:
             print('Done.')
 
-        return waypt_ix
+        return waypoint_ix
 
     def _get_greedy_centers(self, n_mcs=None):
         """Initialize SEACells using fast greedy adaptive CSSP
@@ -167,18 +231,16 @@ class SEACells:
         K = self.K
         n = K.shape[0]
 
-        if n_mcs == None:
+        if n_mcs is None:
             k = self.k
         else:
             k = n_mcs
 
-        X = K
-
         if self.verbose:
             print("Initializing residual matrix using greedy column selection")
 
-        # precompute A.T * A
-        # ATA = K.T @ K
+        # precompute M.T * M
+        # ATA = M.T @ M
         ATA = K
 
         if self.verbose:
@@ -258,9 +320,9 @@ class SEACells:
         t1 = t2 @ B
 
         # update rows of A for given number of iterations
-        while t < self.max_iter:
+        while t < self.max_FW_iter:
             # compute gradient (must convert matrix to ndarray)
-            G = 2. * np.array(t1 @ A - t2)
+            G = 2. * np.array(t1 @ A - t2) - self.l2_penalty*A
 
             # get argmins
             amins = np.argmin(G, axis=0)
@@ -295,7 +357,7 @@ class SEACells:
         t2 = K @ A.T
 
         # update rows of B for a given number of iterations
-        while t < self.max_iter:
+        while t < self.max_FW_iter:
             # compute gradient (need to convert np.matrix to np.array)
             G = 2. * np.array(K @ B @ t1 - t2)
 
@@ -326,7 +388,9 @@ class SEACells:
         if B is None:
             B = self.B_
 
-        return np.dot(np.dot(self.ad.obsm[self.build_kernel_on].T, B), A)
+        if A is None or B is None:
+            raise RuntimeError('Either assignment matrix A or archetype matrix B is None.')
+        return (self.kernel_matrix.dot(B)).dot(A)
 
     def compute_RSS(self, A=None, B=None):
         """
@@ -345,9 +409,8 @@ class SEACells:
             B = self.B_
 
         reconstruction = self.compute_reconstruction(A, B)
-        return np.linalg.norm(self.ad.obsm[self.build_kernel_on].T - reconstruction)
+        return np.linalg.norm(self.kernel_matrix - reconstruction)
 
-        return
 
     def plot_convergence(self, save_as=None, show=True):
         """
@@ -368,7 +431,39 @@ class SEACells:
             plt.show()
         plt.close()
 
-    def _fit(self, max_iter: int = 50, min_iter:int=10, B0=None):
+
+    def step(self):
+        """
+        Perform one iteration of fitting to update A and B assignment matrices.
+        """
+        A = self.A_
+        B = self.B_
+
+        if self.K is None:
+            raise RuntimeError(
+                'Kernel matrix has not been computed. Run model.construct_kernel_matrix() first.')
+
+        if A is None:
+            raise RuntimeError('Cell to SEACell assignment matrix has not been initialised. Run model.initialize() first.')
+
+        if B is None:
+            raise RuntimeError('Archetype matrix has not been initialised. Run model.initialize() first.')
+
+        A = self._updateA(B, A)
+        B = self._updateB(A, B)
+
+        self.RSS_iters.append(self.compute_RSS(A, B))
+
+        self.A_ = A
+        self.B_ = B
+
+        # Label cells by SEACells assignment
+        labels = self.get_hard_assignments()
+        self.ad.obs['SEACell'] = labels['SEACell']
+
+        return
+
+    def _fit(self, max_iter: int = 50, min_iter:int=10, initial_archetypes=None, initial_assignments=None):
         """
         Compute archetypes and loadings given kernel matrix K. Iteratively updates A and B matrices until maximum
         number of iterations or convergence has been achieved.
@@ -376,138 +471,81 @@ class SEACells:
         Modifies ad.obs in place to add 'SEACell' labels to cells.
 
         :param max_iter: (int) maximum number of iterations to update A and B matrices
-        :param B0: (array) n_datapoints x n_SEACells initial guess of archetype matrix
+        :param min_iter: (int) minimum number of iterations to update A and B matrices
+        :param initial_archetypes: (list) indices of cells to use as initial archetypes
+
         """
-        K = self.K
-
-        # initialize B (update this to allow initialization from RRQR)
-        n = K.shape[0]
-        k = self.k
-
-        if self.true_B is None:
-            if B0 is not None:
-                if self.verbose:
-                    print('Using provided initial B matrix')
-                B = B0
-                self.B0 = B0
-            else:
-                if self.archetypes is None:
-                    self.initialize_archetypes()
-
-                # Construction B matrix
-                B0 = np.zeros((n, k))
-                all_ix = self.archetypes
-                idx1 = list(zip(all_ix, np.arange(k)))
-                B0[tuple(zip(*idx1))] = 1
-                self.B0 = B0
-                B = self.B0
-        else:
-            if self.verbose:
-                print('Using fixed B matrix as provided.')
-            B = self.true_B
-
-        A = np.random.random((k, n))
-        A /= A.sum(0)
-        A = self._updateA(B, A)
-        
-        print('Randomly initialized A matrix.')
-
-        # Create convergence threshold
-        RSS = self.compute_RSS(A, B)
-        self.RSS_iters.append(RSS)
-
-        if self.convergence_threshold is None:
-            self.convergence_threshold = self.convergence_epsilon * RSS
-            if self.verbose:
-                print(f'Setting convergence threshold at {self.convergence_threshold}')
+        self.initialize(initial_archetypes=initial_archetypes, initial_assignments=initial_assignments)
 
         converged = False
         n_iter = 0
         while (not converged and n_iter < max_iter) or n_iter < min_iter:
 
             n_iter += 1
+            if n_iter == 1 or (n_iter) % 10 == 0:
+                if self.verbose:
+                    print(f"Starting iteration {n_iter}.")
+
+            self.step()
 
             if n_iter == 1 or (n_iter) % 10 == 0:
-                print(f"Starting iteration {n_iter}.")
-            if self.true_A is None:
-                A = self._updateA(B, A)
-            else:
-                print('Not updating A, true A provided')
-                A = self.true_A
-
-            if self.true_B is None:
-                B = self._updateB(A, B)
-            else:
-                print('Not updating B, true B provided')
-
-            if n_iter == 1 or (n_iter) % 10 == 0:
-                print(f"Completed iteration {n_iter}.")
-
-            self.RSS_iters.append(self.compute_RSS(A, B))
+                if self.verbose:
+                    print(f"Completed iteration {n_iter}.")
 
             # Check for convergence
             if np.abs(self.RSS_iters[-2] - self.RSS_iters[-1]) < self.convergence_threshold:
+                if self.verbose:
+                    print(f'Converged after {n_iter} iterations.')
                 converged = True
 
-            self.A_ = A
-            self.B_ = B
-            n_SEACells = self.get_assignments()['SEACell'].unique().shape[0]
+        self.Z_ = self.B_.T @ self.K
 
-        print(f'Converged after {n_iter} iterations.')
-        self.A_ = A
-        self.B_ = B
-        self.Z_ = B.T @ self.K
-
-        # Label SEACells as well as assignment entropy as proxy for SEACell 'confidence'
-        labels = self.get_assignments()
+        # Label cells by SEACells assignment
+        labels = self.get_hard_assignments()
         self.ad.obs['SEACell'] = labels['SEACell']
 
+        if not converged:
+            raise RuntimeWarning(f'Warning: Algorithm has not converged - you may need to increase the maximum number of iterations')
+        return
 
-    def fit(self, n_iter: int = 8, waypoint_proportion: float = None, B0=None):
+    def fit(self, max_iter: int = 100, min_iter:int=10, initial_archetypes=None):
         """
-        Wrapper to fit model given kernel matrix and max number of iterations
+        Wrapper to fit model.
 
-        :param n_iter: (int) maximum number of iterations to update A and B matrices
-        :param waypoint_proportion: (float) proportion of SEACells to intialize using waypoint initializations
-        :param B0: (array) n_datapoints x n_SEACells initial guess of archetype matrix
+        :param max_iter: (int) maximum number of iterations to update A and B matrices. Default: 100
+        :param min_iter: (int) maximum number of iterations to update A and B matrices. Default: 10
+        :param initial_archetypes: (list) indices of cells to use as initial archetypes
         """
+        if max_iter < min_iter:
+            raise ValueError("The maximum number of iterations specified is lower than the minimum number of iterations specified.")
+        self._fit(max_iter=max_iter, min_iter=min_iter, initial_archetypes=initial_archetypes, initial_assignments=None)
 
-        if waypoint_proportion is not None:
-            self.waypoint_proportion = waypoint_proportion
-        self._fit(n_iter, B0=B0)
-
-    def get_archetypes(self):
+    def get_archetype_matrix(self):
         """Return k x n matrix of archetypes"""
         return self.Z_
 
-    def get_centers(self):
-        """Return closest point to each archetype"""
-        return np.argmax(self.B_, axis=0)
-
     def get_soft_assignments(self):
-        """Return archetype assignments for each point (n x k)
-        """
-        return self.A_.T
 
-    def get_sizes(self):
-        """Return size of each SEACell as array
-        """
-        from collections import Counter
+        archetype_labels = self.get_hard_archetypes()
+        A = copy.deepcopy(self.A_.T)
 
-        return Counter(np.argmax(self.A_, axis=0))
+        labels = []
+        weights = []
+        for i in range(5):
+            l = A.argmax(1)
+            labels.append(archetype_labels[l])
+            weights.append(A[np.arange(A.shape[0]), l])
+            A[np.arange(A.shape[0]), l] = -1
 
-    @staticmethod
-    def binarize_matrix_rows(T):
-        """
-        Convert matrix to binary form where the largest value in each row is 1 and all other values are 0
-        :param T: (array) of floats
-        :return bin_T: (array) with same shape as T, contains zeros everywhere except largest value in each row is 1.
-        """
-        bin_T = np.zeros(T.shape)
-        bin_T[np.argmax(T, axis=0), np.arange(T.shape[1])] = 1
-        return bin_T.astype(int)
+        weights = np.vstack(weights).T
+        labels = np.vstack(labels).T
 
-    def get_assignments(self):
+        soft_labels = pd.DataFrame(labels)
+        soft_labels.index = self.ad.obs_names
+
+        return soft_labels, weights
+
+    def get_hard_assignments(self):
         """
         Returns a dataframe with SEACell assignments under the column 'SEACell'
         :return: pd.DataFrame with column 'SEACell'
@@ -527,6 +565,134 @@ class SEACells:
         df['SEACell'] = df['SEACell'].map(di)
 
         return pd.DataFrame(df['SEACell'])
+
+    def get_archetypes(self):
+        """
+
+        """
+        raise NotImplementedError
+
+    def get_hard_archetypes(self):
+        """
+        Return the names of cells most strongly identified as archetypes.
+        """
+
+        return self.ad.obs_names[self.B_.argmax(0)]
+
+
+    @staticmethod
+    def binarize_matrix_rows(T):
+        """
+        Convert matrix to binary form where the largest value in each row is 1 and all other values are 0
+        :param T: (array) of floats
+        :return bin_T: (array) with same shape as T, contains zeros everywhere except largest value in each row is 1.
+        """
+        bin_T = np.zeros(T.shape)
+        bin_T[np.argmax(T, axis=0), np.arange(T.shape[1])] = 1
+        return bin_T.astype(int)
+
+
+
+    def get_archetypes(self):
+        """
+        Returns a list of cell-names identified as archetypes themselves.
+        """
+
+
+def sparsify_assignments(A, thresh: float):
+    """
+    :param A - is a cell x SEACells assignment matrix
+    :param thresh -
+    """
+    A = copy.deepcopy(A)
+    A[A < thresh] = 0
+
+    # Renormalize
+    A = A / A.sum(1, keepdims=True)
+    A.sum(1)
+
+    return A
+
+
+def sparsify_assignments(A, thresh, keep_above_percentile=95):
+    """
+    :param: A is a cell x SEACells assignment matrix
+    """
+    A = copy.deepcopy(A)
+    A[A == 0] = np.nan
+    mins = np.nanpercentile(A, keep_above_percentile, axis=1).reshape(-1, 1)
+    A = np.nan_to_num(A)
+    mins[mins>thresh] = thresh
+    A[A < mins] = 0
+
+    # Renormalize
+    A = A / A.sum(1, keepdims=True)
+
+    return A
+
+
+
+def summarize_by_soft_SEACell(ad, A, celltype_label=None, summarize_layer='raw', minimum_weight: float=0.05):
+    """
+    Aggregates cells within each SEACell, summing over all raw data x assignment weight for all cells belonging to a
+    SEACell. Data is un-normalized and pseudo-raw aggregated counts are stored in .layers['raw'].
+    Attributes associated with variables (.var) are copied over, but relevant per SEACell attributes must be
+    manually copied, since certain attributes may need to be summed, or averaged etc, depending on the attribute.
+    The output of this function is an anndata object of shape n_metacells x original_data_dimension.
+
+    @param ad: (sc.AnnData) containing raw counts for single-cell data
+    @param A: (np.array) of shape n_SEACells x n_cells containing assignment weights of cells to SEACells
+    @param celltype_label: (str) optionally provide the celltype label to compute modal celltype per SEACell
+    @param summarize_layer: (str) key for ad.layers to find raw data. Use 'raw' to search for ad.raw.X
+    @param minimum_weight: (float) minimum value below which assignment weights are zero-ed out. If all cell assignment
+                            weights are smaller than minimum_weight, the 95th percentile weight is used.
+    @return: aggregated anndata containing weighted expression for aggregated SEACells
+    """
+    from scipy.sparse import csr_matrix
+    import scanpy as sc
+
+    compute_seacell_celltypes = False
+    if celltype_label is not None:
+        if not (celltype_label in ad.obs.columns):
+            raise ValueError(f'Celltype label {celltype_label} not present in ad.obs')
+        compute_seacell_celltypes = True
+
+    if summarize_layer == 'raw' and ad.raw != None:
+        data = ad.raw.X
+    else:
+        data = ad.layers[summarize_layer]
+
+    A = sparsify_assignments(A.T, thresh=minimum_weight)
+
+    seacell_expressions = []
+    seacell_celltypes = []
+    seacell_purities = []
+    for ix in tqdm(range(A.shape[1])):
+        cell_weights = A[:, ix]
+        # Construct the SEACell expression using the
+        seacell_exp = data.multiply(cell_weights[:, np.newaxis]).toarray().sum(0) / cell_weights.sum()
+        seacell_expressions.append(seacell_exp)
+
+        if compute_seacell_celltypes:
+            # Compute the consensus celltype and the celltype purity
+            cell_weights = pd.DataFrame(cell_weights)
+            cell_weights.index = ad.obs_names
+            purity = cell_weights.join(ad.obs[celltype_label]).groupby(celltype_label).sum().sort_values(by=0,
+                                                                                                         ascending=False)
+            purity = purity / purity.sum()
+            celltype = purity.iloc[0]
+            seacell_celltypes.append(celltype.name)
+            seacell_purities.append(celltype.values[0])
+
+    seacell_expressions = csr_matrix(np.array(seacell_expressions))
+    seacell_ad = sc.AnnData(seacell_expressions, dtype=seacell_expressions.dtype)
+    seacell_ad.var_names = ad.var_names
+    seacell_ad.obs['Pseudo-sizes'] = A.sum(0)
+    if compute_seacell_celltypes:
+        seacell_ad.obs['celltype'] = seacell_celltypes
+        seacell_ad.obs['celltype_purity'] = seacell_purities
+    seacell_ad.var_names = ad.var_names
+    return seacell_ad
 
 
 def summarize_by_SEACell(ad, SEACells_label='SEACell', summarize_layer='raw'):
@@ -557,7 +723,7 @@ def summarize_by_SEACell(ad, SEACells_label='SEACell', summarize_layer='raw'):
 
     # Ann data
     # Counts
-    meta_ad = sc.AnnData(csr_matrix(summ_matrix))
+    meta_ad = sc.AnnData(csr_matrix(summ_matrix), dtype=csr_matrix(summ_matrix).dtype)
     meta_ad.obs_names, meta_ad.var_names = summ_matrix.index.astype(str), ad.var_names
     meta_ad.layers['raw'] = csr_matrix(summ_matrix)
     return meta_ad

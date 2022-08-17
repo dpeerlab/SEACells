@@ -1,10 +1,6 @@
 import numpy as np
 from scipy.sparse import coo_matrix, csr_matrix, dok_matrix, lil_matrix, diags, eye, csc_matrix, kron, vstack
-from sklearn.neighbors import kneighbors_graph, radius_neighbors_graph
-from scipy.sparse.linalg import svds, eigs, eigsh, norm, spsolve
-from scipy.spatial.distance import cdist
-from scipy.special import logsumexp
-from scipy.stats import t, entropy, multinomial
+
 
 # for parallelizing stuff
 from multiprocessing import cpu_count, Pool
@@ -52,16 +48,16 @@ def rbf_for_row(G, data, median_distances, i):
     # convert row to binary numpy array
     row_as_array = G[i, :].toarray().ravel()
 
-    # compute distances ||x - y||^2
+    # compute distances ||x - y||^2 in PC/original X space
     numerator = np.sum(np.square(data[i, :] - data), axis=1, keepdims=False)
 
-    # compute radii
+    # compute radii - median distance is distance to kth nearest neighbor
     denominator = median_distances[i] * median_distances
 
     # exp
     full_row = np.exp(-numerator / denominator)
 
-    # masked row
+    # masked row - to contain only indices captured by G matrix
     masked_row = np.multiply(full_row, row_as_array)
 
     return lil_matrix(masked_row)
@@ -95,6 +91,9 @@ class SEACellGraph:
         self.ad = ad
         self.build_on = build_on
 
+        self.knn_graph = None
+        self.sym_graph = None
+
         # number of cores for parallelization
         if n_cores != -1:
             self.num_cores = n_cores
@@ -112,7 +111,7 @@ class SEACellGraph:
     # Methods related to kernel + sim matrix construction
     ##############################################################
 
-    def rbf(self, k: int = 15):
+    def rbf(self, k: int = 15, shared_neighbor_graph=False):
         """
         Initialize adaptive bandwith RBF kernel (as described in C-isomap)
 
@@ -135,6 +134,7 @@ class SEACellGraph:
         # Include self as neighbour
         knn_graph.setdiag(1)
 
+        self.knn_graph = knn_graph
         if self.verbose:
             print("Computing radius for adaptive bandwidth kernel...")
 
@@ -151,8 +151,15 @@ class SEACellGraph:
 
         if self.verbose:
             print("Making graph symmetric...")
-        sym_graph = (knn_graph + knn_graph.T > 0).astype(float)
 
+        if shared_neighbor_graph:
+            print('Using shared NN graph')
+            knn_graph = (knn_graph > 0).astype(float)
+            sym_graph = knn_graph.multiply(knn_graph.T)
+        else:
+            sym_graph = (knn_graph + knn_graph.T > 0).astype(float)
+
+        self.sym_graph = sym_graph
         if self.verbose:
             print("Computing RBF kernel...")
 
@@ -172,6 +179,6 @@ class SEACellGraph:
             print("Constructing CSR matrix...")
 
         self.M = (similarity_matrix).tocsr()
-        return self.M @ self.M.T
+        return self.M
 
 
