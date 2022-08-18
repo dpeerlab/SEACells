@@ -4,8 +4,13 @@ SEACells:
 **S**ingle-c**E**ll **A**ggregation for High Resolution **Cell S**tates 
 
 #### Installation and dependencies
-1. SEACells has been implemented in Python3.8 can be installed from source: 
+1. SEACells has been implemented in Python3.8 can be installed via pip: 
 		
+		$> pip install cmake
+		$> pip install SEACells
+		
+	It can also be installed directly from source.
+	
 		$> git clone https://github.com/dpeerlab/SEACells.git
 		$> cd SEACells
 		$> python setup.py install
