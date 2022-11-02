@@ -134,21 +134,21 @@ def get_de_genes(adata, groups, thresh, group_key, fc_min=1.5, pval_cut=1e-2):
         
     return final_dict
 
-def _compute_de_genes(adata, group, group_dict, references, group_key, 
+def _compute_de_genes(adata, g, group_dict, references, group_key, 
                       fc_min=1.5, pval_cut=1e-2,):
     sc.settings.verbosity = 0 
     for ref in references:
-        de_data = sc.tl.rank_genes_groups(adata, groupby=group_key, groups=[ct], reference=ref, use_raw=False, copy=True)
+        de_data = sc.tl.rank_genes_groups(adata, groupby=group_key, groups=[g], reference=ref, use_raw=False, copy=True)
 
-        de_genes = sc.get.rank_genes_groups_df(de_data, ct, pval_cutoff=pval_cut, log2fc_min=fc_min)
+        de_genes = sc.get.rank_genes_groups_df(de_data, g, pval_cutoff=pval_cut, log2fc_min=fc_min)
 
         valid_de_df = de_genes.sort_values(by='logfoldchanges', ascending=False)
         
         for gene in valid_de_df['names']:                
-            if gene not in ct_dict:
-                ct_dict[gene] = 1
+            if gene not in group_dict:
+                group_dict[gene] = 1
             else: 
-                ct_dict[gene] += 1
+                group_dict[gene] += 1
     sc.settings.verbosity = 1
 
     
@@ -162,8 +162,9 @@ def get_gene_set(mc_ad, peak_counts,de_genes, group_key, sub_group,
     gene_set = np.intersect1d(valid_genes, de_genes)
     gene_set = np.intersect1d(gene_set, highly_expressed)
     
-    print(f'# of highly expressed: {len(highly_expressed)}')
-    print(f'# with sig correlation: {len(valid_genes)}')
+    print('Number of genes...')
+    print(f'...highly expressed in {sub_group}: {len(highly_expressed)}')
+    print(f'...correlated {min_peaks}+ peaks: {len(valid_genes)}')
 
     print(f'total # of genes: {len(gene_set)}')
     
@@ -179,32 +180,17 @@ def fit_lasso_model(gtf, zs, tf_set, gene_set, cells,
     X = pd.DataFrame(scaler.fit_transform(X), index=gene_set, columns=tf_set)
     
     # set up containers
-    coefs = {}
-    base_rmses = {}
-    r_sqs = {}
-    sp_corrs = {}
-    x_tests = {}
-    y_stats = {}
-    intercepts = {}
-    
+    res = {}
+    for key in ['coefs','rmses', 'rsqs', 'sp_corr', 'x_tests', 'intercept', 'y_stats']:
+        res[key] = {}
+
     y = zs.loc[gene_set, :]
     for cell in tqdm(cells, total=len(cells)):
-        _train_model(cell, X, y, gene_set, test_size, cv_fold)
-    
-    # save all outputs into dict
-    res = {}
-    
-    res['coefs'] = coefs
-    res['rmses'] = base_rmses
-    res['rsqs'] = r_sqs
-    res['sp_corr'] = sp_corrs
-    res['x_tests'] = x_tests
-    res['intercept'] = intercepts
-    res['y_stats'] = y_stats
+        _train_model(cell, X, y, gene_set,res, test_size, cv_fold, max_iter )
     
     return res
 
-def _train_model(cell, X, y, gene_set, test_size=0.20, cv_fold=5):
+def _train_model(cell, X, y, gene_set, test_size=0.20, cv_fold=5, max_iter=10000):
     y = y.loc[:, cell]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size)
 
@@ -220,15 +206,15 @@ def _train_model(cell, X, y, gene_set, test_size=0.20, cv_fold=5):
     r_sq = r2_score(y_test, y_pred)
     sp_corr = stats.spearmanr(y_test, y_pred)
 
-    base_rmses[cell] = rmse
-    r_sqs[cell] = r_sq
-    sp_corrs[cell] = sp_corr
-    x_tests[cell] = X_test
-    y_stats[cell] = y_test, y_pred
-    intercepts[cell] = lasso_tuned.intercept_
-    coefs[cell] = pd.Series(lasso_tuned.coef_, index=X.columns).sort_values()    
-
+    res['rmses'][cell] = rmse
+    res['rsqs'][cell] = r_sq
+    res['sp_corr'][cell] = sp_corr
+    res['x_tests'][cell] = X_test
+    res['y_stats'][cell] = y_test, y_pred
+    res['intercept'][cell] = lasso_tuned.intercept_
+    res['coefs'][cell] = pd.Series(lasso_tuned.coef_, index=X.columns).sort_values()
     
+
 # TF-Activity functions
 def non_zero_tfs(cells, ct_res, thresh=20):
     tf_count = {}
