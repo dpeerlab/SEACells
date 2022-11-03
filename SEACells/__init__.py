@@ -5,5 +5,5 @@ from . import plot
 from . import evaluate
 from . import genescores
 from . import accessibility
-from . import tf_activity
+from . import tfactivity
 from .version import __version__
