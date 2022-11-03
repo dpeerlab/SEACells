@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import scanpy as sc
 
+from . import core
 
 def prepare_multiome_anndata(atac_ad, rna_ad, SEACells_label='SEACell', n_bins_for_gc=50):
     """

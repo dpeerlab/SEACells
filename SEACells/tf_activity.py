@@ -163,10 +163,12 @@ def get_gene_set(mc_ad, peak_counts,de_genes, group_key, sub_group,
     gene_set = np.intersect1d(gene_set, highly_expressed)
     
     print('Number of genes...')
-    print(f'...highly expressed in {sub_group}: {len(highly_expressed)}')
-    print(f'...correlated {min_peaks}+ peaks: {len(valid_genes)}')
-
-    print(f'total # of genes: {len(gene_set)}')
+    print(f'   ...highly expressed in {sub_group}: {len(highly_expressed)}')
+    print(f'   ...correlated {min_peaks}+ peaks: {len(valid_genes)}')
+    print(f'   ...differentially expressed: {len(de_genes)}')
+    print('...taking intersection...')
+    print()
+    print(f'TOTAL: {len(gene_set)}')
     
     return gene_set
     
@@ -190,7 +192,7 @@ def fit_lasso_model(gtf, zs, tf_set, gene_set, cells,
     
     return res
 
-def _train_model(cell, X, y, gene_set, test_size=0.20, cv_fold=5, max_iter=10000):
+def _train_model(cell, X, y, gene_set, res, test_size=0.20, cv_fold=5, max_iter=10000):
     y = y.loc[:, cell]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size)
 
