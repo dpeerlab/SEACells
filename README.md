@@ -58,11 +58,14 @@ A tutorial on SEACells usage and results visualization for single cell data can 
 3. <b>Gene regulatory toolkit</b>:
 Peak gene correlations, gene scores and gene accessibility scores can be computed using the [ATAC analysis notebook] (https://github.com/dpeerlab/SEACells/blob/main/notebooks/SEACell_ATAC_analysis.ipynb).
 
-4. <b>Large-scale data integration using SEACells </b>:
+4. <b>TF activity inference</b>:
+TF activities along differenitation trajectories can be computed using the [TF activity notebook] (https://github.com/dpeerlab/SEACells/blob/main/notebooks/SEACell_tf_activity.ipynb).
+
+5. <b>Large-scale data integration using SEACells </b>:
 Details are avaiable in the [COVID integration notebook] (https://github.com/dpeerlab/SEACells/blob/main/notebooks/SEACell_COVID_integration.ipynb)
 
 
-5. <b>Cross-modality integration </b>:
+6. <b>Cross-modality integration </b>:
 Integration between scRNA and scATAC can be performed following the [Integration notebook](https://github.com/dpeerlab/SEACells/blob/main/notebooks/SEACell_domain_adapt.ipynb)
 
 #### Citations
@@ -83,8 +86,6 @@ SEACells manuscript is available on [bioRxiv](https://www.biorxiv.org/content/10
 
 ```
 
-
-Coming soon!
 ____
 
 Release Notes
