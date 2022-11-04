@@ -7,22 +7,20 @@ import numpy as np
 import pandas as pd
 import scanpy as sc
 
+from . import core
 
-def prepare_multiome_anndata(atac_ad, rna_ad, SEACell_label='SEACell', n_bins_for_gc=50):
+def prepare_multiome_anndata(atac_ad, rna_ad, SEACells_label='SEACell', n_bins_for_gc=50):
     """
-    Function to create metacell Anndata objects from single-cell Anndata objects
-
+    Function to create metacell Anndata objects from single-cell Anndata objects for multiome data
     :param atac_ad: (Anndata) ATAC Anndata object with raw peak counts in `X`. These anndata objects should be constructed 
      using the example notebook available in 
     :param rna_ad: (Anndata) RNA Anndata object with raw gene expression counts in `X`. Note: RNA and ATAC anndata objects 
      should contain the same set of cells
-    :param SEACell_label: (str) `atac_ad.obs` field for constructing metacell matrices. Same field will be used for 
+    :param SEACells_label: (str) `atac_ad.obs` field for constructing metacell matrices. Same field will be used for 
       summarizing RNA and ATAC metacells. 
     :param n_bins_gc: (int) Number of bins for creating GC bins of ATAC peaks.
-
     :return: ATAC metacell Anndata object and RNA metacell Anndata object
     """
-    from scipy.sparse import csr_matrix
 
     # Subset of cells common to ATAC and RNA
     common_cells = atac_ad.obs_names.intersection(rna_ad.obs_names)
@@ -33,67 +31,56 @@ def prepare_multiome_anndata(atac_ad, rna_ad, SEACell_label='SEACell', n_bins_fo
 
     # #################################################################################
     # Generate metacell matrices
-    print('Generating Metacell matrices...')
-    print(' ATAC')
 
-    # ATAC - Normalize using TFIDF
-    from sklearn.feature_extraction.text import TfidfTransformer
-    mat = atac_mod_ad.X.astype(int)
-    tfidf = TfidfTransformer().fit(mat)
-    atac_mod_ad.layers['TFIDF'] = tfidf.transform(mat)
-
-    # ATAC - Summarize by metacells
-    metacells = atac_mod_ad.obs[SEACell_label].astype(str).unique()
-    metacells = metacells[atac_mod_ad.obs[SEACell_label].value_counts()[
+    # Set of metacells
+    metacells = atac_mod_ad.obs[SEACells_label].astype(str).unique()
+    metacells = metacells[atac_mod_ad.obs[SEACells_label].value_counts()[
         metacells] > 1]
 
-    # Summary matrix
-    summ_matrix = pd.DataFrame(
-        0.0, index=metacells, columns=atac_mod_ad.var_names)
-    for m in tqdm(summ_matrix.index):
-        cells = atac_mod_ad.obs_names[atac_mod_ad.obs[SEACell_label] == m]
-        summ_matrix.loc[m, :] = np.ravel(
-            atac_mod_ad[cells, :].layers['TFIDF'].sum(axis=0))
+    print('Generating Metacell matrices...')
+    print(' ATAC')
+    atac_meta_ad = core.summarize_by_SEACell(atac_mod_ad, SEACells_label=SEACells_label, summarize_layer='X')
+    atac_meta_ad = atac_meta_ad[metacells, :]
+    # ATAC - Summarize SVD representation 
 
-    # ATAC - create metacell anndata
-    atac_meta_ad = sc.AnnData(summ_matrix)
-    atac_meta_ad.X = csr_matrix(atac_meta_ad.X)
-    atac_meta_ad.obs_names, atac_meta_ad.var_names = summ_matrix.index.astype(
-        str), summ_matrix.columns
-    atac_meta_ad = atac_meta_ad[:, atac_mod_ad.var_names]
-    sc.pp.normalize_per_cell(atac_meta_ad)
+    svd = pd.DataFrame(atac_mod_ad.obsm['X_svd'], index=atac_mod_ad.obs_names)
+    summ_svd = svd.groupby(atac_mod_ad.obs[SEACells_label]).mean()
+    atac_meta_ad.obsm['X_svd'] = summ_svd.loc[atac_meta_ad.obs_names, :].values
 
+
+    # ATAC - Normalize
+    _add_atac_meta_data(atac_meta_ad, atac_mod_ad, n_bins_for_gc)
+    sc.pp.filter_genes(atac_meta_ad, min_cells=1)
+    _normalize_ad(atac_meta_ad)
+
+    # RNA summaries using ATAC SEACells
     print(' RNA')
-    # RNA - Normalize
-    sc.pp.normalize_total(rna_mod_ad)
-    sc.pp.log1p(rna_mod_ad)
-
-    # RNA - Summarize by metacells
-    # Summary matrix
-    summ_matrix = pd.DataFrame(
-        0.0, index=metacells, columns=rna_mod_ad.var_names)
-    for m in tqdm(summ_matrix.index):
-        cells = rna_mod_ad.obs_names[atac_mod_ad.obs[SEACell_label] == m]
-        summ_matrix.loc[m, :] = np.ravel(rna_mod_ad[cells, :].X.sum(axis=0))
-
-    # RNA - create metacell matrix
-    rna_meta_ad = sc.AnnData(summ_matrix)
-    rna_meta_ad.X = csr_matrix(rna_meta_ad.X)
-    rna_meta_ad.obs_names, rna_meta_ad.var_names = summ_matrix.index.astype(
-        str), rna_meta_ad.var_names
-
-
-    # #################################################################################
-    # Update ATAC meta ad with GC content information
-    atac_mod_ad.var['log_n_counts'] = np.ravel(
-        np.log10(atac_mod_ad.X.sum(axis=0)))
-    atac_meta_ad.var['GC_bin'] = np.digitize(
-        atac_mod_ad.var['GC'], np.linspace(0, 1, n_bins_for_gc))
-    atac_meta_ad.var['counts_bin'] = np.digitize(atac_mod_ad.var['log_n_counts'],
-                                                 np.linspace(atac_mod_ad.var['log_n_counts'].min(),
-                                                             atac_mod_ad.var['log_n_counts'].max(), n_bins_for_gc))
+    rna_mod_ad.obs['temp'] = atac_mod_ad.obs[SEACells_label]
+    rna_meta_ad = core.summarize_by_SEACell(rna_mod_ad, SEACells_label='temp', summarize_layer='X')
+    rna_meta_ad = rna_meta_ad[metacells, :]
+    _normalize_ad(rna_meta_ad)
 
     return atac_meta_ad, rna_meta_ad
+
+
+def _normalize_ad(meta_ad, save_raw=True):
+    if save_raw:
+        # Save in raw
+        meta_ad.raw = meta_ad.copy()
+
+    # Normalize 
+    sc.pp.normalize_total(meta_ad, key_added='n_counts')
+    sc.pp.log1p(meta_ad)
+    
+
+def _add_atac_meta_data(atac_meta_ad, atac_ad, n_bins_for_gc):
+    atac_ad.var['log_n_counts'] = np.ravel(np.log10(atac_ad.X.sum(axis=0)))
+    
+    atac_meta_ad.var['GC_bin'] = np.digitize(atac_ad.var['GC'], np.linspace(0, 1, n_bins_for_gc))
+    atac_meta_ad.var['counts_bin'] = np.digitize(atac_ad.var['log_n_counts'],
+                                                 np.linspace(atac_ad.var['log_n_counts'].min(),
+                                                             atac_ad.var['log_n_counts'].max(), 
+                                                             n_bins_for_gc))
 
 
 def _pyranges_from_strings(pos_list):
