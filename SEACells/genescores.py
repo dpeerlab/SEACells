@@ -204,8 +204,8 @@ def get_gene_peak_correlations(atac_meta_ad,
 
     :param atac_meta_ad: (Anndata) ATAC metacell Anndata created using `prepare_multiome_anndata`
     :param rna_meta_ad: (Anndata) RNA metacell Anndata created using `prepare_multiome_anndata`
-    :param path_to_gtf: (str) Path to ENSEMBL GTF file OR None if using pyranges object as input
-    :param gene_ranges: (pyranges) Pyranges object containing translations of annotation names. Not used if path_to_gtf is not None
+    :param path_to_gtf: (str or None) Path to ENSEMBL GTF file OR None if using pyranges object as input
+    :param gene_ranges: (pyranges or None) Pyranges object containing regions corresponding to custom annotation sets. Only used if path_to_gtf is None.
     :param span: (int) Genomic window around the gene body to identify for which correlations with expression are computed
     :param n_jobs: (int) Number of jobs for parallel processing
     :param gene_set: (pd.Series) Subset of genes for which to compute correlations. All genes are used by default
@@ -215,10 +215,10 @@ def get_gene_peak_correlations(atac_meta_ad,
 
     # #################################################################################
     print('Loading transcripts per gene...')
-    if path_to_gtf is not None:
-        transcripts = load_transcripts(path_to_gtf)
-    else:
+    if path_to_gtf is None:
         transcripts = gene_ranges
+    else:
+        transcripts = load_transcripts(path_to_gtf)
 
     print('Preparing matrices for gene-peak associations')
     atac_exprs = pd.DataFrame(atac_meta_ad.X.todense(),
