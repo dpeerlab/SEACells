@@ -8,7 +8,7 @@ backports.functools-lru-cache @ file:///home/conda/feedstock_root/build_artifact
 backports.zoneinfo==0.2.1
 brotlipy @ file:///Users/runner/miniforge3/conda-bld/brotlipy_1636012310340/work
 cached-property @ file:///home/conda/feedstock_root/build_artifacts/cached_property_1615209429212/work
-certifi==2021.10.8
+certifi==2022.12.7
 cffi @ file:///Users/runner/miniforge3/conda-bld/cffi_1636046182160/work
 charset-normalizer @ file:///home/conda/feedstock_root/build_artifacts/charset-normalizer_1644853463426/work
 click @ file:///Users/runner/miniforge3/conda-bld/click_1648543225656/work
