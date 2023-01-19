@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import palantir
-from tqdm.notebook import tqdm
+from tqdm import tqdm
 import copy
 
 from . import build_graph, evaluate
@@ -786,7 +786,9 @@ def summarize_by_SEACell(ad, SEACells_label='SEACell', celltype_label=None, summ
 
     for m in tqdm(summ_matrix.index):
         cells = ad.obs_names[ad.obs[SEACells_label] == m]
-        if summarize_layer == 'raw' and ad.raw != None:
+        if summarize_layer == 'X':
+            summ_matrix.loc[m, :] = np.ravel(ad[cells, :].X.sum(axis=0))
+        elif summarize_layer == 'raw' and ad.raw != None:
             summ_matrix.loc[m, :] = np.ravel(ad[cells, :].raw.X.sum(axis=0))
         else:
             summ_matrix.loc[m, :] = np.ravel(ad[cells, :].layers[summarize_layer].sum(axis=0))

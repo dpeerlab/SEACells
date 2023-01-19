@@ -16,5 +16,5 @@ dependencies:
   - pip
   - pip:
     - dfply
-    - git+https://github.com/settylab/Palantir@removeTSNE
+    - git+https://github.com/dpeerlab/Palantir
     - git+https://github.com/dpeerlab/SEACells
