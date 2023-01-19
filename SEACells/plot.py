@@ -36,11 +36,11 @@ def plot_assignment_entropy(ad,
 def plot_2D(ad, key='X_umap',
             colour_metacells=True,
             title='Metacell Assignments',
-            save_as = None,
-            show = True,
+            save_as=None,
+            show=True,
             cmap='Set2',
-            figsize=(5,5),
-            SEACell_size = 20,
+            figsize=(5, 5),
+            SEACell_size=20,
             cell_size=10
             ):
     """
@@ -55,7 +55,8 @@ def plot_2D(ad, key='X_umap',
     :param figsize: (int,int) tuple of integers representing figure size
     """
     umap = pd.DataFrame(ad.obsm[key]).set_index(ad.obs_names).join(ad.obs['SEACell'])
-    mcs = umap.loc[ad.obs['SEACell'].unique()]
+    umap['SEACell'] = umap['SEACell'].astype("category")
+    mcs = umap.groupby('SEACell').mean().reset_index()
 
     plt.figure(figsize=figsize)
     if colour_metacells:
@@ -90,7 +91,7 @@ def plot_2D(ad, key='X_umap',
     plt.title(title)
     ax = plt.gca()
     ax.set_axis_off()
-    
+
     if save_as is not None:
         plt.savefig(save_as, dpi=150, transparent=True)
     if show:

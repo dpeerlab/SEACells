@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="SEACells",
-    version="0.2.0",
+    version="0.3.2",
     author="Pe'er Lab",
     author_email="scp2152@columbia.edu",
     description=" ",
@@ -14,11 +14,13 @@ setuptools.setup(
     url="https://github.com/dpeerlab/SEACells",
     packages=setuptools.find_packages(),
     install_requires=[
+        "numpy",
+        "pandas",
         "palantir",
-        "scanpy==1.8.2",
+        "scanpy>1.8",
         "anndata",
         "numba>=0.51.2",
-        "scipy==1.6",
+        "scipy>=1.5",
         "pyranges"
         ],
     classifiers=[

@@ -13,7 +13,6 @@ import time
 # get number of cores for multiprocessing
 NUM_CORES = cpu_count()
 
-
 ##########################################################
 # Helper functions for parallelizing kernel construction
 ##########################################################
@@ -69,7 +68,10 @@ def rbf_for_row(G, data, median_distances, i):
 
 class SEACellGraph:
 
-    def __init__(self, ad, build_on='X_pca', n_cores: int = -1, verbose: bool = False):
+    def __init__(self, ad,
+                 build_on='X_pca',
+                 n_cores: int = -1,
+                 verbose: bool = False):
         """
 
         :param ad: (anndata.AnnData) object containing data for which metacells are computed
@@ -111,7 +113,7 @@ class SEACellGraph:
     # Methods related to kernel + sim matrix construction
     ##############################################################
 
-    def rbf(self, k: int = 15, shared_neighbor_graph=False):
+    def rbf(self, k: int = 15, graph_construction='union'):
         """
         Initialize adaptive bandwith RBF kernel (as described in C-isomap)
 
@@ -147,17 +149,18 @@ class SEACellGraph:
         # convert to numpy array
         median_distances = np.array(median_distances)
 
-        # take AND
-
         if self.verbose:
             print("Making graph symmetric...")
 
-        if shared_neighbor_graph:
-            print('Using shared NN graph')
+        print(f'Parameter graph_construction = {graph_construction} being used to build KNN graph...')
+        if graph_construction == 'union':
+            sym_graph = (knn_graph + knn_graph.T > 0).astype(float)
+        elif graph_construction in ['intersect', 'intersection']:
             knn_graph = (knn_graph > 0).astype(float)
             sym_graph = knn_graph.multiply(knn_graph.T)
         else:
-            sym_graph = (knn_graph + knn_graph.T > 0).astype(float)
+            raise ValueError(f'Parameter graph_construction = {graph_construction} is not valid. \
+             Please select `union` or `intersection`')
 
         self.sym_graph = sym_graph
         if self.verbose:

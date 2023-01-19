@@ -4,7 +4,7 @@ import palantir
 from tqdm.notebook import tqdm
 import copy
 
-from . import build_graph
+from . import build_graph, evaluate
 
 
 class SEACells:
@@ -18,6 +18,7 @@ class SEACells:
                  ad,
                  build_kernel_on: str,
                  n_SEACells: int,
+                 use_gpu: bool = False,
                  verbose: bool = True,
                  n_waypoint_eigs: int = 10,
                  n_neighbors: int = 15,
@@ -25,8 +26,11 @@ class SEACells:
                  l2_penalty: float =0,
                  max_franke_wolfe_iters: int=50):
         """
+        ad - anndata.AnnData
 
         """
+
+        print('Welcome to SEACells!')
         self.ad = ad
         self.build_kernel_on = build_kernel_on
         self.n_cells = ad.shape[0]
@@ -62,6 +66,12 @@ class SEACells:
         self.B_ = None
         self.B0 = None
 
+        self.gpu = use_gpu
+        if self.gpu:
+            from numba import cuda
+            import cupy as cp
+            import cupyx
+
         return
 
     def add_precomputed_kernel_matrix(self, K):
@@ -76,7 +86,7 @@ class SEACells:
         # Pre-compute dot product
         self.K = self.kernel_matrix @ self.kernel_matrix.T
 
-    def construct_kernel_matrix(self, n_neighbors: int = None):
+    def construct_kernel_matrix(self, n_neighbors: int = None, graph_construction='union'):
         """
 
         """
@@ -87,7 +97,7 @@ class SEACells:
         if n_neighbors is None:
             n_neighbors = self.n_neighbors
 
-        M = kernel_model.rbf(n_neighbors)
+        M = kernel_model.rbf(n_neighbors, graph_construction=graph_construction)
         self.kernel_matrix = M
 
         # Pre-compute dot product
@@ -164,6 +174,7 @@ class SEACells:
 
         self.A_ = A
         self.B_ = B
+
         # Create convergence threshold
         RSS = self.compute_RSS(A, B)
         self.RSS_iters.append(RSS)
@@ -309,32 +320,72 @@ class SEACells:
         :param B: (array) n*k matrix (dense) defining SEACells as weighted combinations of cells
         :return: A: (array) k*n matrix (dense) defining weights used for assigning cells to SEACells
         """
-        n, k = B.shape
 
+        n, k = B.shape
         A = A_prev
 
         t = 0  # current iteration (determine multiplicative update)
 
-        # precompute some gradient terms
-        t2 = (self.K @ B).T
-        t1 = t2 @ B
 
-        # update rows of A for given number of iterations
-        while t < self.max_FW_iter:
-            # compute gradient (must convert matrix to ndarray)
-            G = 2. * np.array(t1 @ A - t2) - self.l2_penalty*A
+        if self.gpu:
+            # Use the GPU version of the update step
 
-            # get argmins
-            amins = np.argmin(G, axis=0)
+            K = cupyx.scipy.sparse.csc_matrix(seacells.K)
 
-            # loop free implementation
-            e = np.zeros((k, n))
-            e[amins, np.arange(n)] = 1.
+            Ag = cp.array(A)
+            Kg = K
+            Bg = cp.array(B)
 
-            A += 2. / (t + 2.) * (e - A)
-            t += 1
+            # precompute some gradient terms
+            t2g = Kg.dot(Bg).T
+            t1g = t2g.dot(Bg)
 
-        return A
+            # update rows of A for given number of iterations
+            while t < self.max_FW_iter:
+                # compute gradient (must convert matrix to ndarray)
+                # cp.matmul(t1g, Ag)
+                Gg = cp.multiply(2, cp.subtract(t1g.dot(Ag), t2g))
+
+                # get argmins
+                amins = cp.argmin(Gg, axis=0)
+
+                # loop free implementation
+                eg = cp.zeros((k, n))
+                eg[amins, cp.arange(n)] = 1.
+
+                f = 2. / (t + 2.)
+                Ag = cp.add(Ag, cp.multiply(f, cp.subtract(eg, Ag)))
+                t += 1
+
+            A = Ag.get()
+
+            del t1g, t2g, Ag, Kg, Gg, Bg, eg, amins
+            cp._default_memory_pool.free_all_blocks()
+
+            return A
+
+        else:
+
+            # precompute some gradient terms
+            t2 = (self.K @ B).T
+            t1 = t2 @ B
+
+            # update rows of A for given number of iterations
+            while t < self.max_FW_iter:
+                # compute gradient (must convert matrix to ndarray)
+                G = 2. * np.array(t1 @ A - t2) - self.l2_penalty*A
+
+                # get argmins
+                amins = np.argmin(G, axis=0)
+
+                # loop free implementation
+                e = np.zeros((k, n))
+                e[amins, np.arange(n)] = 1.
+
+                A += 2. / (t + 2.) * (e - A)
+                t += 1
+
+            return A
 
     def _updateB(self, A, B_prev):
         """
@@ -552,19 +603,12 @@ class SEACells:
         """
 
         # Use argmax to get the index with the highest assignment weight
-        bin_A = self.binarize_matrix_rows(self.A_)
-        bin_B = self.binarize_matrix_rows(self.B_)
 
-        labels = np.dot(bin_A.T, np.arange(bin_A.shape[0]))
-
-        df = pd.DataFrame({'SEACell': labels.astype(int), 'is_MC': bin_B.sum(1).astype(bool)})
+        df = pd.DataFrame({'SEACell':[f'SEACell-{i}' for i in self.A_.argmax(0)]})
         df.index = self.ad.obs_names
         df.index.name = 'index'
-        di = df[df['is_MC'] == True]['SEACell'].reset_index().set_index('SEACell').to_dict()['index']
 
-        df['SEACell'] = df['SEACell'].map(di)
-
-        return pd.DataFrame(df['SEACell'])
+        return df
 
     def get_archetypes(self):
         """
@@ -578,6 +622,32 @@ class SEACells:
         """
 
         return self.ad.obs_names[self.B_.argmax(0)]
+
+
+    def save_assignments(self, outdir):
+        """
+        Save (sparse) assignment matrices to specified directory.
+        """
+        
+        import os
+        from scipy.sparse import csr_matrix, save_npz
+        
+        os.makedirs(outdir, exist_ok=True)
+        
+        A = csr_matrix(self.A_)
+        B = csr_matrix(self.B_)
+        
+        A = A.T
+
+        save_npz(outdir+'/kernel_matrix.npz',self.kernel_matrix)
+        save_npz(outdir+'/A.npz', A)
+        save_npz(outdir+'/B.npz', B)
+
+        labels = self.get_hard_assignments()
+        labels.to_csv(outdir+'/SEACells.csv')
+
+        return A, B, labels
+
 
 
     @staticmethod
@@ -695,7 +765,7 @@ def summarize_by_soft_SEACell(ad, A, celltype_label=None, summarize_layer='raw',
     return seacell_ad
 
 
-def summarize_by_SEACell(ad, SEACells_label='SEACell', summarize_layer='raw'):
+def summarize_by_SEACell(ad, SEACells_label='SEACell', celltype_label=None, summarize_layer='raw'):
     """
     Aggregates cells within each SEACell, summing over all raw data for all cells belonging to a SEACell.
     Data is unnormalized and raw aggregated counts are stored .layers['raw'].
@@ -722,8 +792,18 @@ def summarize_by_SEACell(ad, SEACells_label='SEACell', summarize_layer='raw'):
             summ_matrix.loc[m, :] = np.ravel(ad[cells, :].layers[summarize_layer].sum(axis=0))
 
     # Ann data
+
     # Counts
     meta_ad = sc.AnnData(csr_matrix(summ_matrix), dtype=csr_matrix(summ_matrix).dtype)
     meta_ad.obs_names, meta_ad.var_names = summ_matrix.index.astype(str), ad.var_names
     meta_ad.layers['raw'] = csr_matrix(summ_matrix)
+
+    # Also compute cell type purity
+    if celltype_label is not None:
+        try:
+            purity_df = evaluate.compute_celltype_purity(ad, celltype_label)
+            meta_ad.obs = meta_ad.obs.join(purity_df)
+        except Exception as e:
+            print(f'Cell type purity failed with Exception {e}')
+
     return meta_ad
