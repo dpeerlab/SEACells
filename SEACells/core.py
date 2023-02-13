@@ -1,10 +1,12 @@
 import numpy as np
 import pandas as pd
 import palantir
-from tqdm import tqdm
+import tqdm
 import copy
+import cupy as cp
+import cupyx
 
-from . import build_graph, evaluate
+import build_graph, evaluate
 
 
 class SEACells:
@@ -268,7 +270,7 @@ class SEACells:
         centers = np.zeros(k, dtype=int)
 
         # sampling
-        for j in tqdm(range(k)):
+        for j in tqdm.tqdm(range(k)):
 
             score = f / g
             p = np.argmax(score)
@@ -424,6 +426,92 @@ class SEACells:
 
         return B
 
+    def _updateA_gpu_sparse(seacells, B, A_prev):
+        """
+        Given archetype matrix B and using kernel matrix K, compute assignment matrix A using gradient descent.
+        :param B: (array) n*k matrix (dense) defining SEACells as weighted combinations of cells
+        :return: A: (array) k*n matrix (dense) defining weights used for assigning cells to SEACells
+        """
+        n, k = B.shape
+
+        A = A_prev
+        K = cupyx.scipy.sparse.csc_matrix(seacells.K)
+
+        t = 0  # current iteration (determine multiplicative update)
+        
+        Ag = cp.array(A)
+        Kg = K
+        Bg = cp.array(B)
+
+        # print(cp.dot(Kg, Bg, out=None))
+        # precompute some gradient terms
+        t2g = Kg.dot(Bg).T
+        # t2g = cp.matmul(Kg, Bg).T #HERE
+        t1g = t2g.dot(Bg)
+        # t1g = cp.matmul(t2g, Bg) #HERE
+
+        # update rows of A for given number of iterations
+        while t < 50:
+            # compute gradient (must convert matrix to ndarray)
+            # cp.matmul(t1g, Ag)
+            Gg = cp.multiply(2, cp.subtract(t1g.dot(Ag), t2g))
+
+            # get argmins
+            amins = cp.argmin(Gg, axis=0)
+
+            # loop free implementation
+            eg = cp.zeros((k, n))
+            eg[amins, cp.arange(n)] = 1.
+            
+            f = 2./(t+2.)
+            Ag = cp.add(Ag, cp.multiply(f, cp.subtract(eg, Ag)))
+            t += 1
+            
+        A = Ag.get()
+
+        del t1g, t2g, Ag, Kg, Gg, Bg, eg, amins
+        cp._default_memory_pool.free_all_blocks()
+
+        return A
+
+
+    def _updateB_gpu_sparse(seacells, A, B_prev):
+        """
+        Given assignment matrix A and using kernel matrix K, compute archetype matrix B
+        :param A: (array) k*n matrix (dense) defining weights used for assigning cells to SEACells
+        :return: B: (array) n*k matrix (dense) defining SEACells as weighted combinations of cells
+        """
+        K = cupyx.scipy.sparse.csc_matrix(seacells.K)
+        k, n = A.shape
+
+        B = B_prev
+        # keep track of error
+        t = 0
+        
+        Ag = cp.array(A)
+        Kg = K
+        Bg = cp.array(B)
+
+        # precompute some terms
+        t1g = Ag.dot(Ag.T) #HERE
+        t2g = Kg.dot(Ag.T) #HERE
+
+        # update rows of B for a given number of iterations
+        while t < 50: 
+            # compute gradient
+            Gg = cp.multiply(2, cp.subtract(Kg.dot(Bg).dot(t1g), t2g))
+            # get all argmins
+            amins = cp.argmin(Gg, axis=0)
+            eg = cp.zeros((n, k))
+            eg[amins, cp.arange(k)] = 1.
+            f = 2./(t+2.)
+            Bg = cp.add(Bg, cp.multiply(f, cp.subtract(eg, Bg)))
+            t += 1  
+        B = Bg.get()
+        del t1g, t2g, Ag, Kg, Gg, Bg, eg, amins, 
+        cp._default_memory_pool.free_all_blocks()
+        return B
+
     def compute_reconstruction(self, A=None, B=None):
         """
         Compute reconstructed data matrix using learned archetypes (SEACells) and assignments
@@ -558,18 +646,99 @@ class SEACells:
         if not converged:
             raise RuntimeWarning(f'Warning: Algorithm has not converged - you may need to increase the maximum number of iterations')
         return
+    
+    def _fit_gpu_sparse(self, max_iter: int = 50, min_iter:int=10, B0=None):
+        """
+        Compute archetypes and loadings given kernel matrix K. Iteratively updates A and B matrices until maximum
+        number of iterations or convergence has been achieved.
+        Modifies ad.obs in place to add 'SEACell' labels to cells.
+        :param max_iter: (int) maximum number of iterations to update A and B matrices
+        :param min_iter: (int) minimum number of iterations to update A and B matrices
+        :param B0: (array) n_datapoints x n_SEACells initial guess of archetype matrix
+        """
+    
+        K = self.K
 
-    def fit(self, max_iter: int = 100, min_iter:int=10, initial_archetypes=None):
+        # initialize B (update this to allow initialization from RRQR)
+        n = K.shape[0]
+        k = self.k
+
+        if B0 is not None:
+            if self.verbose:
+                print('Using provided initial B matrix')
+            B = B0
+            self.B0 = B0
+        else:
+            if self.archetypes is None:
+                self.initialize_archetypes()
+
+            # Construction B matrix
+            B0 = np.zeros((n, k))
+            all_ix = self.archetypes
+            idx1 = list(zip(all_ix, np.arange(k)))
+            B0[tuple(zip(*idx1))] = 1
+            self.B0 = B0
+            B = self.B0
+
+
+        A = np.random.random((k, n))
+        A /= A.sum(0)
+        A = self._updateA(B, A)
+
+        print('Randomly initialized A matrix.')
+
+        # Create convergence threshold
+        RSS = self.compute_RSS(A, B)
+        self.RSS_iters.append(RSS)
+
+        if self.convergence_threshold is None:
+            self.convergence_threshold = self.convergence_epsilon * RSS
+            if self.verbose:
+                print(f'Setting convergence threshold at {self.convergence_threshold}')
+
+        converged = False
+        n_iter = 0
+        
+        while (not converged and n_iter < max_iter) or n_iter < min_iter:
+
+            n_iter += 1
+            A = self._updateA_gpu_sparse(B, A)
+            B = self._updateB_gpu_sparse(A, B)
+
+            self.RSS_iters.append(self.compute_RSS(A, B))
+
+            # Check for convergence
+            if np.abs(self.RSS_iters[-2] - self.RSS_iters[-1]) < self.convergence_threshold:
+                converged = True
+
+            self.A_ = A
+            self.B_ = B
+
+        print(f'Converged after {n_iter} iterations.')
+        self.A_ = A
+        self.B_ = B
+        self.Z_ = B.T @ self.K
+
+        # Label SEACells as well as assignment entropy as proxy for SEACell 'confidence'
+        labels = self.get_hard_assignments()
+        self.ad.obs['SEACell'] = labels['SEACell']
+
+    def fit(self, max_iter: int = 100, min_iter:int=10, initial_archetypes=None, use_gpu = False):
         """
         Wrapper to fit model.
 
         :param max_iter: (int) maximum number of iterations to update A and B matrices. Default: 100
         :param min_iter: (int) maximum number of iterations to update A and B matrices. Default: 10
         :param initial_archetypes: (list) indices of cells to use as initial archetypes
+        :param use_gpu: (boolean) whether you are using a gpu or not
         """
         if max_iter < min_iter:
             raise ValueError("The maximum number of iterations specified is lower than the minimum number of iterations specified.")
-        self._fit(max_iter=max_iter, min_iter=min_iter, initial_archetypes=initial_archetypes, initial_assignments=None)
+
+        if use_gpu is True: 
+            self._fit_gpu_sparse(max_iter=max_iter, min_iter=min_iter, B0=None) 
+        else: 
+            self._fit(max_iter=max_iter, min_iter=min_iter, initial_archetypes=initial_archetypes, initial_assignments=None)
 
     def get_archetype_matrix(self):
         """Return k x n matrix of archetypes"""
@@ -737,7 +906,7 @@ def summarize_by_soft_SEACell(ad, A, celltype_label=None, summarize_layer='raw',
     seacell_expressions = []
     seacell_celltypes = []
     seacell_purities = []
-    for ix in tqdm(range(A.shape[1])):
+    for ix in tqdm.tqdm(range(A.shape[1])):
         cell_weights = A[:, ix]
         # Construct the SEACell expression using the
         seacell_exp = data.multiply(cell_weights[:, np.newaxis]).toarray().sum(0) / cell_weights.sum()
@@ -784,7 +953,7 @@ def summarize_by_SEACell(ad, SEACells_label='SEACell', celltype_label=None, summ
     # Summary matrix
     summ_matrix = pd.DataFrame(0.0, index=metacells, columns=ad.var_names)
 
-    for m in tqdm(summ_matrix.index):
+    for m in tqdm.tqdm(summ_matrix.index):
         cells = ad.obs_names[ad.obs[SEACells_label] == m]
         if summarize_layer == 'X':
             summ_matrix.loc[m, :] = np.ravel(ad[cells, :].X.sum(axis=0))
