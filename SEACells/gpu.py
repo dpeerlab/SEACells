@@ -25,7 +25,6 @@ class SEACellsGPU:
                  ad,
                  build_kernel_on: str,
                  n_SEACells: int,
-                 use_gpu: bool = False,
                  verbose: bool = True,
                  n_waypoint_eigs: int = 10,
                  n_neighbors: int = 15,
