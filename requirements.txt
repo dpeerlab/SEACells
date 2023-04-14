@@ -32,4 +32,4 @@ tabulate==0.8.9
 tqdm==4.64
 tzdata==2022.1
 tzlocal==4.1
-umap-learn==0.5
+umap-learn>0.5.1
