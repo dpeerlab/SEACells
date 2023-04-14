@@ -32,9 +32,8 @@ def SEACells(ad,
     :param convergence_epsilon: (float) convergence threshold for Franke-Wolfe algorithm
     :param l2_penalty: (float) L2 penalty for Franke-Wolfe algorithm
     :param max_franke_wolfe_iters: (int) maximum number of iterations for Franke-Wolfe algorithm
-
-    Methods:
-        fit: fit SEACells mode
+    
+    See cpu.py or gpu.py for descriptions of model attributes and methods.
     """
 
     if use_gpu:
