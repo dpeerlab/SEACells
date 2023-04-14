@@ -101,15 +101,6 @@ class SEACellsGPU:
         self.B_ = None
         self.B0 = None
 
-        self.gpu = use_gpu
-
-        if self.gpu:
-            from numba import cuda
-            import cupy as cp
-            import cupyx
-
-            # Use the sparse matrices w/e
-
         return
 
     def add_precomputed_kernel_matrix(self, K):
