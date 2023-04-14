@@ -1,4 +1,10 @@
-from cpu import SEACellsCPU
+import numpy as np
+import pandas as pd
+import palantir
+from tqdm import tqdm
+import copy
+
+from scipy.sparse import csr_matrix, save_npz
 
 from . import build_graph
 
@@ -68,7 +74,8 @@ class SEACellsCPUDense:
         """
 
         assert K.shape == (self.n_cells,
-                           self.n_cells), f'Dimension of kernel matrix must be n_cells = ({self.n_cells},{self.n_cells}), not {K.shape} '
+                           self.n_cells), f'Dimension of kernel matrix must be n_cells = ' \
+                                          f'({self.n_cells},{self.n_cells}), not {K.shape} '
         self.kernel_matrix = K
 
         # Pre-compute dot product
@@ -585,8 +592,6 @@ class SEACellsCPUDense:
         """
 
         import os
-        from scipy.sparse import csr_matrix, save_npz
-
         os.makedirs(outdir, exist_ok=True)
 
         A = csr_matrix(self.A_)

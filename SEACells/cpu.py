@@ -667,7 +667,7 @@ class SEACellsCPU:
         :return: None
         """
         import pickle
-        with open(self.outdir + '/model.pkl', 'wb') as f:
+        with open(outdir + '/model.pkl', 'wb') as f:
             pickle.dump(self, f)
         return None
 

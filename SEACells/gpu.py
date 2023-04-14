@@ -6,15 +6,12 @@ import cupy as cp
 import cupyx
 from tqdm import tqdm
 
-from scipy.sparse import csr_matrix, save_npz
-from scipy.sparse.linalg import norm
-from sklearn.preprocessing import normalize
+from scipy.sparse import save_npz
 
 try:
     from . import build_graph, evaluate
 except ImportError:
     import build_graph, evaluate
-
 
 class SEACellsGPU:
     """
@@ -30,12 +27,12 @@ class SEACellsGPU:
                  ad,
                  build_kernel_on: str,
                  n_SEACells: int,
-                 verbose: bool,
-                 n_waypoint_eigs: int,
-                 n_neighbors: int,
-                 convergence_epsilon: float,
-                 l2_penalty: float,
-                 max_franke_wolfe_iters:int):
+                 verbose: bool = True,
+                 n_waypoint_eigs: int = 10,
+                 n_neighbors: int = 15,
+                 convergence_epsilon: float = 1e-3,
+                 l2_penalty: float = 0,
+                 max_franke_wolfe_iters: int = 50):
         """
         :param ad: (AnnData) annotated data matrix
         :param build_kernel_on: (str) key corresponding to matrix in ad.obsm which is used to compute kernel for metacells
@@ -510,7 +507,6 @@ class SEACellsGPU:
         :return: None
         """
         import matplotlib.pyplot as plt
-        import seaborn as sns
 
         plt.figure()
         plt.plot(self.RSS_iters)
@@ -659,6 +655,7 @@ class SEACellsGPU:
         :return: (pd.DataFrame) with SEACell assignments
         """
 
+
         # Use argmax to get the index with the highest assignment weight
 
         df = pd.DataFrame({'SEACell': [f'SEACell-{i}' for i in self.A_.argmax(0)]})
@@ -681,7 +678,7 @@ class SEACellsGPU:
         :return: None
         """
         import pickle
-        with open(self.outdir + '/model.pkl', 'wb') as f:
+        with open(outdir + '/model.pkl', 'wb') as f:
             pickle.dump(self, f)
         return None
 

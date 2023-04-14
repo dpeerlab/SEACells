@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import palantir
 from tqdm import tqdm
 import copy
 
@@ -17,12 +16,11 @@ def SEACells(ad,
              verbose: bool = True,
              n_waypoint_eigs: int = 10,
              n_neighbors: int = 15,
-             convergence_epsilon: float=1e-3,
-             l2_penalty: float =0,
-             max_franke_wolfe_iters: int=50,):
+             convergence_epsilon: float = 1e-3,
+             l2_penalty: float = 0,
+             max_franke_wolfe_iters: int = 50,
+             use_sparse: bool = False):
     """
-    Initialize and return SEACells model object for fitting and inference.
-
     :param ad: (AnnData) annotated data matrix
     :param build_kernel_on: (str) key corresponding to matrix in ad.obsm which is used to compute kernel for metacells
                             Typically 'X_pca' for scRNA or 'X_svd' for scATAC
@@ -34,11 +32,28 @@ def SEACells(ad,
     :param convergence_epsilon: (float) convergence threshold for Franke-Wolfe algorithm
     :param l2_penalty: (float) L2 penalty for Franke-Wolfe algorithm
     :param max_franke_wolfe_iters: (int) maximum number of iterations for Franke-Wolfe algorithm
-    :return: (SEACells) SEACells model object
-
-    Methods:
-        fit: fit SEACells mode
+    :param use_sparse: (bool) whether to use sparse matrix operations. Currently only supported for CPU implementation.
+    
+    See cpu.py or gpu.py for descriptions of model attributes and methods.
     """
+
+    if use_sparse:
+        assert not use_gpu, "Sparse matrix operations are only supported for CPU implementation."
+        try:
+            from . import cpu
+        except ImportError:
+            import cpu
+        model = cpu.SEACellsCPU(ad,
+                                build_kernel_on,
+                                n_SEACells,
+                                verbose,
+                                n_waypoint_eigs,
+                                n_neighbors,
+                                convergence_epsilon,
+                                l2_penalty,
+                                max_franke_wolfe_iters)
+
+        return model
 
     if use_gpu:
         try:
@@ -47,29 +62,29 @@ def SEACells(ad,
             import gpu
 
         model = gpu.SEACellsGPU(ad,
-                           build_kernel_on,
-                           n_SEACells,
-                           verbose,
-                           n_waypoint_eigs,
-                           n_neighbors,
-                           convergence_epsilon,
-                           l2_penalty,
-                           max_franke_wolfe_iters)
+                                build_kernel_on,
+                                n_SEACells,
+                                verbose,
+                                n_waypoint_eigs,
+                                n_neighbors,
+                                convergence_epsilon,
+                                l2_penalty,
+                                max_franke_wolfe_iters)
 
     else:
         try:
-            from . import cpu
+            from . import cpu_dense
         except ImportError:
-            import cpu
-        model = cpu.SEACellsCPU(ad,
-                           build_kernel_on,
-                           n_SEACells,
-                           verbose,
-                           n_waypoint_eigs,
-                           n_neighbors,
-                           convergence_epsilon,
-                           l2_penalty,
-                           max_franke_wolfe_iters)
+            import cpu_dense
+        model = cpu_dense.SEACellsCPUDense(ad,
+                                    build_kernel_on,
+                                    n_SEACells,
+                                    verbose,
+                                    n_waypoint_eigs,
+                                    n_neighbors,
+                                    convergence_epsilon,
+                                    l2_penalty,
+                                    max_franke_wolfe_iters)
 
     return model
 
