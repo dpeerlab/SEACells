@@ -6,10 +6,15 @@ import cupy as cp
 import cupyx
 from tqdm import tqdm
 
+from scipy.sparse import csr_matrix, save_npz
+from scipy.sparse.linalg import norm
+from sklearn.preprocessing import normalize
+
 try:
     from . import build_graph, evaluate
 except ImportError:
     import build_graph, evaluate
+
 
 class SEACellsGPU:
     """
@@ -25,13 +30,12 @@ class SEACellsGPU:
                  ad,
                  build_kernel_on: str,
                  n_SEACells: int,
-                 use_gpu: bool = False,
-                 verbose: bool = True,
-                 n_waypoint_eigs: int = 10,
-                 n_neighbors: int = 15,
-                 convergence_epsilon: float = 1e-3,
-                 l2_penalty: float = 0,
-                 max_franke_wolfe_iters: int = 50):
+                 verbose: bool,
+                 n_waypoint_eigs: int,
+                 n_neighbors: int,
+                 convergence_epsilon: float,
+                 l2_penalty: float,
+                 max_franke_wolfe_iters:int):
         """
         :param ad: (AnnData) annotated data matrix
         :param build_kernel_on: (str) key corresponding to matrix in ad.obsm which is used to compute kernel for metacells
@@ -102,15 +106,6 @@ class SEACellsGPU:
         self.B_ = None
         self.B0 = None
 
-        self.gpu = use_gpu
-
-        if self.gpu:
-            from numba import cuda
-            import cupy as cp
-            import cupyx
-
-            # Use the sparse matrices w/e
-
         return
 
     def add_precomputed_kernel_matrix(self, K):
@@ -176,7 +171,7 @@ class SEACellsGPU:
         else:
             from_greedy = self.k
 
-        greedy_ix = self._get_greedy_centers(n_mcs=from_greedy + 10)
+        greedy_ix = self._get_greedy_centers(n_SEACells=from_greedy + 10)
         if self.verbose:
             print(f'Selecting {from_greedy} cells from greedy initialization.')
 
@@ -297,7 +292,7 @@ class SEACellsGPU:
 
         return waypoint_ix
 
-    def _get_greedy_centers(self, n_mcs=None):
+    def _get_greedy_centers(self, n_SEACells=None):
         """Initialize SEACells using fast greedy adaptive CSSP
 
         From https://arxiv.org/pdf/1312.6838.pdf
@@ -308,10 +303,10 @@ class SEACellsGPU:
 
         n = self.K.shape[0]
 
-        if n_mcs is None:
+        if n_SEACells is None:
             k = self.k
         else:
-            k = n_mcs
+            k = n_SEACells
 
         if self.verbose:
             print("Initializing residual matrix using greedy column selection")
@@ -663,7 +658,6 @@ class SEACellsGPU:
         assignment weight.
         :return: (pd.DataFrame) with SEACell assignments
         """
-
 
         # Use argmax to get the index with the highest assignment weight
 

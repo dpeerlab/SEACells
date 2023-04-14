@@ -1,25 +1,12 @@
-import numpy as np
-import pandas as pd
-import palantir
-from tqdm import tqdm
-import copy
+from cpu import SEACellsCPU
 
-from scipy.sparse import csr_matrix, save_npz
-from scipy.sparse.linalg import norm
-from sklearn.preprocessing import normalize
-
-try:
-    from . import build_graph, evaluate
-except ImportError:
-    import build_graph, evaluate
+from . import build_graph
 
 
-class SEACellsCPU:
+class SEACellsCPUDense:
     """
-    CPU Implementation of SEACells algorithm - Uses fast kernel archetypal analysis to find SEACells - groupings
-    of cells that represent highly granular, distinct cell states. SEACells are found by solving a convex optimization
-    problem that minimizes the residual sum of squares between the kernel matrix and the weighted sum of the archetypes.
-
+    Fast kernel archetypal analysis.
+    Finds archetypes and weights given annotated data matrix.
     Modifies annotated data matrix in place to include SEACell assignments in ad.obs['SEACell']
     """
 
@@ -34,40 +21,9 @@ class SEACellsCPU:
                  l2_penalty: float = 0,
                  max_franke_wolfe_iters: int = 50):
         """
-        :param ad: (AnnData) annotated data matrix
-        :param build_kernel_on: (str) key corresponding to matrix in ad.obsm which is used to compute kernel for metacells
-                                Typically 'X_pca' for scRNA or 'X_svd' for scATAC
-        :param n_SEACells: (int) number of SEACells to compute
-        :param verbose: (bool) whether to suppress verbose program logging
-        :param n_waypoint_eigs: (int) number of eigenvectors to use for waypoint initialization
-        :param n_neighbors: (int) number of nearest neighbors to use for graph construction
-        :param convergence_epsilon: (float) convergence threshold for Franke-Wolfe algorithm
-        :param l2_penalty: (float) L2 penalty for Franke-Wolfe algorithm
-        :param max_franke_wolfe_iters: (int) maximum number of iterations for Franke-Wolfe algorithm
+        ad - anndata.AnnData
 
-        Class Attributes:
-            ad: (AnnData) annotated data matrix
-            build_kernel_on: (str) key corresponding to matrix in ad.obsm which is used to compute kernel for metacells
-            n_cells: (int) number of cells in ad
-            k: (int) number of SEACells to compute
-            n_waypoint_eigs: (int) number of eigenvectors to use for waypoint initialization
-            waypoint_proportion: (float) proportion of cells to use for waypoint initialization
-            n_neighbors: (int) number of nearest neighbors to use for graph construction
-            max_FW_iter: (int) maximum number of iterations for Franke-Wolfe algorithm
-            verbose: (bool) whether to suppress verbose program logging
-            l2_penalty: (float) L2 penalty for Franke-Wolfe algorithm
-            RSS_iters: (list) list of residual sum of squares at each iteration of Franke-Wolfe algorithm
-            convergence_epsilon: (float) algorithm converges when RSS < convergence_epsilon * RSS(0)
-            convergence_threshold: (float) convergence threshold for Franke-Wolfe algorithm
-            kernel_matrix: (csr_matrix) kernel matrix of shape (n_cells, n_cells)
-            K: (csr_matrix) dot product of kernel matrix with itself, K = K @ K.T
-            archetypes: (list) list of cell indices corresponding to archetypes
-            A_: (csr_matrix) matrix of shape (k, n) containing final assignments of cells to SEACells
-            B_: (csr_matrix) matrix of shape (n, k) containing archetype weights
-            A0: (csr_matrix) matrix of shape (k, n) containing initial assignments of cells to SEACells
-            B0: (csr_matrix) matrix of shape (n, k) containing initial archetype weights
         """
-
         print('Welcome to SEACells!')
         self.ad = ad
         self.build_kernel_on = build_kernel_on
@@ -102,17 +58,15 @@ class SEACellsCPU:
 
         self.A_ = None
         self.B_ = None
-        self.A0 = None
         self.B0 = None
 
         return
 
     def add_precomputed_kernel_matrix(self, K):
         """
-        Add precomputed kernel matrix to SEACells object
-        :param K: (np.ndarray) kernel matrix of shape (n_cells, n_cells)
-        :return: None
+
         """
+
         assert K.shape == (self.n_cells,
                            self.n_cells), f'Dimension of kernel matrix must be n_cells = ({self.n_cells},{self.n_cells}), not {K.shape} '
         self.kernel_matrix = K
@@ -122,17 +76,8 @@ class SEACellsCPU:
 
     def construct_kernel_matrix(self, n_neighbors: int = None, graph_construction='union'):
         """
-        Construct kernel matrix from data matrix using PCA/SVD and nearest neighbors.
-        :param n_neighbors: (int) number of nearest neighbors to use for graph construction.
-                            If none, use self.n_neighbors, which has a default value of 15.
-        :param graph_construction: (str) method for graph construction. Options are 'union' or 'intersection'.
-                                    Default is 'union', where the neighborhood graph is made symmetric by adding an edge
-                                    (u,v) if either (u,v) or (v,u) is in the neighborhood graph. If 'intersection', the
-                                    neighborhood graph is made symmetric by adding an edge (u,v) if both (u,v) and (v,u)
-                                    are in the neighborhood graph.
-        :return: None
-        """
 
+        """
         # input to graph construction is PCA/SVD
         kernel_model = build_graph.SEACellGraph(self.ad, self.build_kernel_on, verbose=self.verbose)
 
@@ -150,15 +95,10 @@ class SEACellsCPU:
 
     def initialize_archetypes(self):
         """
-        Initialize B matrix which defines cells as SEACells. Uses waypoint analysis for initialization into to fully
-        cover the phenotype space, and then greedily selects the remaining cells (if redundant cells are selected by
-        waypoint analysis).
+        Initialize B matrix which defines cells as SEACells. Selects waypoint_proportion from waypoint analysis,
+        and the remainder by greedy selection.
 
-        Modifies self.archetypes in-place with the indices of cells that are used as initialization for archetypes.
-
-        By default, the proportion of cells selected by waypoint analysis is 1. This can be changed by setting the
-        waypoint_proportion parameter in the SEACells object. For example, setting waypoint_proportion = 0.5 will
-        select half of the cells by waypoint analysis and half by greedy selection.
+        Modifies self.archetypes in-place with the indices of cells that are used as initialization for archetypes
         """
         k = self.k
 
@@ -168,10 +108,11 @@ class SEACellsCPU:
             from_greedy = self.k - len(waypoint_ix)
             if self.verbose:
                 print(f'Selecting {len(waypoint_ix)} cells from waypoint initialization.')
+
         else:
             from_greedy = self.k
 
-        greedy_ix = self._get_greedy_centers(n_SEACells=from_greedy + 10)
+        greedy_ix = self._get_greedy_centers(n_mcs=from_greedy + 10)
         if self.verbose:
             print(f'Selecting {from_greedy} cells from greedy initialization.')
 
@@ -186,17 +127,7 @@ class SEACellsCPU:
 
     def initialize(self, initial_archetypes=None, initial_assignments=None):
         """
-        Initialize the model by initializing the B matrix (constructs archetypes from a convex combination of cells) and
-        the A matrix (defines assignments of cells to archetypes).
 
-        Assumes the kernel matrix has already been constructed. B matrix is of shape (n_cells, n_SEACells) and A matrix
-        is of shape (n_SEACells, n_cells).
-
-        :param initial_archetypes: (np.ndarray) initial archetypes to use for initialization. If None, use waypoint
-                                     analysis and greedy selection to initialize archetypes.
-        :param initial_assignments: (np.ndarray) initial assignments to use for initialization. If None, use
-                                        random initialization.
-        :return: None
         """
         if self.K is None:
             raise RuntimeError('Must first construct kernel matrix before initializing SEACells.')
@@ -213,30 +144,21 @@ class SEACellsCPU:
         if self.archetypes is None:
             self.initialize_archetypes()
 
-        # Sparse construction of B matrix
-        cols = np.arange(k)
-        rows = self.archetypes
-        shape = (n, k)
-        B0 = csr_matrix((np.ones(len(rows)), (rows, cols)), shape=shape)
-
+        # Construction of B matrix
+        B0 = np.zeros((n, k))
+        all_ix = self.archetypes
+        idx1 = list(zip(all_ix, np.arange(k)))
+        B0[tuple(zip(*idx1))] = 1
         self.B0 = B0
         B = self.B0.copy()
 
         if initial_assignments is not None:
             A0 = initial_assignments
             assert A0.shape == (k, n), f'Initial assignment matrix should be of shape (k={k} x n={n})'
-            A0 = csr_matrix(A0)
-            A0 = normalize(A0, axis=0, norm='l1')
+
         else:
-            # Need to ensure each cell is assigned to at least one archetype
-            # Randomly sample roughly 25% of the values between 0 and k
-            archetypes_per_cell = int(k * 0.25)
-            rows = np.random.randint(0, k, size=(n, archetypes_per_cell)).reshape(-1)
-            columns = np.repeat(np.arange(n), archetypes_per_cell)
-
-            A0 = csr_matrix((np.random.random(len(rows)), (rows, columns)), shape=(k, n))
-            A0 = normalize(A0, axis=0, norm='l1')
-
+            A0 = np.random.random((k, n))
+            A0 /= A0.sum(0)
             if self.verbose:
                 print('Randomly initialized A matrix.')
 
@@ -263,7 +185,7 @@ class SEACellsCPU:
 
         :param n_waypoints: (int) number of SEACells to initialize using waypoint analysis. If None specified,
                         all SEACells initialized using this method.
-        :return: (np.ndarray) indices of cells to use as initial archetypes
+        :return: B - (array) n_datapoints x n_SEACells matrix with initial SEACell definitions
         """
 
         if n_waypoints == None:
@@ -302,22 +224,22 @@ class SEACellsCPU:
 
         return waypoint_ix
 
-    def _get_greedy_centers(self, n_SEACells=None):
+    def _get_greedy_centers(self, n_mcs=None):
         """Initialize SEACells using fast greedy adaptive CSSP
 
         From https://arxiv.org/pdf/1312.6838.pdf
-        :param n_SEACells: (int) number of SEACells to initialize using greedy selection. If None specified,
+        :param n_mcs: (int) number of SEACells to initialize using greedy selection. If None specified,
                         all SEACells initialized using this method.
-        :return: (np.ndarray) indices of cells to use as initial archetypes
+        :return: B - (array) n_datapoints x n_SEACells matrix with initial SEACell definitions
         """
 
         K = self.K
         n = K.shape[0]
 
-        if n_SEACells is None:
+        if n_mcs is None:
             k = self.k
         else:
-            k = n_SEACells
+            k = n_mcs
 
         if self.verbose:
             print("Initializing residual matrix using greedy column selection")
@@ -387,12 +309,10 @@ class SEACellsCPU:
 
     def _updateA(self, B, A_prev):
         """
-        Given archetype matrix B and using kernel matrix K, compute assignment matrix A using constrained gradient
-        descent via Frank-Wolfe algorithm.
+        Given archetype matrix B and using kernel matrix K, compute assignment matrix A using gradient descent.
 
-        :param B: (n x k csr_matrix) defining SEACells as weighted combinations of cells
-        :param A_prev: (n x k csr_matrix) defining previous weights used for assigning cells to SEACells
-        :return: (n x k csr_matrix) defining updated weights used for assigning cells to SEACells
+        :param B: (array) n*k matrix (dense) defining SEACells as weighted combinations of cells
+        :return: A: (array) k*n matrix (dense) defining weights used for assigning cells to SEACells
         """
 
         n, k = B.shape
@@ -407,14 +327,14 @@ class SEACellsCPU:
         # update rows of A for given number of iterations
         while t < self.max_FW_iter:
             # compute gradient (must convert matrix to ndarray)
-            G = 2. * np.array(t1 @ A - t2)
+            G = 2. * np.array(t1 @ A - t2) - self.l2_penalty * A
 
-            # # get argmins - shape 1 x n
+            # get argmins
             amins = np.argmin(G, axis=0)
-            amins = np.array(amins).reshape(-1)
 
-            # # loop free implementation
-            e = csr_matrix((np.ones(len(amins)), (amins, np.arange(n))), shape=A.shape)
+            # loop free implementation
+            e = np.zeros((k, n))
+            e[amins, np.arange(n)] = 1.
 
             A += 2. / (t + 2.) * (e - A)
             t += 1
@@ -423,13 +343,12 @@ class SEACellsCPU:
 
     def _updateB(self, A, B_prev):
         """
-        Given assignment matrix A and using kernel matrix K, compute archetype matrix B using constrained gradient
-        descent via Frank-Wolfe algorithm.
+        Given assignment matrix A and using kernel matrix K, compute archetype matrix B
 
-        :param A: (n x k csr_matrix) defining weights used for assigning cells to SEACells
-        :param B_prev: (n x k csr_matrix) defining previous SEACells as weighted combinations of cells
-        :return: (n x k csr_matrix) defining updated SEACells as weighted combinations of cells
+        :param A: (array) k*n matrix (dense) defining weights used for assigning cells to SEACells
+        :return: B: (array) n*k matrix (dense) defining SEACells as weighted combinations of cells
         """
+
         K = self.K
         k, n = A.shape
 
@@ -449,9 +368,9 @@ class SEACellsCPU:
 
             # get all argmins
             amins = np.argmin(G, axis=0)
-            amins = np.array(amins).reshape(-1)
 
-            e = csr_matrix((np.ones(len(amins)), (amins, np.arange(k))), shape=B.shape)
+            e = np.zeros((n, k))
+            e[amins, np.arange(k)] = 1.
 
             B += 2. / (t + 2.) * (e - B)
 
@@ -462,11 +381,12 @@ class SEACellsCPU:
     def compute_reconstruction(self, A=None, B=None):
         """
         Compute reconstructed data matrix using learned archetypes (SEACells) and assignments
-        :param A: (k x n csr_matrix) defining weights used for assigning cells to SEACells
+
+        :param A: (array) k*n matrix (dense) defining weights used for assigning cells to SEACells
                 If None provided, self.A is used.
-        :param B: (n x k csr_matrix) defining SEACells as weighted combinations of cells
+        :param B: (array) n*k matrix (dense) defining SEACells as weighted combinations of cells
                 If None provided, self.B is used.
-        :return: (n x n csr_matrix) defining reconstructed data matrix
+        :return: array (n data points x data dimension) representing reconstruction of original data matrix
         """
         if A is None:
             A = self.A_
@@ -480,9 +400,10 @@ class SEACellsCPU:
     def compute_RSS(self, A=None, B=None):
         """
         Compute residual sum of squares error in difference between reconstruction and true data matrix
-        :param A: (k x n csr_matrix) defining weights used for assigning cells to SEACells
+        :param A: (array) k*n matrix (dense) defining weights used for assigning cells to SEACells
                 If None provided, self.A is used.
-        :param B: (n x k csr_matrix) defining SEACells as weighted combinations of cells
+        :param B: (array) n*k matrix (dense) defining SEACells as weighted combinations of cells
+        :param B: (array) n*k matrix (dense) defining SEACells as weighted combinations of cells
                 If None provided, self.B is used.
         :return:
             ||X-XBA||^2 - (float) square difference between true data and reconstruction
@@ -493,16 +414,16 @@ class SEACellsCPU:
             B = self.B_
 
         reconstruction = self.compute_reconstruction(A, B)
-        return norm(self.kernel_matrix - reconstruction)
+        return np.linalg.norm(self.kernel_matrix - reconstruction)
 
     def plot_convergence(self, save_as=None, show=True):
         """
         Plot behaviour of squared error over iterations.
         :param save_as: (str) name of file which figure is saved as. If None, no plot is saved.
-        :param show: (bool) whether to show plot
-        :return: None
         """
         import matplotlib.pyplot as plt
+        import seaborn as sns
+
         plt.figure()
         plt.plot(self.RSS_iters)
         plt.title('Reconstruction Error over Iterations')
@@ -516,8 +437,7 @@ class SEACellsCPU:
 
     def step(self):
         """
-        Perform one iteration of SEACell algorithm. Update assignment matrix A and archetype matrix B.
-        :return: None
+        Perform one iteration of fitting to update A and B assignment matrices.
         """
         A = self.A_
         B = self.B_
@@ -549,21 +469,22 @@ class SEACellsCPU:
 
     def _fit(self, max_iter: int = 50, min_iter: int = 10, initial_archetypes=None, initial_assignments=None):
         """
-        Internal method to compute archetypes and loadings given kernel matrix K.
-        Iteratively updates A and B matrices until maximum number of iterations or convergence has been achieved.
+        Compute archetypes and loadings given kernel matrix K. Iteratively updates A and B matrices until maximum
+        number of iterations or convergence has been achieved.
 
         Modifies ad.obs in place to add 'SEACell' labels to cells.
-        :param max_iter: (int) maximum number of iterations to perform
-        :param min_iter: (int) minimum number of iterations to perform
-        :param initial_archetypes: (array) initial archetypes to use. If None, random initialisation is used.
-        :param initial_assignments: (array) initial assignments to use. If None, random initialisation is used.
-        :return: None
+
+        :param max_iter: (int) maximum number of iterations to update A and B matrices
+        :param min_iter: (int) minimum number of iterations to update A and B matrices
+        :param initial_archetypes: (list) indices of cells to use as initial archetypes
+
         """
         self.initialize(initial_archetypes=initial_archetypes, initial_assignments=initial_assignments)
 
         converged = False
         n_iter = 0
         while (not converged and n_iter < max_iter) or n_iter < min_iter:
+
             n_iter += 1
             if n_iter == 1 or (n_iter) % 10 == 0:
                 if self.verbose:
@@ -594,13 +515,11 @@ class SEACellsCPU:
 
     def fit(self, max_iter: int = 100, min_iter: int = 10, initial_archetypes=None, initial_assignments=None):
         """
-        Compute archetypes and loadings given kernel matrix K. Iteratively updates A and B matrices until maximum
-        number of iterations or convergence has been achieved.
-        :param max_iter: (int) maximum number of iterations to perform (default 100)
-        :param min_iter: (int) minimum number of iterations to perform (default 10)
-        :param initial_archetypes: (array) initial archetypes to use. If None, random initialisation is used.
-        :param initial_assignments: (array) initial assignments to use. If None, random initialisation is used.
-        :return: None
+        Wrapper to fit model.
+
+        :param max_iter: (int) maximum number of iterations to update A and B matrices. Default: 100
+        :param min_iter: (int) maximum number of iterations to update A and B matrices. Default: 10
+        :param initial_archetypes: (list) indices of cells to use as initial archetypes
         """
         if max_iter < min_iter:
             raise ValueError(
@@ -609,15 +528,10 @@ class SEACellsCPU:
                   initial_assignments=initial_assignments)
 
     def get_archetype_matrix(self):
-        """Return k x n matrix of archetypes computed as the product of the archetype matrix B and the kernel matrix K."""
+        """Return k x n matrix of archetypes"""
         return self.Z_
 
     def get_soft_assignments(self):
-        """
-        Returns a tuple of (labels, weights) where labels is a dataframe with SEACell assignments for the top 5
-        SEACell assignments for each cell and weights is an array with the corresponding weights for each assignment.
-        :return: (pd.DataFrame, np.array) with labels and weights
-        """
 
         archetype_labels = self.get_hard_archetypes()
         A = copy.deepcopy(self.A_.T)
@@ -640,55 +554,49 @@ class SEACellsCPU:
 
     def get_hard_assignments(self):
         """
-        Returns a dataframe with the SEACell assignment for each cell. The assignment is the SEACell with the highest
-        assignment weight.
-        :return: (pd.DataFrame) with SEACell assignments
+        Returns a dataframe with SEACell assignments under the column 'SEACell'
+        :return: pd.DataFrame with column 'SEACell'
         """
 
         # Use argmax to get the index with the highest assignment weight
-        assmts = np.array(self.A_.argmax(0)).reshape(-1)
 
-        df = pd.DataFrame({'SEACell': [f'SEACell-{i}' for i in assmts]})
+        df = pd.DataFrame({'SEACell': [f'SEACell-{i}' for i in self.A_.argmax(0)]})
         df.index = self.ad.obs_names
         df.index.name = 'index'
+
         return df
+
+    def get_archetypes(self):
+        """
+
+        """
+        raise NotImplementedError
 
     def get_hard_archetypes(self):
         """
         Return the names of cells most strongly identified as archetypes.
-        :return list of archetype names
         """
-        return self.ad.obs_names[self.B_.argmax(0)]
 
-    def save_model(self, outdir):
-        """
-        Save the model to a pickle file.
-        :param outdir: (str) path to directory to save to
-        :return: None
-        """
-        import pickle
-        with open(self.outdir + '/model.pkl', 'wb') as f:
-            pickle.dump(self, f)
-        return None
+        return self.ad.obs_names[self.B_.argmax(0)]
 
     def save_assignments(self, outdir):
         """
-        Saves:
-        (1) the cell to SEACell assignments to a csv file with the name 'SEACells.csv'.
-        (2) the kernel matrix to a .npz file with the name 'kernel_matrix.npz'.
-        (3) the archetype matrix to a .npz file with the name 'A.npz'.
-        (4) the loading matrix to a .npz file with the name 'B.npz'.
-
-        :param outdir: (str) path to directory to save to
-        :return: None
+        Save (sparse) assignment matrices to specified directory.
         """
+
         import os
+        from scipy.sparse import csr_matrix, save_npz
 
         os.makedirs(outdir, exist_ok=True)
+
+        A = csr_matrix(self.A_)
+        B = csr_matrix(self.B_)
+
+        A = A.T
+
         save_npz(outdir + '/kernel_matrix.npz', self.kernel_matrix)
-        save_npz(outdir + '/A.npz', self.A_.T)
-        save_npz(outdir + '/B.npz', self.B_)
+        save_npz(outdir + '/A.npz', A)
+        save_npz(outdir + '/B.npz', B)
 
         labels = self.get_hard_assignments()
         labels.to_csv(outdir + '/SEACells.csv')
-        return None
