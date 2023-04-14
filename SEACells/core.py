@@ -46,8 +46,12 @@ class SEACells:
         """
 
         if use_gpu:
-            from gpu import SEACellsGPU
-            self = SEACellsGPU(ad,
+            try:
+                from . import gpu
+            except ImportError:
+                import gpu
+
+            self = gpu.SEACellsGPU(ad,
                                build_kernel_on,
                                n_SEACells,
                                verbose,
@@ -58,8 +62,11 @@ class SEACells:
                                max_franke_wolfe_iters)
 
         else:
-            from cpu import SEACellsCPU
-            self = SEACellsCPU(ad,
+            try:
+                from . import cpu
+            except ImportError:
+                import cpu
+            self = cpu.SEACellsCPU(ad,
                                build_kernel_on,
                                n_SEACells,
                                verbose,
