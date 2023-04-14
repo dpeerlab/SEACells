@@ -10,71 +10,66 @@ except ImportError:
     import build_graph, evaluate
 
 
-class SEACells:
+def SEACells(ad,
+             build_kernel_on: str,
+             n_SEACells: int,
+             use_gpu: bool = False,
+             verbose: bool = True,
+             n_waypoint_eigs: int = 10,
+             n_neighbors: int = 15,
+             convergence_epsilon: float=1e-3,
+             l2_penalty: float =0,
+             max_franke_wolfe_iters: int=50):
     """
-    Fast kernel archetypal analysis.
-    Finds archetypes and weights given annotated data matrix.
-    Modifies annotated data matrix in place to include SEACell assignments in ad.obs['SEACell']
+    :param ad: (AnnData) annotated data matrix
+    :param build_kernel_on: (str) key corresponding to matrix in ad.obsm which is used to compute kernel for metacells
+                            Typically 'X_pca' for scRNA or 'X_svd' for scATAC
+    :param n_SEACells: (int) number of SEACells to compute
+    :param use_gpu: (bool) whether to use GPU for computation
+    :param verbose: (bool) whether to suppress verbose program logging
+    :param n_waypoint_eigs: (int) number of eigenvectors to use for waypoint initialization
+    :param n_neighbors: (int) number of nearest neighbors to use for graph construction
+    :param convergence_epsilon: (float) convergence threshold for Franke-Wolfe algorithm
+    :param l2_penalty: (float) L2 penalty for Franke-Wolfe algorithm
+    :param max_franke_wolfe_iters: (int) maximum number of iterations for Franke-Wolfe algorithm
+
+    Methods:
+        fit: fit SEACells mode
     """
 
-    def __init__(self,
-                 ad,
-                 build_kernel_on: str,
-                 n_SEACells: int,
-                 use_gpu: bool = False,
-                 verbose: bool = True,
-                 n_waypoint_eigs: int = 10,
-                 n_neighbors: int = 15,
-                 convergence_epsilon: float=1e-3,
-                 l2_penalty: float =0,
-                 max_franke_wolfe_iters: int=50):
-        """
-        :param ad: (AnnData) annotated data matrix
-        :param build_kernel_on: (str) key corresponding to matrix in ad.obsm which is used to compute kernel for metacells
-                                Typically 'X_pca' for scRNA or 'X_svd' for scATAC
-        :param n_SEACells: (int) number of SEACells to compute
-        :param use_gpu: (bool) whether to use GPU for computation
-        :param verbose: (bool) whether to suppress verbose program logging
-        :param n_waypoint_eigs: (int) number of eigenvectors to use for waypoint initialization
-        :param n_neighbors: (int) number of nearest neighbors to use for graph construction
-        :param convergence_epsilon: (float) convergence threshold for Franke-Wolfe algorithm
-        :param l2_penalty: (float) L2 penalty for Franke-Wolfe algorithm
-        :param max_franke_wolfe_iters: (int) maximum number of iterations for Franke-Wolfe algorithm
+    if use_gpu:
+        try:
+            from . import gpu
+        except ImportError:
+            import gpu
 
-        Methods:
-            fit: fit SEACells mode
-        """
+        model = gpu.SEACellsGPU(ad,
+                           build_kernel_on,
+                           n_SEACells,
+                           verbose,
+                           n_waypoint_eigs,
+                           n_neighbors,
+                           convergence_epsilon,
+                           l2_penalty,
+                           max_franke_wolfe_iters)
 
-        if use_gpu:
-            try:
-                from . import gpu
-            except ImportError:
-                import gpu
+    else:
+        try:
+            from . import cpu
+        except ImportError:
+            import cpu
+        model = cpu.SEACellsCPU(ad,
+                           build_kernel_on,
+                           n_SEACells,
+                           verbose,
+                           n_waypoint_eigs,
+                           n_neighbors,
+                           convergence_epsilon,
+                           l2_penalty,
+                           max_franke_wolfe_iters)
 
-            self = gpu.SEACellsGPU(ad,
-                               build_kernel_on,
-                               n_SEACells,
-                               verbose,
-                               n_waypoint_eigs,
-                               n_neighbors,
-                               convergence_epsilon,
-                               l2_penalty,
-                               max_franke_wolfe_iters)
+    return model 
 
-        else:
-            try:
-                from . import cpu
-            except ImportError:
-                import cpu
-            self = cpu.SEACellsCPU(ad,
-                               build_kernel_on,
-                               n_SEACells,
-                               verbose,
-                               n_waypoint_eigs,
-                               n_neighbors,
-                               convergence_epsilon,
-                               l2_penalty,
-                               max_franke_wolfe_iters)
 
 def sparsify_assignments(A, thresh: float):
     """
