@@ -223,17 +223,21 @@ class SEACellsGPU:
         idx1 = list(zip(all_ix, np.arange(k)))
         B0[tuple(zip(*idx1))] = 1
         self.B0 = B0
-        B = self.B0
+        B = self.B0.copy()
 
         if initial_assignments is not None:
-            raise NotImplementedError('Direct initialization of assignments of cells to SEACells not yet implemented.')
-        else:
-            A = np.random.random((k, n))
-            A /= A.sum(0)
-            A = self._updateA(B, A)
+            A0 = initial_assignments
+            assert A0.shape == (k, n), f'Initial assignment matrix should be of shape (k={k} x n={n})'
 
+        else:
+            A0 = np.random.random((k, n))
+            A0 /= A0.sum(0)
             if self.verbose:
                 print('Randomly initialized A matrix.')
+
+        self.A0 = A0
+        A = self.A0.copy()
+        A = self._updateA(B, A)
 
         self.A_ = A
         self.B_ = B
@@ -604,7 +608,7 @@ class SEACellsGPU:
                 f'Warning: Algorithm has not converged - you may need to increase the maximum number of iterations')
         return
 
-    def fit(self, max_iter: int = 100, min_iter: int = 10, initial_archetypes=None):
+    def fit(self, max_iter: int = 100, min_iter: int = 10, initial_archetypes=None, initial_assignments=None):
         """
         Compute archetypes and loadings given kernel matrix K. Iteratively updates A and B matrices until maximum
         number of iterations or convergence has been achieved.
@@ -617,7 +621,10 @@ class SEACellsGPU:
         if max_iter < min_iter:
             raise ValueError(
                 "The maximum number of iterations specified is lower than the minimum number of iterations specified.")
-        self._fit(max_iter=max_iter, min_iter=min_iter, initial_archetypes=initial_archetypes, initial_assignments=None)
+        self._fit(max_iter=max_iter,
+                  min_iter=min_iter,
+                  initial_archetypes=initial_archetypes,
+                  initial_assignments=initial_assignments)
 
     def get_archetype_matrix(self):
         """Return k x n matrix of archetypes computed as the product of the archetype matrix B and the kernel matrix K."""
