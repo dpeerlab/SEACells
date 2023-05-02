@@ -203,7 +203,6 @@ class SEACellsCPU:
         K = self.K
         # initialize B (update this to allow initialization from RRQR)
         n = K.shape[0]
-        k = self.k
 
         if initial_archetypes is not None:
             if self.verbose:
@@ -213,6 +212,7 @@ class SEACellsCPU:
         if self.archetypes is None:
             self.initialize_archetypes()
         self.k = len(self.archetypes)
+        k = self.k
         
         # Sparse construction of B matrix
         cols = np.arange(k)
