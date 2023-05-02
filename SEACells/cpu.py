@@ -212,7 +212,8 @@ class SEACellsCPU:
 
         if self.archetypes is None:
             self.initialize_archetypes()
-
+        self.k = len(self.archetypes)
+        
         # Sparse construction of B matrix
         cols = np.arange(k)
         rows = self.archetypes
