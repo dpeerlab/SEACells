@@ -141,7 +141,6 @@ class SEACellsCPUDense:
         K = self.K
         # initialize B (update this to allow initialization from RRQR)
         n = K.shape[0]
-        k = self.k
 
         if initial_archetypes is not None:
             if self.verbose:
@@ -151,6 +150,7 @@ class SEACellsCPUDense:
         if self.archetypes is None:
             self.initialize_archetypes()
         self.k = len(self.archetypes) 
+        k = self.k
         
         # Construction of B matrix
         B0 = np.zeros((n, k))
