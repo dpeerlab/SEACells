@@ -150,7 +150,8 @@ class SEACellsCPUDense:
 
         if self.archetypes is None:
             self.initialize_archetypes()
-
+        self.k = len(self.archetypes) 
+        
         # Construction of B matrix
         B0 = np.zeros((n, k))
         all_ix = self.archetypes
