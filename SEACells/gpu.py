@@ -199,7 +199,6 @@ class SEACellsGPU:
             raise RuntimeError('Must first construct kernel matrix before initializing SEACells.')
         # initialize B (update this to allow initialization from RRQR)
         n = self.K.shape[0]
-        k = self.k
 
         if initial_archetypes is not None:
             if self.verbose:
@@ -208,7 +207,10 @@ class SEACellsGPU:
 
         if self.archetypes is None:
             self.initialize_archetypes()
-
+        
+        self.k = len(self.archetypes)
+        k = self.k
+        
         # Construction of B matrix
         B0 = np.zeros((n, k))
         all_ix = self.archetypes
