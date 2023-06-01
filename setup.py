@@ -1,6 +1,6 @@
 import setuptools
 
-with open("README.md", "r") as fh:
+with open("README.md") as fh:
     long_description = fh.read()
 
 setuptools.setup(
@@ -21,15 +21,16 @@ setuptools.setup(
         "anndata",
         "numba>=0.51.2",
         "scipy>=1.5",
-        "pyranges"
-        ],
+        "pyranges",
+    ],
+    extras_require={"dev": ["ruff", "pre-commit"]},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.8.0',
+    python_requires=">=3.8.0",
     include_package_data=True,
-    package_data={'': ['SEACells/Rscripts/*', '*.r', '*.R']},
-    zip_safe=False
+    package_data={"": ["SEACells/Rscripts/*", "*.r", "*.R"]},
+    zip_safe=False,
 )
