@@ -31,7 +31,7 @@ colnames(my_counts_matrix) <- col_names
 print("Creating SummarizedExperiment...")
 
 fragment_counts <- SummarizedExperiment(assays =  list(counts = my_counts_matrix),
-                                        rowRanges = peaks,  
+                                        rowRanges = peaks,
                                         colData = sampling_depth)
 
 colnames(colData(fragment_counts)) <- c('depth')
@@ -44,7 +44,7 @@ rm(sampling_depth)
 rm(row_names)
 
 
-fragment_counts <- addGCBias(fragment_counts, 
+fragment_counts <- addGCBias(fragment_counts,
                              genome = BSgenome.Hsapiens.UCSC.hg38)
 
 print("Matching motifs...")
@@ -65,4 +65,3 @@ write.csv(deviationScores(dev) ,paste0(base_dir,"deviationScores.csv"))
 write.csv(variability ,paste0(base_dir,"variability.csv"))
 
 print("Finished writing files.")
-

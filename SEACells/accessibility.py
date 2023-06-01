@@ -3,10 +3,16 @@ import pandas as pd
 from tqdm import tqdm
 
 
-def determine_metacell_open_peaks(atac_meta_ad, peak_set=None, low_dim_embedding='X_svd', pval_cutoff=1e-2,
-                                  read_len=147, n_neighbors=3, n_jobs=1):
-    """
-    Determine the set of peaks that are open in each metacell
+def determine_metacell_open_peaks(
+    atac_meta_ad,
+    peak_set=None,
+    low_dim_embedding="X_svd",
+    pval_cutoff=1e-2,
+    read_len=147,
+    n_neighbors=3,
+    n_jobs=1,
+):
+    """Determine the set of peaks that are open in each metacell.
 
     :param atac_meta_ad: (Anndata) ATAC metacell Anndata created using `prepare_multiome_anndata`
     :param peak_set: (pd.Series) Subset of peaks to test. All peaks are tested by default
@@ -17,8 +23,8 @@ def determine_metacell_open_peaks(atac_meta_ad, peak_set=None, low_dim_embedding
 
     :atac_meta_ad is modified inplace with `.obsm['OpenPeaks']` indicating the set of open peaks in each metacell
     """
+    from scipy.stats import multinomial, poisson
     from sklearn.neighbors import NearestNeighbors
-    from scipy.stats import poisson, multinomial
 
     # Effective genome length for background computaiton
     eff_genome_length = atac_meta_ad.shape[1] * 5000
@@ -26,27 +32,32 @@ def determine_metacell_open_peaks(atac_meta_ad, peak_set=None, low_dim_embedding
     # Set up container
     if peak_set is None:
         peak_set = atac_meta_ad.var_names
-    open_peaks = pd.DataFrame(
-        0, index=atac_meta_ad.obs_names, columns=peak_set)
+    open_peaks = pd.DataFrame(0, index=atac_meta_ad.obs_names, columns=peak_set)
 
     # Metacell neighbors
     nbrs = NearestNeighbors(n_neighbors=n_neighbors)
     nbrs.fit(atac_meta_ad.obsm[low_dim_embedding])
-    meta_nbrs = pd.DataFrame(atac_meta_ad.obs_names.values[nbrs.kneighbors(atac_meta_ad.obsm[low_dim_embedding])[1]],
-                             index=atac_meta_ad.obs_names)
+    meta_nbrs = pd.DataFrame(
+        atac_meta_ad.obs_names.values[
+            nbrs.kneighbors(atac_meta_ad.obsm[low_dim_embedding])[1]
+        ],
+        index=atac_meta_ad.obs_names,
+    )
 
     for m in tqdm(open_peaks.index):
         # Boost using local neighbors
         frag_counts = np.ravel(
-            atac_meta_ad[meta_nbrs.loc[m, :].values, :][:, peak_set].X.sum(axis=0))
+            atac_meta_ad[meta_nbrs.loc[m, :].values, :][:, peak_set].X.sum(axis=0)
+        )
         frag_distr = frag_counts / np.sum(frag_counts).astype(np.float64)
 
         # Multinomial distribution
         while not 0 < np.sum(frag_distr) < 1 - 1e-5:
             frag_distr = np.absolute(frag_distr - np.finfo(np.float32).epsneg)
         # Sample from multinomial distribution
-        frag_counts = multinomial.rvs(np.percentile(
-            atac_meta_ad.obs['n_counts'], 100), frag_distr)
+        frag_counts = multinomial.rvs(
+            np.percentile(atac_meta_ad.obs["n_counts"], 100), frag_distr
+        )
 
         # Compute background poisson distribution
         total_frags = frag_counts.sum()
@@ -57,12 +68,13 @@ def determine_metacell_open_peaks(atac_meta_ad, peak_set=None, low_dim_embedding
         open_peaks.loc[m, frag_counts >= poisson.ppf(1 - cutoff, glambda)] = 1
 
     # Update ATAC Metadata object
-    atac_meta_ad.layers['OpenPeaks'] = open_peaks.values
+    atac_meta_ad.layers["OpenPeaks"] = open_peaks.values
 
 
-def get_gene_accessibility(atac_meta_ad, gene_peak_cors, gene_set=None, pval_cutoff=1e-1, cor_cutoff=0.1):
-    """
-    Gene accessibility scores for each. The score is defined as the fraction of significantly correlated peaks that are open in a given metacell
+def get_gene_accessibility(
+    atac_meta_ad, gene_peak_cors, gene_set=None, pval_cutoff=1e-1, cor_cutoff=0.1
+):
+    """Gene accessibility scores for each. The score is defined as the fraction of significantly correlated peaks that are open in a given metacell.
 
     :param atac_meta_ad: (Anndata) ATAC metacell Anndata created using `prepare_multiome_anndata`
     :param gene_peak_cors: (pd.Series) Output of `get_gene_peak_correlations` function
@@ -72,30 +84,31 @@ def get_gene_accessibility(atac_meta_ad, gene_peak_cors, gene_set=None, pval_cut
 
     :atac_meta_ad is modified inplace with `.obsm['GeneAccessibility']` indicating the gene scores for each metacell
     """
-
-    if 'OpenPeaks' not in atac_meta_ad.layers.keys():
+    if "OpenPeaks" not in atac_meta_ad.layers.keys():
         raise Exception(
-            "Run determine_metacell_open_peaks to compute gene accessibility")
-    open_peaks = pd.DataFrame(atac_meta_ad.layers['OpenPeaks'],
-                              index=atac_meta_ad.obs_names, columns=atac_meta_ad.var_names)
+            "Run determine_metacell_open_peaks to compute gene accessibility"
+        )
+    open_peaks = pd.DataFrame(
+        atac_meta_ad.layers["OpenPeaks"],
+        index=atac_meta_ad.obs_names,
+        columns=atac_meta_ad.var_names,
+    )
 
     if gene_set is None:
         gene_set = gene_peak_cors.index
 
     # Container
-    gene_accessiblity = pd.DataFrame(-1,
-                                     index=atac_meta_ad.obs_names, columns=gene_set)
+    gene_accessiblity = pd.DataFrame(-1, index=atac_meta_ad.obs_names, columns=gene_set)
     for gene in tqdm(gene_set):
         df = gene_peak_cors[gene]
 
         # Skip if there no correlated peaks
         if type(df) is int:
             continue
-        gene_peaks = df.index[(df['pval'] < pval_cutoff)
-                              & (df['cor'] > cor_cutoff)]
+        gene_peaks = df.index[(df["pval"] < pval_cutoff) & (df["cor"] > cor_cutoff)]
 
         # Identify fraction open
         s = open_peaks.loc[:, gene_peaks].sum(axis=1)
         gene_accessiblity.loc[s.index, gene] = s.values / len(gene_peaks)
 
-    atac_meta_ad.obsm['GeneAccessibility'] = gene_accessiblity
+    atac_meta_ad.obsm["GeneAccessibility"] = gene_accessiblity

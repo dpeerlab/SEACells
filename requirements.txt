@@ -9,7 +9,7 @@ legacy-api-wrap==0.0.0
 leidenalg==0.8.9
 llvmlite==0.38.0
 louvain==0.7.1
-matplotlib 
+matplotlib
 munkres==1.1.4
 ncls==0.0.64
 numba==0.55
@@ -20,8 +20,8 @@ PhenoGraph==1.5.7
 psutil==5.9.0
 pyranges==0.0.115
 pyrle==0.0.34
-scanpy 
-scikit-learn 
+scanpy
+scikit-learn
 scipy
 seaborn
 six==1.16
