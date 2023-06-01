@@ -39,12 +39,22 @@ cd SEACells
 python setup.py install
 ```
 
-3. SEACells depends on a number of `python3` packages available on pypi and these dependencies are listed in `setup.py`.
+4. SEACells depends on a number of `python3` packages available on pypi and these dependencies are listed in `setup.py`.
 
     All the dependencies will be automatically installed using the above commands
 
-4. To uninstall:
+5. To uninstall:
    $> pip uninstall SEACells
+
+6. To install the developer installation of SEACells, run
+
+```
+git clone https://github.com/dpeerlab/SEACells.git
+cd SEACells.git
+
+pip install -e ".[dev]"
+pre-commit install
+```
 
 #### Usage
 
