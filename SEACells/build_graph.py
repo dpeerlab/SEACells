@@ -1,14 +1,11 @@
-import numpy as np
-from scipy.sparse import coo_matrix, csr_matrix, dok_matrix, lil_matrix, diags, eye, csc_matrix, kron, vstack
-
-
-# for parallelizing stuff
-from multiprocessing import cpu_count, Pool
-from joblib import Parallel, delayed
-from tqdm.notebook import tqdm
-
 # optimization
-import time
+# for parallelizing stuff
+from multiprocessing import cpu_count
+
+import numpy as np
+from joblib import Parallel, delayed
+from scipy.sparse import lil_matrix
+from tqdm.notebook import tqdm
 
 # get number of cores for multiprocessing
 NUM_CORES = cpu_count()
@@ -17,12 +14,15 @@ NUM_CORES = cpu_count()
 # Helper functions for parallelizing kernel construction
 ##########################################################
 
+
 def kth_neighbor_distance(distances, k, i):
-    """Returns distance to kth nearest neighbor
+    """Returns distance to kth nearest neighbor.
+
     Distances: sparse CSR matrix
     k: kth nearest neighbor
-    i: index of row"""
-
+    i: index of row
+    .
+    """
     # convert row to 1D array
     row_as_array = distances[i, :].toarray().ravel()
 
@@ -35,8 +35,7 @@ def kth_neighbor_distance(distances, k, i):
 
 
 def rbf_for_row(G, data, median_distances, i):
-    """
-    Helper function for computing radial basis function kernel for each row of the data matrix
+    """Helper function for computing radial basis function kernel for each row of the data matrix.
 
     :param G: (array) KNN graph representing nearest neighbour connections between cells
     :param data: (array) data matrix between which euclidean distances are computed for RBF
@@ -66,13 +65,12 @@ def rbf_for_row(G, data, median_distances, i):
 # Archetypal Analysis Metacell Graph
 ##########################################################
 
-class SEACellGraph:
 
-    def __init__(self, ad,
-                 build_on='X_pca',
-                 n_cores: int = -1,
-                 verbose: bool = False):
-        """
+class SEACellGraph:
+    """SEACell graph class."""
+
+    def __init__(self, ad, build_on="X_pca", n_cores: int = -1, verbose: bool = False):
+        """SEACell graph class.
 
         :param ad: (anndata.AnnData) object containing data for which metacells are computed
         :param build_on: (str) key corresponding to matrix in ad.obsm which is used to compute kernel for metacells
@@ -81,7 +79,6 @@ class SEACellGraph:
                         number of CPU cores
         :param verbose: (bool) whether or not to suppress verbose program logging
         """
-
         """Initialize model parameters"""
         # data parameters
         self.n, self.d = ad.obsm[build_on].shape
@@ -113,14 +110,12 @@ class SEACellGraph:
     # Methods related to kernel + sim matrix construction
     ##############################################################
 
-    def rbf(self, k: int = 15, graph_construction='union'):
-        """
-        Initialize adaptive bandwith RBF kernel (as described in C-isomap)
+    def rbf(self, k: int = 15, graph_construction="union"):
+        """Initialize adaptive bandwith RBF kernel (as described in C-isomap).
 
         :param k: (int) number of nearest neighbors for RBF kernel
         :return: (sparse matrix) constructed RBF kernel
         """
-
         import scanpy as sc
 
         if self.verbose:
@@ -128,7 +123,7 @@ class SEACellGraph:
 
         # compute kNN and the distance from each point to its nearest neighbors
         sc.pp.neighbors(self.ad, use_rep=self.build_on, n_neighbors=k, knn=True)
-        knn_graph_distances = self.ad.obsp['distances']
+        knn_graph_distances = self.ad.obsp["distances"]
 
         # Binarize distances to get connectivity
         knn_graph = knn_graph_distances.copy()
@@ -144,7 +139,9 @@ class SEACellGraph:
         with Parallel(n_jobs=self.num_cores, backend="threading") as parallel:
             median = k // 2
             median_distances = parallel(
-                delayed(kth_neighbor_distance)(knn_graph_distances, median, i) for i in tqdm(range(self.n)))
+                delayed(kth_neighbor_distance)(knn_graph_distances, median, i)
+                for i in tqdm(range(self.n))
+            )
 
         # convert to numpy array
         median_distances = np.array(median_distances)
@@ -152,15 +149,19 @@ class SEACellGraph:
         if self.verbose:
             print("Making graph symmetric...")
 
-        print(f'Parameter graph_construction = {graph_construction} being used to build KNN graph...')
-        if graph_construction == 'union':
+        print(
+            f"Parameter graph_construction = {graph_construction} being used to build KNN graph..."
+        )
+        if graph_construction == "union":
             sym_graph = (knn_graph + knn_graph.T > 0).astype(float)
-        elif graph_construction in ['intersect', 'intersection']:
+        elif graph_construction in ["intersect", "intersection"]:
             knn_graph = (knn_graph > 0).astype(float)
             sym_graph = knn_graph.multiply(knn_graph.T)
         else:
-            raise ValueError(f'Parameter graph_construction = {graph_construction} is not valid. \
-             Please select `union` or `intersection`')
+            raise ValueError(
+                f"Parameter graph_construction = {graph_construction} is not valid. \
+             Please select `union` or `intersection`"
+            )
 
         self.sym_graph = sym_graph
         if self.verbose:
@@ -168,8 +169,11 @@ class SEACellGraph:
 
         with Parallel(n_jobs=self.num_cores, backend="threading") as parallel:
             similarity_matrix_rows = parallel(
-                delayed(rbf_for_row)(sym_graph, self.ad.obsm[self.build_on], median_distances, i) for i in
-                tqdm(range(self.n)))
+                delayed(rbf_for_row)(
+                    sym_graph, self.ad.obsm[self.build_on], median_distances, i
+                )
+                for i in tqdm(range(self.n))
+            )
 
         if self.verbose:
             print("Building similarity LIL matrix...")
@@ -183,5 +187,3 @@ class SEACellGraph:
 
         self.M = (similarity_matrix).tocsr()
         return self.M
-
-

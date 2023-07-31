@@ -1,20 +1,20 @@
 name: seacells
 channels:
-  - conda-forge
-  - bioconda
+    - conda-forge
+    - bioconda
 dependencies:
-  - python=3.5
-  - cython
-  - ipython
-  - scanpy=1.8.2
-  - loompy=3.0.6
-  - python-igraph
-  - louvain>=0.6,!=0.6.2
-  - fa2
-  - leidenalg
-  - seaborn
-  - pip
-  - pip:
-    - dfply
-    - git+https://github.com/dpeerlab/Palantir
-    - git+https://github.com/dpeerlab/SEACells
+    - python=3.5
+    - cython
+    - ipython
+    - scanpy=1.8.2
+    - loompy=3.0.6
+    - python-igraph
+    - louvain>=0.6,!=0.6.2
+    - fa2
+    - leidenalg
+    - seaborn
+    - pip
+    - pip:
+          - dfply
+          - git+https://github.com/dpeerlab/Palantir
+          - git+https://github.com/dpeerlab/SEACells

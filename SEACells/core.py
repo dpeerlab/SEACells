@@ -1,26 +1,30 @@
+import copy
+
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-import copy
 
 try:
-    from . import build_graph, evaluate
+    from . import evaluate
 except ImportError:
-    import build_graph, evaluate
+    import evaluate
 
 
-def SEACells(ad,
-             build_kernel_on: str,
-             n_SEACells: int,
-             use_gpu: bool = False,
-             verbose: bool = True,
-             n_waypoint_eigs: int = 10,
-             n_neighbors: int = 15,
-             convergence_epsilon: float = 1e-3,
-             l2_penalty: float = 0,
-             max_franke_wolfe_iters: int = 50,
-             use_sparse: bool = False):
-    """
+def SEACells(
+    ad,
+    build_kernel_on: str,
+    n_SEACells: int,
+    use_gpu: bool = False,
+    verbose: bool = True,
+    n_waypoint_eigs: int = 10,
+    n_neighbors: int = 15,
+    convergence_epsilon: float = 1e-3,
+    l2_penalty: float = 0,
+    max_franke_wolfe_iters: int = 50,
+    use_sparse: bool = False,
+):
+    """Core SEACells class.
+
     :param ad: (AnnData) annotated data matrix
     :param build_kernel_on: (str) key corresponding to matrix in ad.obsm which is used to compute kernel for metacells
                             Typically 'X_pca' for scRNA or 'X_svd' for scATAC
@@ -33,25 +37,28 @@ def SEACells(ad,
     :param l2_penalty: (float) L2 penalty for Franke-Wolfe algorithm
     :param max_franke_wolfe_iters: (int) maximum number of iterations for Franke-Wolfe algorithm
     :param use_sparse: (bool) whether to use sparse matrix operations. Currently only supported for CPU implementation.
-    
+
     See cpu.py or gpu.py for descriptions of model attributes and methods.
     """
-
     if use_sparse:
-        assert not use_gpu, "Sparse matrix operations are only supported for CPU implementation."
+        assert (
+            not use_gpu
+        ), "Sparse matrix operations are only supported for CPU implementation."
         try:
             from . import cpu
         except ImportError:
             import cpu
-        model = cpu.SEACellsCPU(ad,
-                                build_kernel_on,
-                                n_SEACells,
-                                verbose,
-                                n_waypoint_eigs,
-                                n_neighbors,
-                                convergence_epsilon,
-                                l2_penalty,
-                                max_franke_wolfe_iters)
+        model = cpu.SEACellsCPU(
+            ad,
+            build_kernel_on,
+            n_SEACells,
+            verbose,
+            n_waypoint_eigs,
+            n_neighbors,
+            convergence_epsilon,
+            l2_penalty,
+            max_franke_wolfe_iters,
+        )
 
         return model
 
@@ -61,39 +68,44 @@ def SEACells(ad,
         except ImportError:
             import gpu
 
-        model = gpu.SEACellsGPU(ad,
-                                build_kernel_on,
-                                n_SEACells,
-                                verbose,
-                                n_waypoint_eigs,
-                                n_neighbors,
-                                convergence_epsilon,
-                                l2_penalty,
-                                max_franke_wolfe_iters)
+        model = gpu.SEACellsGPU(
+            ad,
+            build_kernel_on,
+            n_SEACells,
+            verbose,
+            n_waypoint_eigs,
+            n_neighbors,
+            convergence_epsilon,
+            l2_penalty,
+            max_franke_wolfe_iters,
+        )
 
     else:
         try:
             from . import cpu_dense
         except ImportError:
             import cpu_dense
-        model = cpu_dense.SEACellsCPUDense(ad,
-                                    build_kernel_on,
-                                    n_SEACells,
-                                    verbose,
-                                    n_waypoint_eigs,
-                                    n_neighbors,
-                                    convergence_epsilon,
-                                    l2_penalty,
-                                    max_franke_wolfe_iters)
+        model = cpu_dense.SEACellsCPUDense(
+            ad,
+            build_kernel_on,
+            n_SEACells,
+            verbose,
+            n_waypoint_eigs,
+            n_neighbors,
+            convergence_epsilon,
+            l2_penalty,
+            max_franke_wolfe_iters,
+        )
 
     return model
 
+
 def sparsify_assignments(A, thresh: float):
-    """
-    Zero out all values below a threshold in an assignment matrix
+    """Zero out all values below a threshold in an assignment matrix.
+
     :param A: (csr_matrix) of shape n_cells x n_SEACells containing assignment weights
     :param thresh: (float) threshold below which to zero out assignment weights
-    :return: (np.array) of shape n_cells x n_SEACells containing assignment weights
+    :return: (np.array) of shape n_cells x n_SEACells containing assignment weights.
     """
     A = copy.deepcopy(A)
     A[A < thresh] = 0
@@ -104,8 +116,12 @@ def sparsify_assignments(A, thresh: float):
 
     return A
 
-def summarize_by_soft_SEACell(ad, A, celltype_label=None, summarize_layer='raw', minimum_weight: float=0.05):
-    """
+
+def summarize_by_soft_SEACell(
+    ad, A, celltype_label=None, summarize_layer="raw", minimum_weight: float = 0.05
+):
+    """Summary of soft SEACell assignment.
+
     Aggregates cells within each SEACell, summing over all raw data x assignment weight for all cells belonging to a
     SEACell. Data is un-normalized and pseudo-raw aggregated counts are stored in .layers['raw'].
     Attributes associated with variables (.var) are copied over, but relevant per SEACell attributes must be
@@ -120,16 +136,16 @@ def summarize_by_soft_SEACell(ad, A, celltype_label=None, summarize_layer='raw',
                             weights are smaller than minimum_weight, the 95th percentile weight is used.
     @return: aggregated anndata containing weighted expression for aggregated SEACells
     """
-    from scipy.sparse import csr_matrix
     import scanpy as sc
+    from scipy.sparse import csr_matrix
 
     compute_seacell_celltypes = False
     if celltype_label is not None:
-        if not (celltype_label in ad.obs.columns):
-            raise ValueError(f'Celltype label {celltype_label} not present in ad.obs')
+        if celltype_label not in ad.obs.columns:
+            raise ValueError(f"Celltype label {celltype_label} not present in ad.obs")
         compute_seacell_celltypes = True
 
-    if summarize_layer == 'raw' and ad.raw != None:
+    if summarize_layer == "raw" and ad.raw is not None:
         data = ad.raw.X
     else:
         data = ad.layers[summarize_layer]
@@ -142,15 +158,22 @@ def summarize_by_soft_SEACell(ad, A, celltype_label=None, summarize_layer='raw',
     for ix in tqdm(range(A.shape[1])):
         cell_weights = A[:, ix]
         # Construct the SEACell expression using the
-        seacell_exp = data.multiply(cell_weights[:, np.newaxis]).toarray().sum(0) / cell_weights.sum()
+        seacell_exp = (
+            data.multiply(cell_weights[:, np.newaxis]).toarray().sum(0)
+            / cell_weights.sum()
+        )
         seacell_expressions.append(seacell_exp)
 
         if compute_seacell_celltypes:
             # Compute the consensus celltype and the celltype purity
             cell_weights = pd.DataFrame(cell_weights)
             cell_weights.index = ad.obs_names
-            purity = cell_weights.join(ad.obs[celltype_label]).groupby(celltype_label).sum().sort_values(by=0,
-                                                                                                         ascending=False)
+            purity = (
+                cell_weights.join(ad.obs[celltype_label])
+                .groupby(celltype_label)
+                .sum()
+                .sort_values(by=0, ascending=False)
+            )
             purity = purity / purity.sum()
             celltype = purity.iloc[0]
             seacell_celltypes.append(celltype.name)
@@ -159,16 +182,19 @@ def summarize_by_soft_SEACell(ad, A, celltype_label=None, summarize_layer='raw',
     seacell_expressions = csr_matrix(np.array(seacell_expressions))
     seacell_ad = sc.AnnData(seacell_expressions, dtype=seacell_expressions.dtype)
     seacell_ad.var_names = ad.var_names
-    seacell_ad.obs['Pseudo-sizes'] = A.sum(0)
+    seacell_ad.obs["Pseudo-sizes"] = A.sum(0)
     if compute_seacell_celltypes:
-        seacell_ad.obs['celltype'] = seacell_celltypes
-        seacell_ad.obs['celltype_purity'] = seacell_purities
+        seacell_ad.obs["celltype"] = seacell_celltypes
+        seacell_ad.obs["celltype_purity"] = seacell_purities
     seacell_ad.var_names = ad.var_names
     return seacell_ad
 
 
-def summarize_by_SEACell(ad, SEACells_label='SEACell', celltype_label=None, summarize_layer='raw'):
-    """
+def summarize_by_SEACell(
+    ad, SEACells_label="SEACell", celltype_label=None, summarize_layer="raw"
+):
+    """Summary of SEACell assignment.
+
     Aggregates cells within each SEACell, summing over all raw data for all cells belonging to a SEACell.
     Data is unnormalized and raw aggregated counts are stored .layers['raw'].
     Attributes associated with variables (.var) are copied over, but relevant per SEACell attributes must be
@@ -177,8 +203,8 @@ def summarize_by_SEACell(ad, SEACells_label='SEACell', celltype_label=None, summ
     :return: anndata.AnnData containing aggregated counts.
 
     """
-    from scipy.sparse import csr_matrix
     import scanpy as sc
+    from scipy.sparse import csr_matrix
 
     # Set of metacells
     metacells = ad.obs[SEACells_label].unique()
@@ -188,26 +214,29 @@ def summarize_by_SEACell(ad, SEACells_label='SEACell', celltype_label=None, summ
 
     for m in tqdm(summ_matrix.index):
         cells = ad.obs_names[ad.obs[SEACells_label] == m]
-        if summarize_layer == 'X':
+        if summarize_layer == "X":
             summ_matrix.loc[m, :] = np.ravel(ad[cells, :].X.sum(axis=0))
-        elif summarize_layer == 'raw' and ad.raw != None:
+        elif summarize_layer == "raw" and ad.raw is not None:
             summ_matrix.loc[m, :] = np.ravel(ad[cells, :].raw.X.sum(axis=0))
         else:
-            summ_matrix.loc[m, :] = np.ravel(ad[cells, :].layers[summarize_layer].sum(axis=0))
+            summ_matrix.loc[m, :] = np.ravel(
+                ad[cells, :].layers[summarize_layer].sum(axis=0)
+            )
 
     # Ann data
 
     # Counts
     meta_ad = sc.AnnData(csr_matrix(summ_matrix), dtype=csr_matrix(summ_matrix).dtype)
     meta_ad.obs_names, meta_ad.var_names = summ_matrix.index.astype(str), ad.var_names
-    meta_ad.layers['raw'] = csr_matrix(summ_matrix)
+    meta_ad.layers["raw"] = csr_matrix(summ_matrix)
 
     # Also compute cell type purity
     if celltype_label is not None:
+        # TODO: Catch specific exception
         try:
             purity_df = evaluate.compute_celltype_purity(ad, celltype_label)
             meta_ad.obs = meta_ad.obs.join(purity_df)
-        except Exception as e:
-            print(f'Cell type purity failed with Exception {e}')
+        except Exception as e:  # noqa: BLE001
+            print(f"Cell type purity failed with Exception {e}")
 
     return meta_ad

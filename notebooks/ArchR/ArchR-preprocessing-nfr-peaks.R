@@ -11,12 +11,12 @@ proj_name <- "NAME OF ARCHR Project"
 
 
 # Configure
-addArchRThreads(threads = 15) 
+addArchRThreads(threads = 15)
 addArchRGenome('hg19')
 
 
 # ################################################################################################
-# Arrow files and project 
+# Arrow files and project
 
 # Input files
 setwd(sprintf("%s/ArchR", data_dir))
@@ -26,7 +26,7 @@ ArrowFiles <- createArrowFiles(
   inputFiles = inputFiles,
   sampleNames = names(inputFiles),
   filterTSS = 1, #Dont set this too high because you can always increase later
-  filterFrags =3000, 
+  filterFrags =3000,
   addTileMat = TRUE,
   addGeneScoreMat = FALSE,
   excludeChr = c('chrM'),
@@ -36,7 +36,7 @@ ArrowFiles <- createArrowFiles(
 
 # Create project
 proj <- ArchRProject(
-  ArrowFiles = ArrowFiles, 
+  ArrowFiles = ArrowFiles,
   outputDirectory = proj_name,
   copyArrows = FALSE
 )
@@ -46,7 +46,7 @@ proj <- ArchRProject(
 # PReprocesing
 
 # SVD, Clustering, UMAP
-proj <- addIterativeLSI(ArchRProj = proj, useMatrix = "TileMatrix", 
+proj <- addIterativeLSI(ArchRProj = proj, useMatrix = "TileMatrix",
                        name = "IterativeLSI", force=TRUE)
 
 # GEne scores with selected features
@@ -66,7 +66,7 @@ proj <- addReproduciblePeakSet(proj)
 # Counts
 proj <- addPeakMatrix(proj, maxFragmentLength=147, ceiling=10^9)
 
-# Save 
+# Save
 proj <- saveArchRProject(ArchRProj = proj)
 
 
@@ -92,13 +92,13 @@ write.csv(scores, sprintf('%s/export/gene_scores.csv', proj_name), quote=FALSE)
 peaks <- getPeakSet(proj)
 peak.counts <- getMatrixFromProject(proj, 'PeakMatrix')
 
-# Reorder peaks 
+# Reorder peaks
 # Chromosome order
 chr_order <- sort(seqlevels(peaks))
 reordered_features <- list()
 for(chr in chr_order)
     reordered_features[[chr]] = peaks[seqnames(peaks) == chr]
-reordered_features <- Reduce("c", reordered_features)    
+reordered_features <- Reduce("c", reordered_features)
 
 # Export counts
 dir.create(sprintf("%s/export/peak_counts", proj_name))
@@ -107,5 +107,3 @@ writeMM(counts, sprintf('%s/export/peak_counts/counts.mtx', proj_name))
 write.csv(colnames(peak.counts), sprintf('%s/export/peak_counts/cells.csv', proj_name), quote=FALSE)
 names(reordered_features) <- sprintf("Peak%d", 1:length(reordered_features))
 write.csv(as.data.frame(reordered_features), sprintf('%s/export/peak_counts/peaks.csv', proj_name), quote=FALSE)
-
-
