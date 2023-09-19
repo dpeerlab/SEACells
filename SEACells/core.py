@@ -64,11 +64,11 @@ def SEACells(
 
     if use_gpu:
         try:
-            from . import gpu
+            from . import gpu_dense
         except ImportError:
-            import gpu
+            import SEACells.gpu_dense as gpu_dense
 
-        model = gpu.SEACellsGPU(
+        model = gpu_dense.SEACellsGPU(
             ad,
             build_kernel_on,
             n_SEACells,

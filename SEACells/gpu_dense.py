@@ -3,9 +3,7 @@ import cupyx
 import numpy as np
 import palantir
 import pandas as pd
-from scipy.sparse.linalg import norm
-from sklearn.preprocessing import normalize
-from scipy.sparse import csr_matrix, save_npz
+from scipy.sparse import save_npz
 from tqdm import tqdm
 
 try:
@@ -14,7 +12,7 @@ except ImportError:
     import build_graph
 
 
-class SEACellsGPU:
+class SEACellsGPUDense:
     """GPU Implementation of SEACells algorithm.
 
     The implementation uses fast kernel archetypal analysis to find SEACells - groupings
@@ -108,7 +106,6 @@ class SEACellsGPU:
 
         self.A_ = None
         self.B_ = None
-        self.A0 = None
         self.B0 = None
 
         return
@@ -234,11 +231,11 @@ class SEACellsGPU:
         self.k = len(self.archetypes)
         k = self.k
 
-        # Sparse construction of B matrix
-        cols = np.arange(k)
-        rows = self.archetypes
-        shape = (n, k) 
-        B0 = csr_matrix((np.ones(len(rows)), (rows, cols)), shape=shape)
+        # Construction of B matrix
+        B0 = np.zeros((n, k))
+        all_ix = self.archetypes
+        idx1 = list(zip(all_ix, np.arange(k)))
+        B0[tuple(zip(*idx1))] = 1
         self.B0 = B0
         B = self.B0.copy()
 
@@ -248,21 +245,10 @@ class SEACellsGPU:
                 k,
                 n,
             ), f"Initial assignment matrix should be of shape (k={k} x n={n})"
-            A0 = csr_matrix(A0)
-            A0 = normalize(A0, axis = 0, norm = "l1")
 
         else:
-            # Need to ensure each cell is assigned to at least one archetype
-            # Randomly sample roughly 25% of the values between 0 and k
-            archetypes_per_cell = int(k * 0.25)
-            rows = np.random.randint(0, k, size=(n, archetypes_per_cell)).reshape(-1)
-            columns = np.repeat(np.arange(n), archetypes_per_cell)
-
-            A0 = csr_matrix(
-                (np.random.random(len(rows)), (rows, columns)), shape=(k, n)
-            )
-            A0 = normalize(A0, axis=0, norm="l1")
-
+            A0 = np.random.random((k, n))
+            A0 /= A0.sum(0)
             if self.verbose:
                 print("Randomly initialized A matrix.")
 
@@ -558,7 +544,7 @@ class SEACellsGPU:
             B = self.B_
 
         reconstruction = self.compute_reconstruction(A, B)
-        return norm(self.kernel_matrix - reconstruction)
+        return np.linalg.norm(self.kernel_matrix - reconstruction)
 
     def plot_convergence(self, save_as=None, show=True):
         """Plot behaviour of squared error over iterations.
