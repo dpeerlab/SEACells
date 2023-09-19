@@ -41,61 +41,73 @@ def SEACells(
     See cpu.py or gpu.py for descriptions of model attributes and methods.
     """
     if use_sparse:
-        assert (
-            not use_gpu
-        ), "Sparse matrix operations are only supported for CPU implementation."
-        try:
-            from . import cpu
-        except ImportError:
-            import cpu
-        model = cpu.SEACellsCPU(
-            ad,
-            build_kernel_on,
-            n_SEACells,
-            verbose,
-            n_waypoint_eigs,
-            n_neighbors,
-            convergence_epsilon,
-            l2_penalty,
-            max_franke_wolfe_iters,
-        )
-
-        return model
-
-    if use_gpu:
-        try:
-            from . import gpu_dense
-        except ImportError:
-            import SEACells.gpu_dense as gpu_dense
-
-        model = gpu_dense.SEACellsGPU(
-            ad,
-            build_kernel_on,
-            n_SEACells,
-            verbose,
-            n_waypoint_eigs,
-            n_neighbors,
-            convergence_epsilon,
-            l2_penalty,
-            max_franke_wolfe_iters,
-        )
-
+        if use_gpu:
+            try:
+                from . import gpu
+            except ImportError:
+                import gpu
+            model = gpu.SEACellsGPU(
+                ad,
+                build_kernel_on,
+                n_SEACells,
+                verbose,
+                n_waypoint_eigs,
+                n_neighbors,
+                convergence_epsilon,
+                l2_penalty,
+                max_franke_wolfe_iters,
+            )
+        else:
+            assert not use_gpu
+            try:
+                from . import cpu
+            except ImportError:
+                import cpu
+            model = cpu.SEACellsCPU(
+                ad,
+                build_kernel_on,
+                n_SEACells,
+                verbose,
+                n_waypoint_eigs,
+                n_neighbors,
+                convergence_epsilon,
+                l2_penalty,
+                max_franke_wolfe_iters,
+            )
     else:
-        try:
-            from . import cpu_dense
-        except ImportError:
-            import cpu_dense
-        model = cpu_dense.SEACellsCPUDense(
-            ad,
-            build_kernel_on,
-            n_SEACells,
-            verbose,
-            n_waypoint_eigs,
-            n_neighbors,
-            convergence_epsilon,
-            l2_penalty,
-            max_franke_wolfe_iters,
-        )
+        if use_gpu:
+            try:
+                from . import gpu_dense
+            except ImportError:
+                import SEACells.gpu_dense as gpu_dense
+
+            model = gpu_dense.SEACellsGPU(
+                ad,
+                build_kernel_on,
+                n_SEACells,
+                verbose,
+                n_waypoint_eigs,
+                n_neighbors,
+                convergence_epsilon,
+                l2_penalty,
+                max_franke_wolfe_iters,
+            )
+        else:
+            try:
+                from . import cpu_dense
+            except ImportError:
+                import cpu_dense
+            model = cpu_dense.SEACellsCPUDense(
+                ad,
+                build_kernel_on,
+                n_SEACells,
+                verbose,
+                n_waypoint_eigs,
+                n_neighbors,
+                convergence_epsilon,
+                l2_penalty,
+                max_franke_wolfe_iters,
+            )
 
     return model
 
