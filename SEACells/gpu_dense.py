@@ -710,11 +710,11 @@ class SEACellsGPUDense:
         for _i in range(5):
             l = A.argmax(1)
             labels.append(archetype_labels[l])
-            weights.append(A[np.arange(A.shape[0]), l])
-            A[np.arange(A.shape[0]), l] = -1
+            weights.append(A[cp.arange(A.shape[0]), l])
+            A[cp.arange(A.shape[0]), l] = -1
 
-        weights = np.vstack(weights).T
-        labels = np.vstack(labels).T
+        weights = cp.vstack(weights).T
+        labels = cp.vstack(labels).T
 
         soft_labels = pd.DataFrame(labels)
         soft_labels.index = self.ad.obs_names

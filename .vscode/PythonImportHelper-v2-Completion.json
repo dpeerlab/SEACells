@@ -1,0 +1,852 @@
+[
+    {
+        "label": "numpy",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "numpy",
+        "description": "numpy",
+        "detail": "numpy",
+        "documentation": {}
+    },
+    {
+        "label": "pandas",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pandas",
+        "description": "pandas",
+        "detail": "pandas",
+        "documentation": {}
+    },
+    {
+        "label": "tqdm",
+        "importPath": "tqdm",
+        "description": "tqdm",
+        "isExtraImport": true,
+        "detail": "tqdm",
+        "documentation": {}
+    },
+    {
+        "label": "tqdm",
+        "importPath": "tqdm",
+        "description": "tqdm",
+        "isExtraImport": true,
+        "detail": "tqdm",
+        "documentation": {}
+    },
+    {
+        "label": "tqdm",
+        "importPath": "tqdm",
+        "description": "tqdm",
+        "isExtraImport": true,
+        "detail": "tqdm",
+        "documentation": {}
+    },
+    {
+        "label": "tqdm",
+        "importPath": "tqdm",
+        "description": "tqdm",
+        "isExtraImport": true,
+        "detail": "tqdm",
+        "documentation": {}
+    },
+    {
+        "label": "tqdm",
+        "importPath": "tqdm",
+        "description": "tqdm",
+        "isExtraImport": true,
+        "detail": "tqdm",
+        "documentation": {}
+    },
+    {
+        "label": "tqdm",
+        "importPath": "tqdm",
+        "description": "tqdm",
+        "isExtraImport": true,
+        "detail": "tqdm",
+        "documentation": {}
+    },
+    {
+        "label": "tqdm",
+        "importPath": "tqdm",
+        "description": "tqdm",
+        "isExtraImport": true,
+        "detail": "tqdm",
+        "documentation": {}
+    },
+    {
+        "label": "cpu_count",
+        "importPath": "multiprocessing",
+        "description": "multiprocessing",
+        "isExtraImport": true,
+        "detail": "multiprocessing",
+        "documentation": {}
+    },
+    {
+        "label": "Parallel",
+        "importPath": "joblib",
+        "description": "joblib",
+        "isExtraImport": true,
+        "detail": "joblib",
+        "documentation": {}
+    },
+    {
+        "label": "delayed",
+        "importPath": "joblib",
+        "description": "joblib",
+        "isExtraImport": true,
+        "detail": "joblib",
+        "documentation": {}
+    },
+    {
+        "label": "scipy.sparse",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "scipy.sparse",
+        "description": "scipy.sparse",
+        "detail": "scipy.sparse",
+        "documentation": {}
+    },
+    {
+        "label": "lil_matrix",
+        "importPath": "scipy.sparse",
+        "description": "scipy.sparse",
+        "isExtraImport": true,
+        "detail": "scipy.sparse",
+        "documentation": {}
+    },
+    {
+        "label": "csr_matrix",
+        "importPath": "scipy.sparse",
+        "description": "scipy.sparse",
+        "isExtraImport": true,
+        "detail": "scipy.sparse",
+        "documentation": {}
+    },
+    {
+        "label": "save_npz",
+        "importPath": "scipy.sparse",
+        "description": "scipy.sparse",
+        "isExtraImport": true,
+        "detail": "scipy.sparse",
+        "documentation": {}
+    },
+    {
+        "label": "csr_matrix",
+        "importPath": "scipy.sparse",
+        "description": "scipy.sparse",
+        "isExtraImport": true,
+        "detail": "scipy.sparse",
+        "documentation": {}
+    },
+    {
+        "label": "save_npz",
+        "importPath": "scipy.sparse",
+        "description": "scipy.sparse",
+        "isExtraImport": true,
+        "detail": "scipy.sparse",
+        "documentation": {}
+    },
+    {
+        "label": "save_npz",
+        "importPath": "scipy.sparse",
+        "description": "scipy.sparse",
+        "isExtraImport": true,
+        "detail": "scipy.sparse",
+        "documentation": {}
+    },
+    {
+        "label": "tqdm",
+        "importPath": "tqdm.notebook",
+        "description": "tqdm.notebook",
+        "isExtraImport": true,
+        "detail": "tqdm.notebook",
+        "documentation": {}
+    },
+    {
+        "label": "copy",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "copy",
+        "description": "copy",
+        "detail": "copy",
+        "documentation": {}
+    },
+    {
+        "label": "palantir",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "palantir",
+        "description": "palantir",
+        "detail": "palantir",
+        "documentation": {}
+    },
+    {
+        "label": "norm",
+        "importPath": "scipy.sparse.linalg",
+        "description": "scipy.sparse.linalg",
+        "isExtraImport": true,
+        "detail": "scipy.sparse.linalg",
+        "documentation": {}
+    },
+    {
+        "label": "normalize",
+        "importPath": "sklearn.preprocessing",
+        "description": "sklearn.preprocessing",
+        "isExtraImport": true,
+        "detail": "sklearn.preprocessing",
+        "documentation": {}
+    },
+    {
+        "label": "normalize",
+        "importPath": "sklearn.preprocessing",
+        "description": "sklearn.preprocessing",
+        "isExtraImport": true,
+        "detail": "sklearn.preprocessing",
+        "documentation": {}
+    },
+    {
+        "label": "StandardScaler",
+        "importPath": "sklearn.preprocessing",
+        "description": "sklearn.preprocessing",
+        "isExtraImport": true,
+        "detail": "sklearn.preprocessing",
+        "documentation": {}
+    },
+    {
+        "label": "pyranges",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pyranges",
+        "description": "pyranges",
+        "detail": "pyranges",
+        "documentation": {}
+    },
+    {
+        "label": "scanpy",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "scanpy",
+        "description": "scanpy",
+        "detail": "scanpy",
+        "documentation": {}
+    },
+    {
+        "label": "rankdata",
+        "importPath": "scipy.stats",
+        "description": "scipy.stats",
+        "isExtraImport": true,
+        "detail": "scipy.stats",
+        "documentation": {}
+    },
+    {
+        "label": "pairwise_distances",
+        "importPath": "sklearn.metrics",
+        "description": "sklearn.metrics",
+        "isExtraImport": true,
+        "detail": "sklearn.metrics",
+        "documentation": {}
+    },
+    {
+        "label": "mean_squared_error",
+        "importPath": "sklearn.metrics",
+        "description": "sklearn.metrics",
+        "isExtraImport": true,
+        "detail": "sklearn.metrics",
+        "documentation": {}
+    },
+    {
+        "label": "r2_score",
+        "importPath": "sklearn.metrics",
+        "description": "sklearn.metrics",
+        "isExtraImport": true,
+        "detail": "sklearn.metrics",
+        "documentation": {}
+    },
+    {
+        "label": "cupy",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "cupy",
+        "description": "cupy",
+        "detail": "cupy",
+        "documentation": {}
+    },
+    {
+        "label": "cupyx",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "cupyx",
+        "description": "cupyx",
+        "detail": "cupyx",
+        "documentation": {}
+    },
+    {
+        "label": "scipy",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "scipy",
+        "description": "scipy",
+        "detail": "scipy",
+        "documentation": {}
+    },
+    {
+        "label": "stats",
+        "importPath": "scipy",
+        "description": "scipy",
+        "isExtraImport": true,
+        "detail": "scipy",
+        "documentation": {}
+    },
+    {
+        "label": "ic",
+        "importPath": "icecream",
+        "description": "icecream",
+        "isExtraImport": true,
+        "detail": "icecream",
+        "documentation": {}
+    },
+    {
+        "label": "matplotlib.pyplot",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "matplotlib.pyplot",
+        "description": "matplotlib.pyplot",
+        "detail": "matplotlib.pyplot",
+        "documentation": {}
+    },
+    {
+        "label": "seaborn",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "seaborn",
+        "description": "seaborn",
+        "detail": "seaborn",
+        "documentation": {}
+    },
+    {
+        "label": "Lasso",
+        "importPath": "sklearn.linear_model",
+        "description": "sklearn.linear_model",
+        "isExtraImport": true,
+        "detail": "sklearn.linear_model",
+        "documentation": {}
+    },
+    {
+        "label": "LassoCV",
+        "importPath": "sklearn.linear_model",
+        "description": "sklearn.linear_model",
+        "isExtraImport": true,
+        "detail": "sklearn.linear_model",
+        "documentation": {}
+    },
+    {
+        "label": "train_test_split",
+        "importPath": "sklearn.model_selection",
+        "description": "sklearn.model_selection",
+        "isExtraImport": true,
+        "detail": "sklearn.model_selection",
+        "documentation": {}
+    },
+    {
+        "label": "tqdm",
+        "importPath": "tqdm.auto",
+        "description": "tqdm.auto",
+        "isExtraImport": true,
+        "detail": "tqdm.auto",
+        "documentation": {}
+    },
+    {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "display",
+        "importPath": "IPython.display",
+        "description": "IPython.display",
+        "isExtraImport": true,
+        "detail": "IPython.display",
+        "documentation": {}
+    },
+    {
+        "label": "setuptools",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "setuptools",
+        "description": "setuptools",
+        "detail": "setuptools",
+        "documentation": {}
+    },
+    {
+        "label": "determine_metacell_open_peaks",
+        "kind": 2,
+        "importPath": "SEACells.accessibility",
+        "description": "SEACells.accessibility",
+        "peekOfCode": "def determine_metacell_open_peaks(\n    atac_meta_ad,\n    peak_set=None,\n    low_dim_embedding=\"X_svd\",\n    pval_cutoff=1e-2,\n    read_len=147,\n    n_neighbors=3,\n    n_jobs=1,\n):\n    \"\"\"Determine the set of peaks that are open in each metacell.",
+        "detail": "SEACells.accessibility",
+        "documentation": {}
+    },
+    {
+        "label": "get_gene_accessibility",
+        "kind": 2,
+        "importPath": "SEACells.accessibility",
+        "description": "SEACells.accessibility",
+        "peekOfCode": "def get_gene_accessibility(\n    atac_meta_ad, gene_peak_cors, gene_set=None, pval_cutoff=1e-1, cor_cutoff=0.1\n):\n    \"\"\"Gene accessibility scores for each. The score is defined as the fraction of significantly correlated peaks that are open in a given metacell.\n    :param atac_meta_ad: (Anndata) ATAC metacell Anndata created using `prepare_multiome_anndata`\n    :param gene_peak_cors: (pd.Series) Output of `get_gene_peak_correlations` function\n    :param gene_set: (pd.Series) Subset of genes to compute accessibility scores. All genes are used by default.\n    :param p_val_cutoff: (float) Nominal p-value cutoff for test of significance of correlation\n    :param cor_cutoff: (float) Correlation cutoff\n    :atac_meta_ad is modified inplace with `.obsm['GeneAccessibility']` indicating the gene scores for each metacell",
+        "detail": "SEACells.accessibility",
+        "documentation": {}
+    },
+    {
+        "label": "SEACellGraph",
+        "kind": 6,
+        "importPath": "SEACells.build_graph",
+        "description": "SEACells.build_graph",
+        "peekOfCode": "class SEACellGraph:\n    \"\"\"SEACell graph class.\"\"\"\n    def __init__(self, ad, build_on=\"X_pca\", n_cores: int = -1, verbose: bool = False):\n        \"\"\"SEACell graph class.\n        :param ad: (anndata.AnnData) object containing data for which metacells are computed\n        :param build_on: (str) key corresponding to matrix in ad.obsm which is used to compute kernel for metacells\n                        Typically 'X_pca' for scRNA or 'X_svd' for scATAC\n        :param n_cores: (int) number of cores for multiprocessing. If unspecified, computed automatically as\n                        number of CPU cores\n        :param verbose: (bool) whether or not to suppress verbose program logging",
+        "detail": "SEACells.build_graph",
+        "documentation": {}
+    },
+    {
+        "label": "kth_neighbor_distance",
+        "kind": 2,
+        "importPath": "SEACells.build_graph",
+        "description": "SEACells.build_graph",
+        "peekOfCode": "def kth_neighbor_distance(distances, k, i):\n    \"\"\"Returns distance to kth nearest neighbor.\n    Distances: sparse CSR matrix\n    k: kth nearest neighbor\n    i: index of row\n    .\n    \"\"\"\n    # convert row to 1D array\n    row_as_array = distances[i, :].toarray().ravel()\n    # number of nonzero elements",
+        "detail": "SEACells.build_graph",
+        "documentation": {}
+    },
+    {
+        "label": "rbf_for_row",
+        "kind": 2,
+        "importPath": "SEACells.build_graph",
+        "description": "SEACells.build_graph",
+        "peekOfCode": "def rbf_for_row(G, data, median_distances, i):\n    \"\"\"Helper function for computing radial basis function kernel for each row of the data matrix.\n    :param G: (array) KNN graph representing nearest neighbour connections between cells\n    :param data: (array) data matrix between which euclidean distances are computed for RBF\n    :param median_distances: (array) radius for RBF - the median distance between cell and k nearest-neighbours\n    :param i: (int) data row index for which RBF is calculated\n    :return: sparse matrix containing computed RBF for row\n    \"\"\"\n    # convert row to binary numpy array\n    row_as_array = G[i, :].toarray().ravel()",
+        "detail": "SEACells.build_graph",
+        "documentation": {}
+    },
+    {
+        "label": "NUM_CORES",
+        "kind": 5,
+        "importPath": "SEACells.build_graph",
+        "description": "SEACells.build_graph",
+        "peekOfCode": "NUM_CORES = cpu_count()\n##########################################################\n# Helper functions for parallelizing kernel construction\n##########################################################\ndef kth_neighbor_distance(distances, k, i):\n    \"\"\"Returns distance to kth nearest neighbor.\n    Distances: sparse CSR matrix\n    k: kth nearest neighbor\n    i: index of row\n    .",
+        "detail": "SEACells.build_graph",
+        "documentation": {}
+    },
+    {
+        "label": "SEACells",
+        "kind": 2,
+        "importPath": "SEACells.core",
+        "description": "SEACells.core",
+        "peekOfCode": "def SEACells(\n    ad,\n    build_kernel_on: str,\n    n_SEACells: int,\n    use_gpu: bool = False,\n    verbose: bool = True,\n    n_waypoint_eigs: int = 10,\n    n_neighbors: int = 15,\n    convergence_epsilon: float = 1e-3,\n    l2_penalty: float = 0,",
+        "detail": "SEACells.core",
+        "documentation": {}
+    },
+    {
+        "label": "sparsify_assignments",
+        "kind": 2,
+        "importPath": "SEACells.core",
+        "description": "SEACells.core",
+        "peekOfCode": "def sparsify_assignments(A, thresh: float):\n    \"\"\"Zero out all values below a threshold in an assignment matrix.\n    :param A: (csr_matrix) of shape n_cells x n_SEACells containing assignment weights\n    :param thresh: (float) threshold below which to zero out assignment weights\n    :return: (np.array) of shape n_cells x n_SEACells containing assignment weights.\n    \"\"\"\n    A = copy.deepcopy(A)\n    A[A < thresh] = 0\n    # Renormalize\n    A = A / A.sum(1, keepdims=True)",
+        "detail": "SEACells.core",
+        "documentation": {}
+    },
+    {
+        "label": "summarize_by_soft_SEACell",
+        "kind": 2,
+        "importPath": "SEACells.core",
+        "description": "SEACells.core",
+        "peekOfCode": "def summarize_by_soft_SEACell(\n    ad, A, celltype_label=None, summarize_layer=\"raw\", minimum_weight: float = 0.05\n):\n    \"\"\"Summary of soft SEACell assignment.\n    Aggregates cells within each SEACell, summing over all raw data x assignment weight for all cells belonging to a\n    SEACell. Data is un-normalized and pseudo-raw aggregated counts are stored in .layers['raw'].\n    Attributes associated with variables (.var) are copied over, but relevant per SEACell attributes must be\n    manually copied, since certain attributes may need to be summed, or averaged etc, depending on the attribute.\n    The output of this function is an anndata object of shape n_metacells x original_data_dimension.\n    @param ad: (sc.AnnData) containing raw counts for single-cell data",
+        "detail": "SEACells.core",
+        "documentation": {}
+    },
+    {
+        "label": "summarize_by_SEACell",
+        "kind": 2,
+        "importPath": "SEACells.core",
+        "description": "SEACells.core",
+        "peekOfCode": "def summarize_by_SEACell(\n    ad, SEACells_label=\"SEACell\", celltype_label=None, summarize_layer=\"raw\"\n):\n    \"\"\"Summary of SEACell assignment.\n    Aggregates cells within each SEACell, summing over all raw data for all cells belonging to a SEACell.\n    Data is unnormalized and raw aggregated counts are stored .layers['raw'].\n    Attributes associated with variables (.var) are copied over, but relevant per SEACell attributes must be\n    manually copied, since certain attributes may need to be summed, or averaged etc, depending on the attribute.\n    The output of this function is an anndata object of shape n_metacells x original_data_dimension.\n    :return: anndata.AnnData containing aggregated counts.",
+        "detail": "SEACells.core",
+        "documentation": {}
+    },
+    {
+        "label": "SEACellsCPU",
+        "kind": 6,
+        "importPath": "SEACells.cpu",
+        "description": "SEACells.cpu",
+        "peekOfCode": "class SEACellsCPU:\n    \"\"\"CPU Implementation of SEACells algorithm.\n    This implementation uses fast kernel archetypal analysis to find SEACells - groupings\n    of cells that represent highly granular, distinct cell states. SEACells are found by solving a convex optimization\n    problem that minimizes the residual sum of squares between the kernel matrix and the weighted sum of the archetypes.\n    Modifies annotated data matrix in place to include SEACell assignments in ad.obs['SEACell']\n    \"\"\"\n    def __init__(\n        self,\n        ad,",
+        "detail": "SEACells.cpu",
+        "documentation": {}
+    },
+    {
+        "label": "SEACellsCPUDense",
+        "kind": 6,
+        "importPath": "SEACells.cpu_dense",
+        "description": "SEACells.cpu_dense",
+        "peekOfCode": "class SEACellsCPUDense:\n    \"\"\"Fast kernel archetypal analysis.\n    Finds archetypes and weights given annotated data matrix.\n    Modifies annotated data matrix in place to include SEACell assignments in ad.obs['SEACell'].\n    \"\"\"\n    def __init__(\n        self,\n        ad,\n        build_kernel_on: str,\n        n_SEACells: int,",
+        "detail": "SEACells.cpu_dense",
+        "documentation": {}
+    },
+    {
+        "label": "LinearOT",
+        "kind": 6,
+        "importPath": "SEACells.domainadapt",
+        "description": "SEACells.domainadapt",
+        "peekOfCode": "class LinearOT:\n    \"\"\"Transformer class for linear OT problem.\"\"\"\n    def __init__(self, rho: float = 1.0, reg: float = 1e-6):\n        self.rho = rho\n        self.reg = reg\n    def _fit(self, xs, xt, ws, wt):\n        return barycenter(xs, xt, self.rho, ws, wt, self.reg)\n    def fit(self, xs, xt, ws=None, wt=None):\n        \"\"\"Fit linear OT problem.\"\"\"\n        self.As, self.bs, self.At, self.bt = self._fit(xs, xt, ws, wt)",
+        "detail": "SEACells.domainadapt",
+        "documentation": {}
+    },
+    {
+        "label": "psd_sqrt",
+        "kind": 2,
+        "importPath": "SEACells.domainadapt",
+        "description": "SEACells.domainadapt",
+        "peekOfCode": "def psd_sqrt(A):\n    \"\"\"Square root of a positive semidefinite matrix A.\"\"\"\n    u, s, v = np.linalg.svd(A)\n    return u @ np.diag(s**0.5) @ v\ndef compute_stats(x, w=None, reg=1e-12):\n    \"\"\"Compute mean, covariance, correlation, and variances from set of data points.\"\"\"\n    d = x.shape[1]\n    n = x.shape[0]\n    # if weights not given, make them all 1\n    if w is None:",
+        "detail": "SEACells.domainadapt",
+        "documentation": {}
+    },
+    {
+        "label": "compute_stats",
+        "kind": 2,
+        "importPath": "SEACells.domainadapt",
+        "description": "SEACells.domainadapt",
+        "peekOfCode": "def compute_stats(x, w=None, reg=1e-12):\n    \"\"\"Compute mean, covariance, correlation, and variances from set of data points.\"\"\"\n    d = x.shape[1]\n    n = x.shape[0]\n    # if weights not given, make them all 1\n    if w is None:\n        w = np.ones(n)\n    # reshape weights to make them easier to multiply\n    w_reshaped = w.reshape(-1, 1)\n    # mean of the distribution",
+        "detail": "SEACells.domainadapt",
+        "documentation": {}
+    },
+    {
+        "label": "compute_transformation",
+        "kind": 2,
+        "importPath": "SEACells.domainadapt",
+        "description": "SEACells.domainadapt",
+        "peekOfCode": "def compute_transformation(cs, ct, ms, mt, rho=1.0, reg=1e-6):\n    \"\"\"Given mean and covariance, compute transport plan.\"\"\"\n    n, ix = ms.shape\n    d = cs.shape[0]\n    # add regularization to make sure invertible\n    cs += np.eye(d) * reg\n    ct += np.eye(d) * reg\n    # square roots\n    cs_sqrt = psd_sqrt(cs)\n    ct_sqrt = psd_sqrt(ct)",
+        "detail": "SEACells.domainadapt",
+        "documentation": {}
+    },
+    {
+        "label": "barycenter",
+        "kind": 2,
+        "importPath": "SEACells.domainadapt",
+        "description": "SEACells.domainadapt",
+        "peekOfCode": "def barycenter(\n    xs,\n    xt,\n    rho=1.0,\n    ws=None,\n    wt=None,\n    reg: float = 1e-6,\n):\n    \"\"\"Wasserstein barycenter between two Gaussians.\"\"\"\n    # number of points",
+        "detail": "SEACells.domainadapt",
+        "documentation": {}
+    },
+    {
+        "label": "compactness",
+        "kind": 2,
+        "importPath": "SEACells.evaluate",
+        "description": "SEACells.evaluate",
+        "peekOfCode": "def compactness(ad, low_dim_embedding=\"X_pca\", SEACells_label=\"SEACell\"):\n    \"\"\"Compute compactness of each metacell.\n    Compactness is defined is the average variance of diffusion components across cells that constitute a metcell.\n    :param ad: (Anndata) Anndata object\n    :param low_dim_embedding: (str) `ad.obsm` field for constructing diffusion components\n    :param SEACell_label: (str) `ad.obs` field for computing diffusion component variances\n    :return: `pd.DataFrame` with a dataframe of compactness per metacell\n    \"\"\"\n    import palantir\n    components = pd.DataFrame(ad.obsm[low_dim_embedding]).set_index(ad.obs_names)",
+        "detail": "SEACells.evaluate",
+        "documentation": {}
+    },
+    {
+        "label": "separation",
+        "kind": 2,
+        "importPath": "SEACells.evaluate",
+        "description": "SEACells.evaluate",
+        "peekOfCode": "def separation(\n    ad, low_dim_embedding=\"X_pca\", nth_nbr=1, cluster=None, SEACells_label=\"SEACell\"\n):\n    \"\"\"Compute separation of each metacell.\n    Separation is defined is the distance to the nearest neighboring metacell.\n    :param ad: (Anndata) Anndata object\n    :param low_dim_embedding: (str) `ad.obsm` field for constructing diffusion components\n    :param nth_nbr: (int) Which neighbor to use for computing separation\n    :param SEACell_label: (str) `ad.obs` field for computing diffusion component variances\n    :return: `pd.DataFrame` with a separation of compactness per metacell",
+        "detail": "SEACells.evaluate",
+        "documentation": {}
+    },
+    {
+        "label": "get_density",
+        "kind": 2,
+        "importPath": "SEACells.evaluate",
+        "description": "SEACells.evaluate",
+        "peekOfCode": "def get_density(ad, key, nth_neighbor=150):\n    \"\"\"Compute cell density as 1/ the distance to the 150th (by default) nearest neighbour.\n    :param ad: AnnData object\n    :param key: (str) key in ad.obsm to use to build diffusion components on.\n    :param nth_neighbor:\n    :return: pd.DataFrame containing cell ID and density.\n    \"\"\"\n    from sklearn.neighbors import NearestNeighbors\n    neigh = NearestNeighbors(n_neighbors=nth_neighbor)\n    if \"key\" in ad.obsm:",
+        "detail": "SEACells.evaluate",
+        "documentation": {}
+    },
+    {
+        "label": "celltype_frac",
+        "kind": 2,
+        "importPath": "SEACells.evaluate",
+        "description": "SEACells.evaluate",
+        "peekOfCode": "def celltype_frac(x, col_name):\n    \"\"\"TODO.\"\"\"\n    val_counts = x[col_name].value_counts()\n    return val_counts.values[0] / val_counts.values.sum()\ndef compute_celltype_purity(ad, col_name):\n    \"\"\"Compute the purity (prevalence of most abundant value) of the specified col_name from ad.obs within each metacell.\n    @param: ad - AnnData object with SEACell assignment and col_name in ad.obs dataframe\n    @param: col_name - (str) column name within ad.obs representing celltype groupings for each cell.\n    \"\"\"\n    celltype_fraction = ad.obs.groupby(\"SEACell\").apply(",
+        "detail": "SEACells.evaluate",
+        "documentation": {}
+    },
+    {
+        "label": "compute_celltype_purity",
+        "kind": 2,
+        "importPath": "SEACells.evaluate",
+        "description": "SEACells.evaluate",
+        "peekOfCode": "def compute_celltype_purity(ad, col_name):\n    \"\"\"Compute the purity (prevalence of most abundant value) of the specified col_name from ad.obs within each metacell.\n    @param: ad - AnnData object with SEACell assignment and col_name in ad.obs dataframe\n    @param: col_name - (str) column name within ad.obs representing celltype groupings for each cell.\n    \"\"\"\n    celltype_fraction = ad.obs.groupby(\"SEACell\").apply(\n        lambda x: celltype_frac(x, col_name)\n    )\n    celltype = ad.obs.groupby(\"SEACell\").apply(\n        lambda x: x[col_name].value_counts().index[0]",
+        "detail": "SEACells.evaluate",
+        "documentation": {}
+    },
+    {
+        "label": "prepare_multiome_anndata",
+        "kind": 2,
+        "importPath": "SEACells.genescores",
+        "description": "SEACells.genescores",
+        "peekOfCode": "def prepare_multiome_anndata(\n    atac_ad, rna_ad, SEACells_label=\"SEACell\", n_bins_for_gc=50\n):\n    \"\"\"Function to create metacell Anndata objects from single-cell Anndata objects for multiome data.\n    :param atac_ad: (Anndata) ATAC Anndata object with raw peak counts in `X`. These anndata objects should be constructed\n     using the example notebook available in\n    :param rna_ad: (Anndata) RNA Anndata object with raw gene expression counts in `X`. Note: RNA and ATAC anndata objects\n     should contain the same set of cells\n    :param SEACells_label: (str) `atac_ad.obs` field for constructing metacell matrices. Same field will be used for\n      summarizing RNA and ATAC metacells.",
+        "detail": "SEACells.genescores",
+        "documentation": {}
+    },
+    {
+        "label": "load_transcripts",
+        "kind": 2,
+        "importPath": "SEACells.genescores",
+        "description": "SEACells.genescores",
+        "peekOfCode": "def load_transcripts(path_to_gtf):\n    \"\"\"Load transcripts from GTF File. `chr` is preprended to each entry.\"\"\"\n    gtf = pr.read_gtf(path_to_gtf)\n    gtf.Chromosome = \"chr\" + gtf.Chromosome.astype(str)\n    transcripts = gtf[gtf.Feature == \"transcript\"]\n    return transcripts\ndef _peaks_correlations_per_gene(\n    gene,\n    atac_exprs,\n    rna_exprs,",
+        "detail": "SEACells.genescores",
+        "documentation": {}
+    },
+    {
+        "label": "get_gene_peak_correlations",
+        "kind": 2,
+        "importPath": "SEACells.genescores",
+        "description": "SEACells.genescores",
+        "peekOfCode": "def get_gene_peak_correlations(\n    atac_meta_ad,\n    rna_meta_ad,\n    path_to_gtf,\n    gene_ranges=None,\n    span=100000,\n    n_jobs=1,\n    gene_set=None,\n):\n    \"\"\"Function to compute  correlations between gene expression and peak accessibility.",
+        "detail": "SEACells.genescores",
+        "documentation": {}
+    },
+    {
+        "label": "get_gene_peak_assocations",
+        "kind": 2,
+        "importPath": "SEACells.genescores",
+        "description": "SEACells.genescores",
+        "peekOfCode": "def get_gene_peak_assocations(gene_peak_correlations, pval_cutoff=1e-1, cor_cutoff=0.1):\n    \"\"\"Determine the number of significantly correlated peaks per gene.\n    :param gene_peak_correlations: (pd.Series) Output of `get_gene_peak_correlations` function\n    :param p_val_cutoff: (float) Nominal p-value cutoff for test of significance of correlation\n    :param cor_cutoff: (float) Correlation cutoff\n    :return: `pd.Series` with number of significantly positive correlated peaks with each gene\n    \"\"\"\n    peak_counts = pd.Series(0, index=gene_peak_correlations.index)\n    for gene in tqdm(peak_counts.index):\n        df = gene_peak_correlations[gene]",
+        "detail": "SEACells.genescores",
+        "documentation": {}
+    },
+    {
+        "label": "get_gene_scores",
+        "kind": 2,
+        "importPath": "SEACells.genescores",
+        "description": "SEACells.genescores",
+        "peekOfCode": "def get_gene_scores(\n    atac_meta_ad, gene_peak_correlations, pval_cutoff=1e-1, cor_cutoff=0.1\n):\n    \"\"\"Compute the aggregate accessibility of all peaks associated with each gene.\n    Gene scores are computed as the aggregate accessibility of all the signficantly correlated peaks associated with a gene.\n    :param atac_meta_ad: (Anndata) ATAC metacell Anndata created using `prepare_multiome_anndata`\n    :param gene_peak_correlations: (pd.Series) Output of `get_gene_peak_correlations` function\n    :param p_val_cutoff: (float) Nominal p-value cutoff for test of significance of correlation\n    :param cor_cutoff: (float) Correlation cutoff\n    :return: `pd.DataFrame` of ATAC gene scores (cells X genes)",
+        "detail": "SEACells.genescores",
+        "documentation": {}
+    },
+    {
+        "label": "SEACellsGPU",
+        "kind": 6,
+        "importPath": "SEACells.gpu",
+        "description": "SEACells.gpu",
+        "peekOfCode": "class SEACellsGPU:\n    \"\"\"GPU Implementation of SEACells algorithm.\n    The implementation uses fast kernel archetypal analysis to find SEACells - groupings\n    of cells that represent highly granular, distinct cell states. SEACells are found by solving a convex optimization\n    problem that minimizes the residual sum of squares between the kernel matrix and the weighted sum of the archetypes.\n    Modifies annotated data matrix in place to include SEACell assignments in ad.obs['SEACell']\n    \"\"\"\n    def __init__(\n        self,\n        ad,",
+        "detail": "SEACells.gpu",
+        "documentation": {}
+    },
+    {
+        "label": "SEACellsGPUDense",
+        "kind": 6,
+        "importPath": "SEACells.gpu_dense",
+        "description": "SEACells.gpu_dense",
+        "peekOfCode": "class SEACellsGPUDense:\n    \"\"\"GPU Implementation of SEACells algorithm.\n    The implementation uses fast kernel archetypal analysis to find SEACells - groupings\n    of cells that represent highly granular, distinct cell states. SEACells are found by solving a convex optimization\n    problem that minimizes the residual sum of squares between the kernel matrix and the weighted sum of the archetypes.\n    Modifies annotated data matrix in place to include SEACell assignments in ad.obs['SEACell']\n    \"\"\"\n    def __init__(\n        self,\n        ad,",
+        "detail": "SEACells.gpu_dense",
+        "documentation": {}
+    },
+    {
+        "label": "plot_assignment_entropy",
+        "kind": 2,
+        "importPath": "SEACells.plot",
+        "description": "SEACells.plot",
+        "peekOfCode": "def plot_assignment_entropy(\n    ad,\n    title=\"Entropy of Metacell Assignment\",\n    save_as=None,\n    show=True,\n    bins=None,\n    figsize=(5, 5),\n):\n    \"\"\"Plot the distribution of assignment entropy over all cells.\n    Each cell is assigned with a partial weight",
+        "detail": "SEACells.plot",
+        "documentation": {}
+    },
+    {
+        "label": "plot_2D",
+        "kind": 2,
+        "importPath": "SEACells.plot",
+        "description": "SEACells.plot",
+        "peekOfCode": "def plot_2D(\n    ad,\n    key=\"X_umap\",\n    colour_metacells=True,\n    title=\"Metacell Assignments\",\n    save_as=None,\n    show=True,\n    cmap=\"Set2\",\n    figsize=(5, 5),\n    SEACell_size=20,",
+        "detail": "SEACells.plot",
+        "documentation": {}
+    },
+    {
+        "label": "plot_SEACell_sizes",
+        "kind": 2,
+        "importPath": "SEACells.plot",
+        "description": "SEACells.plot",
+        "peekOfCode": "def plot_SEACell_sizes(\n    ad,\n    save_as=None,\n    show=True,\n    title=\"Distribution of Metacell Sizes\",\n    bins=None,\n    figsize=(5, 5),\n):\n    \"\"\"Plot distribution of number of cells contained per metacell.\n    :param ad: annData containing 'Metacells' label in .obs",
+        "detail": "SEACells.plot",
+        "documentation": {}
+    },
+    {
+        "label": "plot_initialization",
+        "kind": 2,
+        "importPath": "SEACells.plot",
+        "description": "SEACells.plot",
+        "peekOfCode": "def plot_initialization(\n    ad,\n    model,\n    plot_basis=\"X_umap\",\n    save_as=None,\n    show=True,\n):\n    \"\"\"Plot archetype initizlation.\n    :param ad: annData containing 'Metacells' label in .obs\n    :param model: Initilized SEACells model",
+        "detail": "SEACells.plot",
+        "documentation": {}
+    },
+    {
+        "label": "log_transform",
+        "kind": 2,
+        "importPath": "SEACells.preprocess",
+        "description": "SEACells.preprocess",
+        "peekOfCode": "def log_transform(ad, ps=0.1):\n    \"\"\"Compute log transformation of AnnData data in place.\n    :param ad: anndata.AnnData object to be normalized\n    :param ps: (float) pseudo-count for log transformation to avoid log(0) errors\n    \"\"\"\n    ad.X = np.log2(ad.X + ps) - np.log2(ps)",
+        "detail": "SEACells.preprocess",
+        "documentation": {}
+    },
+    {
+        "label": "gene_tf_associations",
+        "kind": 2,
+        "importPath": "SEACells.tfactivity",
+        "description": "SEACells.tfactivity",
+        "peekOfCode": "def gene_tf_associations(\n    gene_peak,\n    pwm,\n    min_corr=0.0,\n    max_pval=0.1,\n    min_peaks=0,\n    ct_peaks=None,\n    gene_set=None,\n):\n    \"\"\"TODO.\"\"\"",
+        "detail": "SEACells.tfactivity",
+        "documentation": {}
+    },
+    {
+        "label": "compute_tf_target_mat",
+        "kind": 2,
+        "importPath": "SEACells.tfactivity",
+        "description": "SEACells.tfactivity",
+        "peekOfCode": "def compute_tf_target_mat(pwm, gene_peak, gene_tfs, ct_specific=False):\n    \"\"\"TODO.\"\"\"\n    tfs = pwm.var_names\n    # initiate three DFs\n    tf_targ_mat = pd.DataFrame(0.0, index=gene_peak.index, columns=tfs)\n    pwm_scores = pwm.to_df()\n    for gene, tf_dict in tqdm(gene_tfs.items(), total=len(gene_tfs)):\n        for tf, peaks in tf_dict.items():\n            if ct_specific:\n                score = pwm_scores.loc[peaks, tf].sum()",
+        "detail": "SEACells.tfactivity",
+        "documentation": {}
+    },
+    {
+        "label": "get_de_genes",
+        "kind": 2,
+        "importPath": "SEACells.tfactivity",
+        "description": "SEACells.tfactivity",
+        "peekOfCode": "def get_de_genes(adata, groups, thresh, group_key, fc_min=1.5, pval_cut=1e-2):\n    \"\"\"TODO.\"\"\"\n    final_dict = {}\n    print(\"threshold:\", thresh)\n    print()\n    for g in tqdm(groups, total=len(groups)):\n        group_dict = {}\n        ref = [x for x in groups if x != g]\n        _compute_de_genes(adata, g, group_dict, ref, group_key, fc_min, pval_cut)\n        gene_list = []",
+        "detail": "SEACells.tfactivity",
+        "documentation": {}
+    },
+    {
+        "label": "get_gene_set",
+        "kind": 2,
+        "importPath": "SEACells.tfactivity",
+        "description": "SEACells.tfactivity",
+        "peekOfCode": "def get_gene_set(\n    mc_ad, peak_counts, de_genes, group_key, sub_group, expr_thresh=25, min_peaks=5\n):\n    \"\"\"TODO.\"\"\"\n    mc_expr = mc_ad.to_df()\n    valid_genes = peak_counts[peak_counts >= min_peaks].index\n    highly_expressed = mc_expr.columns[\n        (\n            mc_expr.groupby(mc_ad.obs[group_key]).mean().loc[sub_group] > expr_thresh\n        ).any()",
+        "detail": "SEACells.tfactivity",
+        "documentation": {}
+    },
+    {
+        "label": "fit_lasso_model",
+        "kind": 2,
+        "importPath": "SEACells.tfactivity",
+        "description": "SEACells.tfactivity",
+        "peekOfCode": "def fit_lasso_model(\n    gtf, zs, tf_set, gene_set, cells, test_size=0.20, cv_fold=5, max_iter=10000\n):\n    \"\"\"TODO.\"\"\"\n    X = gtf.loc[gene_set, tf_set]\n    scaler = StandardScaler()\n    X = pd.DataFrame(scaler.fit_transform(X), index=gene_set, columns=tf_set)\n    # set up containers\n    res = {}\n    for key in [\"coefs\", \"rmses\", \"rsqs\", \"sp_corr\", \"x_tests\", \"intercept\", \"y_stats\"]:",
+        "detail": "SEACells.tfactivity",
+        "documentation": {}
+    },
+    {
+        "label": "non_zero_tfs",
+        "kind": 2,
+        "importPath": "SEACells.tfactivity",
+        "description": "SEACells.tfactivity",
+        "peekOfCode": "def non_zero_tfs(cells, ct_res, thresh=20):\n    \"\"\"TODO.\"\"\"\n    tf_count = {}\n    for cell in tqdm(cells, total=len(cells)):\n        coefs = ct_res[\"coefs\"][cell]\n        coefs = coefs[coefs != 0]\n        for tf in coefs.index:\n            if tf not in tf_count:\n                tf_count[tf] = 1\n            else:",
+        "detail": "SEACells.tfactivity",
+        "documentation": {}
+    },
+    {
+        "label": "compute_tf_activity",
+        "kind": 2,
+        "importPath": "SEACells.tfactivity",
+        "description": "SEACells.tfactivity",
+        "peekOfCode": "def compute_tf_activity(ad_sub, res, valid_tfs, cells):\n    \"\"\"TODO.\"\"\"\n    # cell_order = ad_sub.obs.loc[cells,:].sort_values('palantir_pseudotime').index\n    tf_activities = pd.DataFrame(\n        0.0, index=valid_tfs, columns=cells\n    )  # set up container\n    for cell in tqdm(cells, total=len(cells)):\n        X_test = res[\"x_tests\"][cell]\n        y_test = res[\"y_stats\"][cell][0]\n        res[\"y_stats\"][cell][1]",
+        "detail": "SEACells.tfactivity",
+        "documentation": {}
+    },
+    {
+        "label": "get_data",
+        "kind": 2,
+        "importPath": "SEACells.utils",
+        "description": "SEACells.utils",
+        "peekOfCode": "def get_data(path):\n    \"\"\"Get absolute path relative to package installation for loading static files.\n    :param path: (str) relative path to items\n    :return: (str) absolute path to items.\n    \"\"\"\n    return os.path.join(_ROOT, \"data\", path)\ndef get_Rscript(path):\n    \"\"\"Get absolute path for loading Rscripts.\n    :param path: (str) relative path to items\n    :return: (str) absolute path to items.",
+        "detail": "SEACells.utils",
+        "documentation": {}
+    },
+    {
+        "label": "get_Rscript",
+        "kind": 2,
+        "importPath": "SEACells.utils",
+        "description": "SEACells.utils",
+        "peekOfCode": "def get_Rscript(path):\n    \"\"\"Get absolute path for loading Rscripts.\n    :param path: (str) relative path to items\n    :return: (str) absolute path to items.\n    \"\"\"\n    return os.path.join(_ROOT, \"Rscripts\", path)\ndef load_data():\n    \"\"\"Get absolute path for loading sample data.\n    :return: (anndata.AnnData object) sample dataset.\n    \"\"\"",
+        "detail": "SEACells.utils",
+        "documentation": {}
+    },
+    {
+        "label": "load_data",
+        "kind": 2,
+        "importPath": "SEACells.utils",
+        "description": "SEACells.utils",
+        "peekOfCode": "def load_data():\n    \"\"\"Get absolute path for loading sample data.\n    :return: (anndata.AnnData object) sample dataset.\n    \"\"\"\n    p = get_data(\"sample_data.h5ad\")\n    return sc.read(p)\ndef chromVAR_R(outdir):\n    \"\"\"Run chromVAR R scripts.\n    Given an output directory containing:\n        - peaks.bed",
+        "detail": "SEACells.utils",
+        "documentation": {}
+    },
+    {
+        "label": "chromVAR_R",
+        "kind": 2,
+        "importPath": "SEACells.utils",
+        "description": "SEACells.utils",
+        "peekOfCode": "def chromVAR_R(outdir):\n    \"\"\"Run chromVAR R scripts.\n    Given an output directory containing:\n        - peaks.bed\n        - sampling_depth.txt\n        - peak_names.txt\n        - cell_names.txt\n        - counts.txt\n    Executes chromVAR R script and writes output files to same directory:\n        - deviations.csv",
+        "detail": "SEACells.utils",
+        "documentation": {}
+    },
+    {
+        "label": "run_chromVAR",
+        "kind": 2,
+        "importPath": "SEACells.utils",
+        "description": "SEACells.utils",
+        "peekOfCode": "def run_chromVAR(ad, outdir):\n    \"\"\"Run chromVAR Rscript on anndata object and output deviations to outdir.\n    Writes the following files in outdir:\n        - peaks.bed\n        - sampling_depth.txt\n        - peak_names.txt\n        - cell_names.txt\n        - counts.txt.\n    Executes chromVAR_R() - runs chromVAR R script and writes output files to same directory:\n        - deviations.csv",
+        "detail": "SEACells.utils",
+        "documentation": {}
+    },
+    {
+        "label": "tanay_metacells",
+        "kind": 2,
+        "importPath": "SEACells.utils",
+        "description": "SEACells.utils",
+        "peekOfCode": "def tanay_metacells():\n    \"\"\"TOOD.\"\"\"\n    raise NotImplementedError\ndef run_tanay():\n    \"\"\"TODO.\"\"\"\n    raise NotImplementedError",
+        "detail": "SEACells.utils",
+        "documentation": {}
+    },
+    {
+        "label": "run_tanay",
+        "kind": 2,
+        "importPath": "SEACells.utils",
+        "description": "SEACells.utils",
+        "peekOfCode": "def run_tanay():\n    \"\"\"TODO.\"\"\"\n    raise NotImplementedError",
+        "detail": "SEACells.utils",
+        "documentation": {}
+    },
+    {
+        "label": "_ROOT",
+        "kind": 5,
+        "importPath": "SEACells.utils",
+        "description": "SEACells.utils",
+        "peekOfCode": "_ROOT = os.path.abspath(os.path.dirname(__file__))\ndef get_data(path):\n    \"\"\"Get absolute path relative to package installation for loading static files.\n    :param path: (str) relative path to items\n    :return: (str) absolute path to items.\n    \"\"\"\n    return os.path.join(_ROOT, \"data\", path)\ndef get_Rscript(path):\n    \"\"\"Get absolute path for loading Rscripts.\n    :param path: (str) relative path to items",
+        "detail": "SEACells.utils",
+        "documentation": {}
+    },
+    {
+        "label": "__version__",
+        "kind": 5,
+        "importPath": "SEACells.version",
+        "description": "SEACells.version",
+        "peekOfCode": "__version__ = \"0.3.3\"\n__author__ = \"Manu Setty, Zi-Ning Choo, Sitara Persad\"\n__author_email__ = \"scp2152@columbia.edu\"",
+        "detail": "SEACells.version",
+        "documentation": {}
+    },
+    {
+        "label": "__author__",
+        "kind": 5,
+        "importPath": "SEACells.version",
+        "description": "SEACells.version",
+        "peekOfCode": "__author__ = \"Manu Setty, Zi-Ning Choo, Sitara Persad\"\n__author_email__ = \"scp2152@columbia.edu\"",
+        "detail": "SEACells.version",
+        "documentation": {}
+    },
+    {
+        "label": "__author_email__",
+        "kind": 5,
+        "importPath": "SEACells.version",
+        "description": "SEACells.version",
+        "peekOfCode": "__author_email__ = \"scp2152@columbia.edu\"",
+        "detail": "SEACells.version",
+        "documentation": {}
+    }
+]

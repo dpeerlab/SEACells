@@ -3,10 +3,11 @@ import cupyx
 import numpy as np
 import palantir
 import pandas as pd
-from scipy.sparse.linalg import norm
 from sklearn.preprocessing import normalize
-from scipy.sparse import csr_matrix, save_npz
+import scipy.sparse
 from tqdm import tqdm
+import scipy
+from icecream import ic 
 
 try:
     from . import build_graph
@@ -123,10 +124,10 @@ class SEACellsGPU:
             self.n_cells,
             self.n_cells,
         ), f"Dimension of kernel matrix must be n_cells = ({self.n_cells},{self.n_cells}), not {K.shape} "
-        self.kernel_matrix = K
+        self.kernel_matrix = cupyx.scipy.sparse.csr_matrix(K)
 
         # Pre-compute dot product
-        self.K = self.kernel_matrix @ self.kernel_matrix.T
+        self.K = self.kernel_matrix.dot(self.kernel_matrix.transpose())
 
     def construct_kernel_matrix(
         self, n_neighbors: int = None, graph_construction="union"
@@ -142,20 +143,26 @@ class SEACellsGPU:
                                     are in the neighborhood graph.
         :return: None.
         """
+        # TODO: make K sparse / check if already sparse 
+
         # input to graph construction is PCA/SVD
         kernel_model = build_graph.SEACellGraph(
             self.ad, self.build_kernel_on, verbose=self.verbose
         )
+        print("build_graph.SEACellGraph completed")
 
         # K is a sparse matrix representing input to SEACell alg
         if n_neighbors is None:
             n_neighbors = self.n_neighbors
 
         M = kernel_model.rbf(n_neighbors, graph_construction=graph_construction)
-        self.kernel_matrix = M
+        self.kernel_matrix = cupyx.scipy.sparse.csr_matrix(M)
 
         # Pre-compute dot product
-        self.K = self.kernel_matrix @ self.kernel_matrix.T
+        self.K = self.kernel_matrix.dot(self.kernel_matrix.transpose())
+        #ic(self.K.s)
+        #ic(sle)
+        #ic(type(self..))
         return
 
     def initialize_archetypes(self):
@@ -189,17 +196,22 @@ class SEACellsGPU:
             from_greedy = self.k
 
         greedy_ix = self._get_greedy_centers(n_SEACells=from_greedy + 10)
+        # ic("_get_greedy_centers completed")
+        
         if self.verbose:
             print(f"Selecting {from_greedy} cells from greedy initialization.")
 
         if self.waypoint_proportion > 0:
+            # print("SELF.WAYPOINT_PROPORTION > 0")
             all_ix = np.hstack([waypoint_ix, greedy_ix])
         else:
+            # print("SELF.WAYPOINT_PROPORTION <= 0")
             all_ix = np.hstack([greedy_ix])
 
         unique_ix, ind = np.unique(all_ix, return_index=True)
+
         all_ix = unique_ix[np.argsort(ind)][:k]
-        self.archetypes = all_ix
+        self.archetypes = cp.array(all_ix)
 
     def initialize(self, initial_archetypes=None, initial_assignments=None):
         """Initialize the model.
@@ -222,6 +234,11 @@ class SEACellsGPU:
             )
         # initialize B (update this to allow initialization from RRQR)
         n = self.K.shape[0]
+        # print("n = self.K.shape[0]")
+        # print(n)
+
+        # print("initial_archetypes")
+        # print(initial_archetypes)
 
         if initial_archetypes is not None:
             if self.verbose:
@@ -229,18 +246,35 @@ class SEACellsGPU:
             self.archetypes = initial_archetypes
 
         if self.archetypes is None:
+            # print("STARTING INITIALIZE_ARCHETYPES")
             self.initialize_archetypes()
+            # print("FINISHED INITIALIZE_ARCHETYPES")
 
         self.k = len(self.archetypes)
         k = self.k
 
+        # print("k")
+        # print(k)
+
         # Sparse construction of B matrix
-        cols = np.arange(k)
+        cols = cp.arange(k)
+        # print("cols")
+        # print(type(cols))
         rows = self.archetypes
+        # print("rows")
+        # print(type(rows))
         shape = (n, k) 
-        B0 = csr_matrix((np.ones(len(rows)), (rows, cols)), shape=shape)
+        # print("shape")
+        # print(shape)
+        data = cp.ones(len(rows))
+        # print(type(data))
+        B0 = cupyx.scipy.sparse.csr_matrix((cp.ones(len(rows)), (rows, cols)), shape=shape)
+        # print("constructed b0")
         self.B0 = B0
         B = self.B0.copy()
+        # print("constructed B0 and B")
+
+        # print(initial_assignments)
 
         if initial_assignments is not None:
             A0 = initial_assignments
@@ -248,7 +282,7 @@ class SEACellsGPU:
                 k,
                 n,
             ), f"Initial assignment matrix should be of shape (k={k} x n={n})"
-            A0 = csr_matrix(A0)
+            A0 = cp.sparse.csr_matrix(A0)
             A0 = normalize(A0, axis = 0, norm = "l1")
 
         else:
@@ -257,31 +291,46 @@ class SEACellsGPU:
             archetypes_per_cell = int(k * 0.25)
             rows = np.random.randint(0, k, size=(n, archetypes_per_cell)).reshape(-1)
             columns = np.repeat(np.arange(n), archetypes_per_cell)
+            # print(type(rows))
+            # print(type(columns))
 
-            A0 = csr_matrix(
+            A0 = scipy.sparse.csr_matrix(
                 (np.random.random(len(rows)), (rows, columns)), shape=(k, n)
             )
-            A0 = normalize(A0, axis=0, norm="l1")
+            # print(type(A0))
+            # print("STARTING NORMALIZE")
+            A0 = cupyx.scipy.sparse.csr_matrix(normalize(A0, axis=0, norm="l1"))
+            # print("COMPLETED NORMALIZE")
 
             if self.verbose:
                 print("Randomly initialized A matrix.")
 
         self.A0 = A0
         A = self.A0.copy()
+
+        # print("UPDATE A BEGINNING")
+        # print(B.shape)
+        # print(type(B))
+        # print(A.shape)
+        # print(type(A))
         A = self._updateA(B, A)
+        # print("UPDATE A COMPLETED")
 
         self.A_ = A
         self.B_ = B
 
         # Create convergence threshold
+        # print("RSS START")
         RSS = self.compute_RSS(A, B)
+        # print("RSS FIN")
         self.RSS_iters.append(RSS)
 
         if self.convergence_threshold is None:
             self.convergence_threshold = self.convergence_epsilon * RSS
+            # ic(type(self.convergence_threshold))
             if self.verbose:
                 print(
-                    f"Setting convergence threshold at {self.convergence_threshold:.5f}"
+                    f"Convergence threshold set to {self.convergence_threshold} based on epsilon = {self.convergence_epsilon}"
                 )
 
     def _get_waypoint_centers(self, n_waypoints=None):
@@ -364,46 +413,46 @@ class SEACellsGPU:
         if self.verbose:
             print("Initializing f and g...")
 
-        f = np.array((ATA.multiply(ATA)).sum(axis=0)).ravel()
-        g = np.array(ATA.diagonal()).ravel()
+        f = cp.array((ATA.multiply(ATA)).sum(axis=0)).ravel()
+        g = cp.array(ATA.diagonal()).ravel()
 
-        d = np.zeros((k, n))
-        omega = np.zeros((k, n))
+        d = cp.sparse.csr_matrix((k, n))
+        omega = cp.sparse.csr_matrix((k, n))
 
         # keep track of selected indices
-        centers = np.zeros(k, dtype=int)
+        centers = np.zeros((k,), dtype=int)
 
         # sampling
         for j in tqdm(range(k)):
+            # Compute score, dividing the sparse f by the sparse g
             score = f / g
-            p = np.argmax(score)
+                    
+            # Compute p, which is the largest score
+            p = cp.argmax(score)
 
-            # print residuals
-            np.sum(f)
-
+            # Compute delta_term1 to be the column of ATA at index p
             delta_term1 = ATA[:, p].toarray().squeeze()
-            # print(delta_term1)
-            delta_term2 = (
-                np.multiply(omega[:, p].reshape(-1, 1), omega).sum(axis=0).squeeze()
-            )
+
+            # Compute delta_term2 to be the sum of the outer product of omega and itself
+            delta_term2 = (omega[:, p].reshape(-1, 1).multiply(omega).sum(axis=0).squeeze())
             delta = delta_term1 - delta_term2
 
             # some weird rounding errors
-            delta[p] = np.max([0, delta[p]])
+            delta[p] = max([0, delta[p]])
 
-            o = delta / np.max([np.sqrt(delta[p]), 1e-6])
-            omega_square_norm = np.linalg.norm(o) ** 2
-            omega_hadamard = np.multiply(o, o)
+            o = delta / max([cp.sqrt(delta[p]), 1e-6])
+            omega_square_norm = cp.linalg.norm(o) ** 2
+            omega_hadamard = cp.multiply(o, o)
             term1 = omega_square_norm * omega_hadamard
 
             # update f (term2)
-            pl = np.zeros(n)
+            pl = cp.zeros(n)
             for r in range(j):
                 omega_r = omega[r, :]
-                pl += np.dot(omega_r, o) * omega_r
+                pl += omega_r.dot(o) * omega_r
 
             ATAo = (ATA @ o.reshape(-1, 1)).ravel()
-            term2 = np.multiply(o, ATAo - pl)
+            term2 = o *  (ATAo - pl)
 
             # update f
             f += -2.0 * term2 + term1
@@ -431,39 +480,68 @@ class SEACellsGPU:
         :return: (n x k csr_matrix) defining updated weights used for assigning cells to SEACells
         """
         n, k = B.shape
+        # print(n, k)
         A = A_prev
+        # ic(type(A))
 
         t = 0  # current iteration (determine multiplicative update)
 
-        Ag = cp.array(A)
-        Bg = cp.array(B)
+        # print("bookmark")
+        Ag = A
+        # ic(type(A))
+        Bg = B
+        # print(type(self.K))
         Kg = cupyx.scipy.sparse.csc_matrix(self.K)
+        # print("computed Ag, Bg, Kg")
 
         # precompute some gradient terms
         t2g = Kg.dot(Bg).T
         t1g = t2g.dot(Bg)
+        # print("computed t2g, t1g")
 
         # update rows of A for given number of iterations
         while t < self.max_FW_iter:
             # compute gradient (must convert matrix to ndarray)
-            Gg = cp.multiply(2, cp.subtract(t1g.dot(Ag), t2g))
-
+            # X = t1g.dot(Ag)
+            # print(X.shape)
+            # print(type(X))
+            # print(t2g.shape)
+            # print(type(t2g))
+            # Y = X - t2g 
+            # print(Y.shape)
+            # print(type(Y))
+            # Z = 2.0 *Y 
+            # print(Z.shape)
+            # print(type(Z))
+            # print((cp.subtract(t1g.dot(Ag), t2g)).shape)
+            # print((cp.multiply(2, cp.subtract(t1g.dot(Ag), t2g))).shape)
+            Gg = 2.0*(t1g.dot(Ag) - t2g)
+            # ic(Gg.shape)
+            # ic(type(Gg))
             # get argmins
-            amins = cp.argmin(Gg, axis=0)
-
-            # loop free implementation
-            eg = cp.zeros((k, n))
+            amins = Gg.argmin(axis = 0)
+            # ic(amins.shape)
+            # ic(type(amins))
+            # loop free implementaton
+            eg = cupyx.scipy.sparse.csr_matrix((k, n), dtype=cp.float64)
             eg[amins, cp.arange(n)] = 1.0
+            # print("eg")
 
             f = 2.0 / (t + 2.0)
-            Ag = cp.add(Ag, cp.multiply(f, cp.subtract(eg, Ag)))
+            Ag = Ag + (f * (eg - Ag))
+            # Ag = cp.add(Ag, cp.multiply(f, cp.subtract(eg, Ag)))
             t += 1
+            # print("f, Ag, t")
 
-        A = Ag.get()
+
+        # A = Ag.get()
+        A = Ag
+
 
         del t1g, t2g, Ag, Kg, Gg, Bg, eg, amins
         cp._default_memory_pool.free_all_blocks()
 
+        # ic(type(A))
         return A
 
     def _updateB(self, A, B_prev):
@@ -483,30 +561,30 @@ class SEACellsGPU:
         # keep track of error
         t = 0
 
-        Ag = cp.array(A)
-        Bg = cp.array(B)
+        Ag = cupyx.scipy.sparse.csc_matrix(A)
+        Bg = cupyx.scipy.sparse.csc_matrix(B)
         Kg = cupyx.scipy.sparse.csc_matrix(self.K)
         # precompute some terms
         t1g = Ag.dot(Ag.T)
         t2g = Kg.dot(Ag.T)
 
         # update rows of B for a given number of iterations
-        while t < 50:
+        while t < self.max_FW_iter:
             # compute gradient
-            Gg = cp.multiply(2, cp.subtract(Kg.dot(Bg).dot(t1g), t2g))
+            Gg = 2 * (Kg.dot(Bg).dot(t1g) -t2g)
 
             # get all argmins
-            amins = cp.argmin(Gg, axis=0)
+            amins = Gg.argmin(axis=0)
 
-            eg = cp.zeros((n, k))
+            eg = cupyx.scipy.sparse.csr_matrix((n, k), dtype=cp.float64)
             eg[amins, cp.arange(k)] = 1.0
 
             f = 2.0 / (t + 2.0)
-            Bg = cp.add(Bg, cp.multiply(f, cp.subtract(eg, Bg)))
+            Bg = Bg + (f * (eg - Bg))
 
             t += 1
 
-        B = Bg.get()
+        B = Bg
 
         del (
             t1g,
@@ -540,6 +618,7 @@ class SEACellsGPU:
             raise RuntimeError(
                 "Either assignment matrix A or archetype matrix B is None."
             )
+
         return (self.kernel_matrix.dot(B)).dot(A)
 
     def compute_RSS(self, A=None, B=None):
@@ -556,9 +635,29 @@ class SEACellsGPU:
             A = self.A_
         if B is None:
             B = self.B_
-
+        
+        # print("COMPUTE RECONSTRUCTION")
         reconstruction = self.compute_reconstruction(A, B)
-        return norm(self.kernel_matrix - reconstruction)
+        # print("FINISHED COMPUTE RECONSTRUCTION")
+
+        assert reconstruction.shape == self.kernel_matrix.shape
+        assert reconstruction.shape == (self.n_cells, self.n_cells), 'reconstruction.shape != (self.n_cells, self.n_cells)'
+
+        diff = self.kernel_matrix - reconstruction 
+        # ic(type(diff))
+
+        # Want to free up memory for A, B, and reconstruction 
+        del A, B, reconstruction
+        cp._default_memory_pool.free_all_blocks() 
+
+        # convert diff to array 
+        diff = diff.get()
+
+        #ic(scipy.sparse.linalg.norm(self.kernel_matrix - reconstruction))
+        # ic(cp.linalg.norm(diff))
+        # ic(np.linalg.norm(diff))
+
+        return cp.linalg.norm(diff)
 
     def plot_convergence(self, save_as=None, show=True):
         """Plot behaviour of squared error over iterations.
@@ -606,12 +705,15 @@ class SEACellsGPU:
         A = self._updateA(B, A)
         B = self._updateB(A, B)
 
-        self.RSS_iters.append(self.compute_RSS(A, B))
+        # ic(self.RSS_iters)
+        RSS = self.compute_RSS(A, B)
+        self.RSS_iters.append(RSS)
+        # ic(self.RSS_iters)
 
         self.A_ = A
         self.B_ = B
 
-        del A, B
+        del A, B, RSS
 
         # Label cells by SEACells assignment
         labels = self.get_hard_assignments()
@@ -637,10 +739,13 @@ class SEACellsGPU:
         :param initial_assignments: (array) initial assignments to use. If None, random initialisation is used.
         :return: None
         """
+        # print("RUNNING SELF.INITIALIZE")
         self.initialize(
             initial_archetypes=initial_archetypes,
             initial_assignments=initial_assignments,
         )
+        # print("SELF.INITIALIZE COMPLETE")
+
 
         converged = False
         n_iter = 0
@@ -724,11 +829,11 @@ class SEACellsGPU:
         for _i in range(5):
             l = A.argmax(1)
             labels.append(archetype_labels[l])
-            weights.append(A[np.arange(A.shape[0]), l])
-            A[np.arange(A.shape[0]), l] = -1
+            weights.append(A[cp.arange(A.shape[0]), l])
+            A[cp.arange(A.shape[0]), l] = -1
 
-        weights = np.vstack(weights).T
-        labels = np.vstack(labels).T
+        weights = cp.vstack(weights).T
+        labels = cp.vstack(labels).T
 
         soft_labels = pd.DataFrame(labels)
         soft_labels.index = self.ad.obs_names
@@ -744,7 +849,13 @@ class SEACellsGPU:
         """
         # Use argmax to get the index with the highest assignment weight
 
-        df = pd.DataFrame({"SEACell": [f"SEACell-{i}" for i in self.A_.argmax(0)]})
+        # ic(self.A_.shape)
+        # ic(self.A_.argmax(0).shape)
+        # ic(self.A_.argmax(0).flatten().shape)
+
+        # ic(self.ad.obs_names.shape)
+
+        df = pd.DataFrame({"SEACell": [f"SEACell-{i}" for i in self.A_.argmax(axis=0).flatten()]})
         df.index = self.ad.obs_names
         df.index.name = "index"
 

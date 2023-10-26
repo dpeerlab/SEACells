@@ -42,6 +42,8 @@ def SEACells(
     """
     if use_sparse:
         if use_gpu:
+            print("SPARSE AND GPU")
+            print("TRYING SEACellsGPU")
             try:
                 from . import gpu
             except ImportError:
@@ -58,6 +60,8 @@ def SEACells(
                 max_franke_wolfe_iters,
             )
         else:
+            print("SPARSE AND NOT GPU") 
+            print("TRYING SEACellsCPU")
             assert not use_gpu
             try:
                 from . import cpu
@@ -76,12 +80,14 @@ def SEACells(
             )
     else:
         if use_gpu:
+            print("NOT SPARSE AND GPU") 
+            print("TRYING SEACellsGPUDense")
             try:
                 from . import gpu_dense
             except ImportError:
                 import SEACells.gpu_dense as gpu_dense
 
-            model = gpu_dense.SEACellsGPU(
+            model = gpu_dense.SEACellsGPUDense(
                 ad,
                 build_kernel_on,
                 n_SEACells,
@@ -93,6 +99,8 @@ def SEACells(
                 max_franke_wolfe_iters,
             )
         else:
+            print("NOT SPARSE AND NOT GPUT") 
+            print("TRYING SEACellsCPUDense")
             try:
                 from . import cpu_dense
             except ImportError:
