@@ -6,3 +6,4 @@ SEACells.egg-info
 **/.ipynb_checkpoints/
 **/.DS_Store
 **/.idea
+notebooks/data/cd34_multiome_rna.h5ad
