@@ -657,7 +657,7 @@ class SEACellsGPU:
         # ic(cp.linalg.norm(diff))
         # ic(np.linalg.norm(diff))
 
-        return cp.linalg.norm(diff)
+        return np.linalg.norm(diff.get().todense())
 
     def plot_convergence(self, save_as=None, show=True):
         """Plot behaviour of squared error over iterations.
