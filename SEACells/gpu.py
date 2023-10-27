@@ -5,6 +5,7 @@ import palantir
 import pandas as pd
 from sklearn.preprocessing import normalize
 import scipy.sparse
+from cupyx.scipy.sparse.linalg import norm
 from tqdm import tqdm
 import scipy
 from icecream import ic 
@@ -651,13 +652,13 @@ class SEACellsGPU:
         cp._default_memory_pool.free_all_blocks() 
 
         # convert diff to array 
-        diff = diff.get()
+        # diff = diff.get()
 
         #ic(scipy.sparse.linalg.norm(self.kernel_matrix - reconstruction))
         # ic(cp.linalg.norm(diff))
         # ic(np.linalg.norm(diff))
 
-        return np.linalg.norm(diff.get().todense())
+        return norm(diff)
 
     def plot_convergence(self, save_as=None, show=True):
         """Plot behaviour of squared error over iterations.

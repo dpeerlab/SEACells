@@ -281,6 +281,14 @@
         "documentation": {}
     },
     {
+        "label": "norm",
+        "importPath": "cupyx.scipy.sparse.linalg",
+        "description": "cupyx.scipy.sparse.linalg",
+        "isExtraImport": true,
+        "detail": "cupyx.scipy.sparse.linalg",
+        "documentation": {}
+    },
+    {
         "label": "scipy",
         "kind": 6,
         "isExtraImport": true,
