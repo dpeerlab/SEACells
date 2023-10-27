@@ -418,11 +418,11 @@ class SEACellsGPU:
         f = cp.array((ATA.multiply(ATA)).sum(axis=0)).ravel()
         g = cp.array(ATA.diagonal()).ravel()
 
-        d = cp.sparse.csr_matrix((k, n))
-        omega = cp.sparse.csr_matrix((k, n))
+        d = cupyx.scipy.sparse.csr_matrix((k, n))
+        omega = cupyx.scipy.sparse.csr_matrix((k, n))
 
         # keep track of selected indices
-        centers = np.zeros((k,), dtype=int)
+        centers = cp.zeros((k,), dtype=int)
 
         # sampling
         for j in tqdm(range(k)):
@@ -769,7 +769,7 @@ class SEACellsGPU:
 
             # Check for convergence
             if (
-                np.abs(self.RSS_iters[-2] - self.RSS_iters[-1])
+                cp.abs(self.RSS_iters[-2] - self.RSS_iters[-1])
                 < self.convergence_threshold
             ):
                 if self.verbose:
@@ -861,7 +861,7 @@ class SEACellsGPU:
         # ic(self.A_.argmax(0).flatten().shape)
 
         # ic(self.ad.obs_names.shape)
-
+        ic("get_hard_assignments")
         df = pd.DataFrame({"SEACell": [f"SEACell-{i}" for i in self.A_.argmax(axis=0).flatten()]})
         df.index = self.ad.obs_names
         df.index.name = "index"
