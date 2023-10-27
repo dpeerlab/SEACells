@@ -283,12 +283,13 @@ class SEACellsGPU:
                 k,
                 n,
             ), f"Initial assignment matrix should be of shape (k={k} x n={n})"
-            A0 = cp.sparse.csr_matrix(A0)
+            A0 = cupyx.scipy.sparse.csr_matrix(A0)
             A0 = normalize(A0, axis = 0, norm = "l1")
 
         else:
             # Need to ensure each cell is assigned to at least one archetype
             # Randomly sample roughly 25% of the values between 0 and k
+            ic("flag")
             archetypes_per_cell = int(k * 0.25)
             rows = np.random.randint(0, k, size=(n, archetypes_per_cell)).reshape(-1)
             columns = np.repeat(np.arange(n), archetypes_per_cell)
@@ -480,6 +481,7 @@ class SEACellsGPU:
         :param A_prev: (n x k csr_matrix) defining previous weights used for assigning cells to SEACells
         :return: (n x k csr_matrix) defining updated weights used for assigning cells to SEACells
         """
+        ic("updateA")
         n, k = B.shape
         # print(n, k)
         A = A_prev
@@ -492,13 +494,15 @@ class SEACellsGPU:
         # ic(type(A))
         Bg = B
         # print(type(self.K))
-        Kg = cupyx.scipy.sparse.csc_matrix(self.K)
-        # print("computed Ag, Bg, Kg")
+        Kg = self.K
+        # ic(type(Kg))
+        # ic("computed Ag, Bg, Kg")
 
         # precompute some gradient terms
         t2g = Kg.dot(Bg).T
         t1g = t2g.dot(Bg)
-        # print("computed t2g, t1g")
+        # ic("computed t2g, t1g")
+        # ic(type(t2g), type(t1g))
 
         # update rows of A for given number of iterations
         while t < self.max_FW_iter:
@@ -555,6 +559,7 @@ class SEACellsGPU:
         :param B_prev: (n x k csr_matrix) defining previous SEACells as weighted combinations of cells
         :return: (n x k csr_matrix) defining updated SEACells as weighted combinations of cells
         """
+        ic("_updateB")
         k, n = A.shape
 
         B = B_prev
@@ -562,9 +567,9 @@ class SEACellsGPU:
         # keep track of error
         t = 0
 
-        Ag = cupyx.scipy.sparse.csc_matrix(A)
-        Bg = cupyx.scipy.sparse.csc_matrix(B)
-        Kg = cupyx.scipy.sparse.csc_matrix(self.K)
+        Ag = A
+        Bg = B
+        Kg = self.K
         # precompute some terms
         t1g = Ag.dot(Ag.T)
         t2g = Kg.dot(Ag.T)
@@ -685,6 +690,7 @@ class SEACellsGPU:
 
         :return: None.
         """
+        ic("step")
         A = self.A_
         B = self.B_
 
