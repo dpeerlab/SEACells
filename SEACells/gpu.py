@@ -289,7 +289,7 @@ class SEACellsGPU:
         else:
             # Need to ensure each cell is assigned to at least one archetype
             # Randomly sample roughly 25% of the values between 0 and k
-            ic("flag")
+            # ic("flag")
             archetypes_per_cell = int(k * 0.25)
             rows = np.random.randint(0, k, size=(n, archetypes_per_cell)).reshape(-1)
             columns = np.repeat(np.arange(n), archetypes_per_cell)
@@ -481,7 +481,7 @@ class SEACellsGPU:
         :param A_prev: (n x k csr_matrix) defining previous weights used for assigning cells to SEACells
         :return: (n x k csr_matrix) defining updated weights used for assigning cells to SEACells
         """
-        ic("updateA")
+       # ic("updateA")
         n, k = B.shape
         # print(n, k)
         A = A_prev
@@ -528,8 +528,9 @@ class SEACellsGPU:
             # ic(amins.shape)
             # ic(type(amins))
             # loop free implementaton
-            eg = cupyx.scipy.sparse.csr_matrix((k, n), dtype=cp.float64)
+            eg = cp.zeros((k, n))
             eg[amins, cp.arange(n)] = 1.0
+            eg = cupyx.scipy.sparse.csr_matrix(eg) 
             # print("eg")
 
             f = 2.0 / (t + 2.0)
@@ -559,7 +560,7 @@ class SEACellsGPU:
         :param B_prev: (n x k csr_matrix) defining previous SEACells as weighted combinations of cells
         :return: (n x k csr_matrix) defining updated SEACells as weighted combinations of cells
         """
-        ic("_updateB")
+        # ic("_updateB")
         k, n = A.shape
 
         B = B_prev
@@ -582,8 +583,9 @@ class SEACellsGPU:
             # get all argmins
             amins = Gg.argmin(axis=0)
 
-            eg = cupyx.scipy.sparse.csr_matrix((n, k), dtype=cp.float64)
+            eg = cp.zeros((n, k))
             eg[amins, cp.arange(k)] = 1.0
+            eg = cupyx.scipy.sparse.csr_matrix(eg)
 
             f = 2.0 / (t + 2.0)
             Bg = Bg + (f * (eg - Bg))
@@ -690,7 +692,7 @@ class SEACellsGPU:
 
         :return: None.
         """
-        ic("step")
+        # ic("step")
         A = self.A_
         B = self.B_
 
@@ -861,7 +863,7 @@ class SEACellsGPU:
         # ic(self.A_.argmax(0).flatten().shape)
 
         # ic(self.ad.obs_names.shape)
-        ic("get_hard_assignments")
+        # ic("get_hard_assignments")
         df = pd.DataFrame({"SEACell": [f"SEACell-{i}" for i in self.A_.argmax(axis=0).flatten()]})
         df.index = self.ad.obs_names
         df.index.name = "index"
