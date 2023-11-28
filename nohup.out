@@ -1,0 +1,108 @@
+findfont: Font family ['Raleway'] not found. Falling back to DejaVu Sans.
+findfont: Font family ['Lato'] not found. Falling back to DejaVu Sans.
+NOT SPARSE AND GPU
+TRYING SEACellsGPUDense
+Welcome to SEACells GPU!
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/10000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/10000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/10000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 119 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/24 [00:00<?, ?it/s] 42%|████▏     | 10/24 [00:00<00:00, 97.32it/s] 92%|█████████▏| 22/24 [00:00<00:00, 106.09it/s]100%|██████████| 24/24 [00:00<00:00, 106.23it/s]
+Selecting 14 cells from greedy initialization.
+Randomly initialized A matrix.
+Setting convergence threshold at 0.00178
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Starting iteration 20.
+Completed iteration 20.
+Starting iteration 30.
+Completed iteration 30.
+Converged after 36 iterations.
+SPARSE AND GPU
+TRYING SEACellsGPU
+Welcome to SEACells GPU!
+build_graph.SEACellGraph completed
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/10000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/10000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/10000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 119 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/24 [00:00<?, ?it/s]/home/aparna/miniconda3/lib/python3.9/site-packages/cupyx/scipy/sparse/_compressed.py:545: SparseEfficiencyWarning: Changing the sparsity structure of a csr_matrix is expensive.
+  warnings.warn('Changing the sparsity structure of a '
+  4%|▍         | 1/24 [00:00<00:03,  5.85it/s] 25%|██▌       | 6/24 [00:00<00:00, 23.93it/s] 46%|████▌     | 11/24 [00:00<00:00, 31.66it/s] 67%|██████▋   | 16/24 [00:00<00:00, 35.73it/s] 83%|████████▎ | 20/24 [00:00<00:00, 34.42it/s]100%|██████████| 24/24 [00:00<00:00, 32.76it/s]100%|██████████| 24/24 [00:00<00:00, 30.64it/s]
+Selecting 14 cells from greedy initialization.
+Randomly initialized A matrix.
+Convergence threshold set to 0.0017809197686690815 based on epsilon = 1e-05
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Traceback (most recent call last):
+  File "/data/aparna/aparnakumar/github clone/SEACells/create_results.py", line 96, in <module>
+    get_results(num_cells)
+  File "/data/aparna/aparnakumar/github clone/SEACells/create_results.py", line 79, in get_results
+    assignments, comparisons = gpu_versions(ad, num_cell)
+  File "/data/aparna/aparnakumar/github clone/SEACells/create_results.py", line 61, in gpu_versions
+    assignments4, time4, mem4 = get_data(ad, num_cells = num_cells, use_gpu=True, use_sparse=True)
+  File "/data/aparna/aparnakumar/github clone/SEACells/create_results.py", line 47, in get_data
+    model.fit(min_iter=10, max_iter=150)
+  File "/data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py", line 813, in fit
+    self._fit(
+  File "/data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py", line 766, in _fit
+    self.step()
+  File "/data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py", line 718, in step
+    RSS = self.compute_RSS(A, B)
+  File "/data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py", line 648, in compute_RSS
+    reconstruction = self.compute_reconstruction(A, B)
+  File "/data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py", line 630, in compute_reconstruction
+    return (self.kernel_matrix.dot(B)).dot(A)
+  File "/home/aparna/miniconda3/lib/python3.9/site-packages/cupyx/scipy/sparse/_base.py", line 338, in dot
+    return self @ other
+  File "/home/aparna/miniconda3/lib/python3.9/site-packages/cupyx/scipy/sparse/_base.py", line 127, in __matmul__
+    return self.__mul__(other)
+  File "/home/aparna/miniconda3/lib/python3.9/site-packages/cupyx/scipy/sparse/_csr.py", line 156, in __mul__
+    return cusparse.spgemm(self, other)
+  File "/home/aparna/miniconda3/lib/python3.9/site-packages/cupy/cusparse.py", line 2075, in spgemm
+    c_data = _cupy.empty(c_nnz, c.dtype)
+  File "/home/aparna/miniconda3/lib/python3.9/site-packages/cupy/_creation/basic.py", line 22, in empty
+    return cupy.ndarray(shape, dtype, order=order)
+  File "cupy/_core/core.pyx", line 136, in cupy._core.core.ndarray.__new__
+  File "cupy/_core/core.pyx", line 224, in cupy._core.core._ndarray_base._init
+  File "cupy/cuda/memory.pyx", line 742, in cupy.cuda.memory.alloc
+  File "cupy/cuda/memory.pyx", line 1419, in cupy.cuda.memory.MemoryPool.malloc
+  File "cupy/cuda/memory.pyx", line 1440, in cupy.cuda.memory.MemoryPool.malloc
+  File "cupy/cuda/memory.pyx", line 1120, in cupy.cuda.memory.SingleDeviceMemoryPool.malloc
+  File "cupy/cuda/memory.pyx", line 1141, in cupy.cuda.memory.SingleDeviceMemoryPool._malloc
+  File "cupy/cuda/memory.pyx", line 1379, in cupy.cuda.memory.SingleDeviceMemoryPool._try_malloc
+cupy.cuda.memory.OutOfMemoryError: Out of memory allocating 784,381,440 bytes (allocated so far: 13,170,216,960 bytes).
