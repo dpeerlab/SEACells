@@ -106,3 +106,520 @@ Traceback (most recent call last):
   File "cupy/cuda/memory.pyx", line 1141, in cupy.cuda.memory.SingleDeviceMemoryPool._malloc
   File "cupy/cuda/memory.pyx", line 1379, in cupy.cuda.memory.SingleDeviceMemoryPool._try_malloc
 cupy.cuda.memory.OutOfMemoryError: Out of memory allocating 784,381,440 bytes (allocated so far: 13,170,216,960 bytes).
+findfont: Font family ['Raleway'] not found. Falling back to DejaVu Sans.
+findfont: Font family ['Lato'] not found. Falling back to DejaVu Sans.
+SPARSE AND GPU
+TRYING SEACellsGPU
+Welcome to SEACells GPU!
+build_graph.SEACellGraph completed
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 57 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/19 [00:00<?, ?it/s]/home/aparna/miniconda3/lib/python3.9/site-packages/cupyx/scipy/sparse/_compressed.py:545: SparseEfficiencyWarning: Changing the sparsity structure of a csr_matrix is expensive.
+  warnings.warn('Changing the sparsity structure of a '
+ 16%|█▌        | 3/19 [00:00<00:00, 26.15it/s] 47%|████▋     | 9/19 [00:00<00:00, 41.16it/s] 74%|███████▎  | 14/19 [00:00<00:00, 44.77it/s]100%|██████████| 19/19 [00:00<00:00, 45.20it/s]100%|██████████| 19/19 [00:00<00:00, 43.07it/s]
+Selecting 9 cells from greedy initialization.
+Randomly initialized A matrix.
+Convergence threshold set to 0.0012468980775966637 based on epsilon = 1e-05
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Starting iteration 20.
+Completed iteration 20.
+Converged after 26 iterations.
+NOT SPARSE AND GPU
+TRYING SEACellsGPUDense
+Welcome to SEACells GPU!
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 57 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/19 [00:00<?, ?it/s] 79%|███████▉  | 15/19 [00:00<00:00, 147.63it/s]100%|██████████| 19/19 [00:00<00:00, 158.40it/s]
+Selecting 9 cells from greedy initialization.
+Randomly initialized A matrix.
+Setting convergence threshold at 0.00125
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Starting iteration 20.
+Completed iteration 20.
+Starting iteration 30.
+Completed iteration 30.
+Converged after 36 iterations.
+SPARSE AND NOT GPU
+TRYING SEACellsCPU
+Welcome to SEACells!
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 57 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/19 [00:00<?, ?it/s] 89%|████████▉ | 17/19 [00:00<00:00, 169.47it/s]100%|██████████| 19/19 [00:00<00:00, 175.72it/s]
+Selecting 9 cells from greedy initialization.
+Randomly initialized A matrix.
+Setting convergence threshold at 0.00125
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Converged after 19 iterations.
+Done with 5000 cells, trial 1
+SPARSE AND GPU
+TRYING SEACellsGPU
+Welcome to SEACells GPU!
+build_graph.SEACellGraph completed
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 57 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/19 [00:00<?, ?it/s]/home/aparna/miniconda3/lib/python3.9/site-packages/cupyx/scipy/sparse/_compressed.py:545: SparseEfficiencyWarning: Changing the sparsity structure of a csr_matrix is expensive.
+  warnings.warn('Changing the sparsity structure of a '
+ 26%|██▋       | 5/19 [00:00<00:00, 39.76it/s] 53%|█████▎    | 10/19 [00:00<00:00, 44.05it/s] 79%|███████▉  | 15/19 [00:00<00:00, 43.43it/s]100%|██████████| 19/19 [00:00<00:00, 42.22it/s]
+Selecting 9 cells from greedy initialization.
+Randomly initialized A matrix.
+Convergence threshold set to 0.0012468980775966637 based on epsilon = 1e-05
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Starting iteration 20.
+Completed iteration 20.
+Converged after 26 iterations.
+NOT SPARSE AND GPU
+TRYING SEACellsGPUDense
+Welcome to SEACells GPU!
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 57 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/19 [00:00<?, ?it/s] 84%|████████▍ | 16/19 [00:00<00:00, 157.82it/s]100%|██████████| 19/19 [00:00<00:00, 155.98it/s]
+Selecting 9 cells from greedy initialization.
+Randomly initialized A matrix.
+Setting convergence threshold at 0.00125
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Starting iteration 20.
+Completed iteration 20.
+Starting iteration 30.
+Completed iteration 30.
+Converged after 36 iterations.
+SPARSE AND NOT GPU
+TRYING SEACellsCPU
+Welcome to SEACells!
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 57 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/19 [00:00<?, ?it/s] 89%|████████▉ | 17/19 [00:00<00:00, 169.32it/s]100%|██████████| 19/19 [00:00<00:00, 169.60it/s]
+Selecting 9 cells from greedy initialization.
+Randomly initialized A matrix.
+Setting convergence threshold at 0.00125
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Converged after 19 iterations.
+Done with 5000 cells, trial 2
+SPARSE AND GPU
+TRYING SEACellsGPU
+Welcome to SEACells GPU!
+build_graph.SEACellGraph completed
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 57 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/19 [00:00<?, ?it/s]/home/aparna/miniconda3/lib/python3.9/site-packages/cupyx/scipy/sparse/_compressed.py:545: SparseEfficiencyWarning: Changing the sparsity structure of a csr_matrix is expensive.
+  warnings.warn('Changing the sparsity structure of a '
+ 21%|██        | 4/19 [00:00<00:00, 36.44it/s] 47%|████▋     | 9/19 [00:00<00:00, 41.09it/s] 74%|███████▎  | 14/19 [00:00<00:00, 42.32it/s]100%|██████████| 19/19 [00:00<00:00, 40.83it/s]100%|██████████| 19/19 [00:00<00:00, 40.76it/s]
+Selecting 9 cells from greedy initialization.
+Randomly initialized A matrix.
+Convergence threshold set to 0.0012468980775966637 based on epsilon = 1e-05
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Starting iteration 20.
+Completed iteration 20.
+Converged after 26 iterations.
+NOT SPARSE AND GPU
+TRYING SEACellsGPUDense
+Welcome to SEACells GPU!
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 57 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/19 [00:00<?, ?it/s]100%|██████████| 19/19 [00:00<00:00, 209.30it/s]
+Selecting 9 cells from greedy initialization.
+Randomly initialized A matrix.
+Setting convergence threshold at 0.00125
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Starting iteration 20.
+Completed iteration 20.
+Starting iteration 30.
+Completed iteration 30.
+Converged after 36 iterations.
+SPARSE AND NOT GPU
+TRYING SEACellsCPU
+Welcome to SEACells!
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 57 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/19 [00:00<?, ?it/s]100%|██████████| 19/19 [00:00<00:00, 195.96it/s]
+Selecting 9 cells from greedy initialization.
+Randomly initialized A matrix.
+Setting convergence threshold at 0.00125
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Converged after 19 iterations.
+Done with 5000 cells, trial 3
+SPARSE AND GPU
+TRYING SEACellsGPU
+Welcome to SEACells GPU!
+build_graph.SEACellGraph completed
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 57 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/19 [00:00<?, ?it/s]/home/aparna/miniconda3/lib/python3.9/site-packages/cupyx/scipy/sparse/_compressed.py:545: SparseEfficiencyWarning: Changing the sparsity structure of a csr_matrix is expensive.
+  warnings.warn('Changing the sparsity structure of a '
+ 16%|█▌        | 3/19 [00:00<00:00, 27.87it/s] 42%|████▏     | 8/19 [00:00<00:00, 37.11it/s] 68%|██████▊   | 13/19 [00:00<00:00, 39.62it/s] 95%|█████████▍| 18/19 [00:00<00:00, 40.70it/s]100%|██████████| 19/19 [00:00<00:00, 39.33it/s]
+Selecting 9 cells from greedy initialization.
+Randomly initialized A matrix.
+Convergence threshold set to 0.0012468980775966637 based on epsilon = 1e-05
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Starting iteration 20.
+Completed iteration 20.
+Converged after 26 iterations.
+NOT SPARSE AND GPU
+TRYING SEACellsGPUDense
+Welcome to SEACells GPU!
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 57 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/19 [00:00<?, ?it/s] 95%|█████████▍| 18/19 [00:00<00:00, 177.72it/s]100%|██████████| 19/19 [00:00<00:00, 179.54it/s]
+Selecting 9 cells from greedy initialization.
+Randomly initialized A matrix.
+Setting convergence threshold at 0.00125
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Starting iteration 20.
+Completed iteration 20.
+Starting iteration 30.
+Completed iteration 30.
+Converged after 36 iterations.
+SPARSE AND NOT GPU
+TRYING SEACellsCPU
+Welcome to SEACells!
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 57 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/19 [00:00<?, ?it/s] 84%|████████▍ | 16/19 [00:00<00:00, 158.14it/s]100%|██████████| 19/19 [00:00<00:00, 162.43it/s]
+Selecting 9 cells from greedy initialization.
+Randomly initialized A matrix.
+Setting convergence threshold at 0.00125
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Converged after 19 iterations.
+Done with 5000 cells, trial 4
+SPARSE AND GPU
+TRYING SEACellsGPU
+Welcome to SEACells GPU!
+build_graph.SEACellGraph completed
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 57 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/19 [00:00<?, ?it/s]/home/aparna/miniconda3/lib/python3.9/site-packages/cupyx/scipy/sparse/_compressed.py:545: SparseEfficiencyWarning: Changing the sparsity structure of a csr_matrix is expensive.
+  warnings.warn('Changing the sparsity structure of a '
+ 21%|██        | 4/19 [00:00<00:00, 33.50it/s] 47%|████▋     | 9/19 [00:00<00:00, 39.40it/s] 74%|███████▎  | 14/19 [00:00<00:00, 41.88it/s]100%|██████████| 19/19 [00:00<00:00, 39.54it/s]100%|██████████| 19/19 [00:00<00:00, 39.41it/s]
+Selecting 9 cells from greedy initialization.
+Randomly initialized A matrix.
+Convergence threshold set to 0.0012468980775966637 based on epsilon = 1e-05
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Starting iteration 20.
+Completed iteration 20.
+Converged after 26 iterations.
+NOT SPARSE AND GPU
+TRYING SEACellsGPUDense
+Welcome to SEACells GPU!
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 57 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/19 [00:00<?, ?it/s]100%|██████████| 19/19 [00:00<00:00, 178.02it/s]100%|██████████| 19/19 [00:00<00:00, 177.48it/s]
+Selecting 9 cells from greedy initialization.
+Randomly initialized A matrix.
+Setting convergence threshold at 0.00125
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Starting iteration 20.
+Completed iteration 20.
+Starting iteration 30.
+Completed iteration 30.
+Converged after 36 iterations.
+SPARSE AND NOT GPU
+TRYING SEACellsCPU
+Welcome to SEACells!
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/5000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 57 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/19 [00:00<?, ?it/s] 89%|████████▉ | 17/19 [00:00<00:00, 168.17it/s]100%|██████████| 19/19 [00:00<00:00, 168.15it/s]
+Selecting 9 cells from greedy initialization.
+Randomly initialized A matrix.
+Setting convergence threshold at 0.00125
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Converged after 19 iterations.
+Done with 5000 cells, trial 5

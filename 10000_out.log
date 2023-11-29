@@ -1,0 +1,104 @@
+nohup: ignoring input
+findfont: Font family ['Raleway'] not found. Falling back to DejaVu Sans.
+findfont: Font family ['Lato'] not found. Falling back to DejaVu Sans.
+SPARSE AND GPU
+TRYING SEACellsGPU
+Welcome to SEACells GPU!
+build_graph.SEACellGraph completed
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/10000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/10000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/10000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 119 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/24 [00:00<?, ?it/s]/home/aparna/miniconda3/lib/python3.9/site-packages/cupyx/scipy/sparse/_compressed.py:545: SparseEfficiencyWarning: Changing the sparsity structure of a csr_matrix is expensive.
+  warnings.warn('Changing the sparsity structure of a '
+ 17%|█▋        | 4/24 [00:00<00:00, 32.67it/s] 38%|███▊      | 9/24 [00:00<00:00, 39.19it/s] 58%|█████▊    | 14/24 [00:00<00:00, 39.18it/s] 75%|███████▌  | 18/24 [00:00<00:00, 38.90it/s] 92%|█████████▏| 22/24 [00:00<00:00, 35.45it/s]100%|██████████| 24/24 [00:00<00:00, 35.81it/s]
+Selecting 14 cells from greedy initialization.
+Randomly initialized A matrix.
+Convergence threshold set to 0.0017809197686690815 based on epsilon = 1e-05
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Starting iteration 20.
+Completed iteration 20.
+Starting iteration 30.
+Completed iteration 30.
+Starting iteration 40.
+Completed iteration 40.
+Converged after 45 iterations.
+NOT SPARSE AND GPU
+TRYING SEACellsGPUDense
+Welcome to SEACells GPU!
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/10000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/10000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/10000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 119 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/24 [00:00<?, ?it/s] 42%|████▏     | 10/24 [00:00<00:00, 96.45it/s] 96%|█████████▌| 23/24 [00:00<00:00, 113.28it/s]100%|██████████| 24/24 [00:00<00:00, 110.97it/s]
+Selecting 14 cells from greedy initialization.
+Randomly initialized A matrix.
+Setting convergence threshold at 0.00178
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Starting iteration 20.
+Completed iteration 20.
+Starting iteration 30.
+Completed iteration 30.
+Converged after 36 iterations.
+SPARSE AND NOT GPU
+TRYING SEACellsCPU
+Welcome to SEACells!
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/10000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/10000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/10000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 119 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/24 [00:00<?, ?it/s] 42%|████▏     | 10/24 [00:00<00:00, 92.28it/s] 92%|█████████▏| 22/24 [00:00<00:00, 103.90it/s]100%|██████████| 24/24 [00:00<00:00, 103.16it/s]
+nohup: ignoring input
+findfont: Font family ['Raleway'] not found. Falling back to DejaVu Sans.
+findfont: Font family ['Lato'] not found. Falling back to DejaVu Sans.

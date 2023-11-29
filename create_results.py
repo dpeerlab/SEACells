@@ -57,16 +57,85 @@ def get_data(ad, num_cells, use_gpu, use_sparse):
   return assignments, tot_time, mem
 
 def gpu_versions(ad, num_cells):
-    assignments3, time3, mem3 = get_data(ad, num_cells = num_cells, use_gpu=True, use_sparse=False)
-    assignments4, time4, mem4 = get_data(ad, num_cells = num_cells, use_gpu=True, use_sparse=True)
+    try:
+        assignments4, time4, mem4 = get_data(ad, num_cells = num_cells, use_gpu=True, use_sparse=True)
+        # If successful, write the time and memory a file "{num_cells}_cells/v4_{timestamp}.txt"
+        # Get the timestamp as a number 
+        timestamp = time.time()
+
+        # Write the time and memory data 
+        with open(f"results/{num_cells}_cells/v4_{timestamp}.txt", "w") as f: 
+            f.write(f"Time: {time4}\n")
+            f.write(f"Memory: {mem4}\n")
+
+
+    except Exception as e:
+        # fill with nans if it fails
+        assignments4, time4, mem4 =  ([np.nan, np.nan, np.nan], np.nan, [np.nan, np.nan])
+
+        # If it fails, write the error to a file "{num_cells}_cells/v4_{timestamp}.txt" 
+        # Get the timestamp as a number 
+        timestamp = time.time()
+
+        # Write the error to a file
+        with open(f"results/{num_cells}_cells/v4_{timestamp}.txt", "w") as f: 
+            f.write(f"Error: {e}\n")
+
+    try: 
+        assignments3, time3, mem3 = get_data(ad, num_cells = num_cells, use_gpu=True, use_sparse=False)
+
+        # If successful, write the time and memory a file "{num_cells}_cells/v3_{timestamp}.txt"
+        # Get the timestamp as a number
+        timestamp = time.time()
+
+        # Write the time and memory data 
+        with open(f"results/{num_cells}_cells/v3_{timestamp}.txt", "w") as f: 
+            f.write(f"Time: {time3}\n")
+            f.write(f"Memory: {mem3}\n")
+
+    except Exception as e: 
+        # fill with nans if it fails
+        assignments3, time3, mem3 =  ([np.nan, np.nan, np.nan], np.nan, [np.nan, np.nan])
+
+        # If it fails, write the error to a file "{num_cells}_cells/v3_{timestamp}.txt"
+        # Get the timestamp as a number
+        timestamp = time.time()
+
+        # Write the error to a file
+        with open(f"results/{num_cells}_cells/v3_{timestamp}.txt", "w") as f: 
+            f.write(f"Error: {e}\n")
+
+    try: 
+        assignments2, time2, mem2 = get_data(ad, num_cells = num_cells, use_gpu=False, use_sparse=True)
+
+        # If successful, write the time and memory a file "{num_cells}_cells/v2_{timestamp}.txt"
+        # Get the timestamp as a number
+        timestamp = time.time()
+
+        # Write the time and memory data 
+        with open(f"results/{num_cells}_cells/v2_{timestamp}.txt", "w") as f: 
+            f.write(f"Time: {time2}\n")
+            f.write(f"Memory: {mem2}\n")
+
+    except Exception as e:
+        # fill with nans if it fails
+        assignments2, time2, mem2 =  ([np.nan, np.nan, np.nan], np.nan, [np.nan, np.nan])
+
+        # If it fails, write the error to a file "{num_cells}_cells/v2_{timestamp}.txt"
+        # Get the timestamp as a number
+        timestamp = time.time()
+
+        # Write the error to a file
+        with open(f"results/{num_cells}_cells/v2_{timestamp}.txt", "w") as f: 
+            f.write(f"Error: {e}\n")
 
     # Write the assignments
-    assignments = [assignments3, assignments4] 
+    assignments = [assignments2, assignments3, assignments4] 
     
     # Write the time and memory data
-    comparisons = pd.DataFrame({'version': ['v3: yes GPU, no sparse', 'v4: yes GPU, yes sparse'], 
-                           'time (s)': [time3, time4],
-                           'peak memory': [mem3[1], mem4[1]]})
+    comparisons = pd.DataFrame({'version': ['v2: no GPU, yes sparse', 'v3: yes GPU, no sparse', 'v4: yes GPU, yes sparse'], 
+                           'time (s)': [time2, time3, time4],
+                           'peak memory': [mem2[1], mem3[1], mem4[1]]})
     
     return assignments, comparisons
 
