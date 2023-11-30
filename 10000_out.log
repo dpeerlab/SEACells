@@ -77,3 +77,45 @@ Initializing f and g...
   self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
 /data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py:650: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
   self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py:650: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py:650: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py:650: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py:650: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py:650: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py:650: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py:650: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py:650: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py:650: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py:650: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py:650: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py:650: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py:650: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py:650: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py:650: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py:650: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py:650: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py:650: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py:650: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py:650: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/gpu.py:650: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
