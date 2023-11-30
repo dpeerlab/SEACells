@@ -1,3 +1,112 @@
 nohup: ignoring input
 findfont: Font family ['Raleway'] not found. Falling back to DejaVu Sans.
 findfont: Font family ['Lato'] not found. Falling back to DejaVu Sans.
+SPARSE AND GPU
+TRYING SEACellsGPU
+Welcome to SEACells GPU!
+build_graph.SEACellGraph completed
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/100000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/100000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/100000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 1274 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/69 [00:00<?, ?it/s]/home/aparna/miniconda3/lib/python3.9/site-packages/cupyx/scipy/sparse/_compressed.py:545: SparseEfficiencyWarning: Changing the sparsity structure of a csr_matrix is expensive.
+  warnings.warn('Changing the sparsity structure of a '
+  3%|▎         | 2/69 [00:00<00:05, 13.11it/s]  6%|▌         | 4/69 [00:00<00:05, 12.95it/s]  9%|▊         | 6/69 [00:00<00:05, 12.58it/s] 12%|█▏        | 8/69 [00:00<00:04, 12.37it/s] 14%|█▍        | 10/69 [00:00<00:04, 11.91it/s] 17%|█▋        | 12/69 [00:01<00:04, 11.45it/s] 20%|██        | 14/69 [00:01<00:05, 10.82it/s] 23%|██▎       | 16/69 [00:01<00:05, 10.20it/s] 26%|██▌       | 18/69 [00:01<00:05,  9.70it/s] 28%|██▊       | 19/69 [00:01<00:05,  9.40it/s] 29%|██▉       | 20/69 [00:01<00:05,  9.10it/s] 30%|███       | 21/69 [00:02<00:05,  8.77it/s] 32%|███▏      | 22/69 [00:02<00:05,  8.39it/s] 33%|███▎      | 23/69 [00:02<00:05,  8.13it/s] 35%|███▍      | 24/69 [00:02<00:05,  7.82it/s] 36%|███▌      | 25/69 [00:02<00:05,  7.62it/s] 38%|███▊      | 26/69 [00:02<00:05,  7.44it/s] 39%|███▉      | 27/69 [00:02<00:05,  7.13it/s] 41%|████      | 28/69 [00:03<00:05,  6.96it/s] 42%|████▏     | 29/69 [00:03<00:05,  6.82it/s] 43%|████▎     | 30/69 [00:03<00:05,  6.69it/s] 45%|████▍     | 31/69 [00:03<00:05,  6.58it/s] 46%|████▋     | 32/69 [00:03<00:05,  6.46it/s] 48%|████▊     | 33/69 [00:03<00:05,  6.61it/s] 49%|████▉     | 34/69 [00:03<00:05,  6.69it/s] 51%|█████     | 35/69 [00:04<00:05,  6.72it/s] 52%|█████▏    | 36/69 [00:04<00:04,  6.71it/s] 54%|█████▎    | 37/69 [00:04<00:04,  6.66it/s] 55%|█████▌    | 38/69 [00:04<00:04,  6.59it/s] 57%|█████▋    | 39/69 [00:04<00:04,  6.51it/s] 58%|█████▊    | 40/69 [00:04<00:04,  6.44it/s] 59%|█████▉    | 41/69 [00:05<00:04,  6.32it/s] 61%|██████    | 42/69 [00:05<00:04,  6.27it/s] 62%|██████▏   | 43/69 [00:05<00:04,  6.15it/s] 64%|██████▍   | 44/69 [00:05<00:04,  6.00it/s] 65%|██████▌   | 45/69 [00:05<00:04,  5.94it/s] 67%|██████▋   | 46/69 [00:05<00:03,  5.85it/s] 68%|██████▊   | 47/69 [00:06<00:03,  5.73it/s] 70%|██████▉   | 48/69 [00:06<00:03,  5.66it/s] 71%|███████   | 49/69 [00:06<00:03,  5.58it/s] 72%|███████▏  | 50/69 [00:06<00:03,  5.42it/s] 74%|███████▍  | 51/69 [00:06<00:03,  5.30it/s] 75%|███████▌  | 52/69 [00:07<00:03,  5.19it/s] 77%|███████▋  | 53/69 [00:07<00:03,  5.12it/s] 78%|███████▊  | 54/69 [00:07<00:02,  5.01it/s] 80%|███████▉  | 55/69 [00:07<00:02,  4.95it/s] 81%|████████  | 56/69 [00:07<00:02,  4.85it/s] 83%|████████▎ | 57/69 [00:08<00:02,  4.79it/s] 84%|████████▍ | 58/69 [00:08<00:02,  4.69it/s] 86%|████████▌ | 59/69 [00:08<00:02,  4.57it/s] 87%|████████▋ | 60/69 [00:08<00:01,  4.54it/s] 88%|████████▊ | 61/69 [00:08<00:01,  4.48it/s] 90%|████████▉ | 62/69 [00:09<00:01,  4.41it/s] 91%|█████████▏| 63/69 [00:09<00:01,  4.35it/s] 93%|█████████▎| 64/69 [00:09<00:01,  4.30it/s] 94%|█████████▍| 65/69 [00:09<00:00,  4.33it/s] 96%|█████████▌| 66/69 [00:10<00:00,  4.32it/s] 97%|█████████▋| 67/69 [00:10<00:00,  4.33it/s] 99%|█████████▊| 68/69 [00:10<00:00,  4.31it/s]100%|██████████| 69/69 [00:10<00:00,  4.30it/s]100%|██████████| 69/69 [00:10<00:00,  6.35it/s]
+Selecting 59 cells from greedy initialization.
+Randomly initialized A matrix.
+SPARSE AND NOT GPU
+TRYING SEACellsCPU
+Welcome to SEACells!
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/100000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/100000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/100000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 1274 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/69 [00:00<?, ?it/s]  1%|▏         | 1/69 [00:00<00:20,  3.38it/s]  3%|▎         | 2/69 [00:00<00:19,  3.39it/s]  4%|▍         | 3/69 [00:00<00:22,  2.91it/s]  6%|▌         | 4/69 [00:01<00:21,  3.06it/s]  7%|▋         | 5/69 [00:01<00:20,  3.07it/s]  9%|▊         | 6/69 [00:01<00:19,  3.20it/s] 10%|█         | 7/69 [00:02<00:20,  3.01it/s] 12%|█▏        | 8/69 [00:02<00:20,  2.91it/s] 13%|█▎        | 9/69 [00:02<00:20,  2.93it/s] 14%|█▍        | 10/69 [00:03<00:21,  2.69it/s] 16%|█▌        | 11/69 [00:03<00:22,  2.62it/s] 17%|█▋        | 12/69 [00:04<00:22,  2.59it/s] 19%|█▉        | 13/69 [00:04<00:22,  2.49it/s] 20%|██        | 14/69 [00:05<00:22,  2.45it/s] 22%|██▏       | 15/69 [00:05<00:23,  2.28it/s] 23%|██▎       | 16/69 [00:05<00:21,  2.52it/s] 25%|██▍       | 17/69 [00:06<00:20,  2.55it/s] 26%|██▌       | 18/69 [00:06<00:21,  2.37it/s] 28%|██▊       | 19/69 [00:07<00:21,  2.29it/s] 29%|██▉       | 20/69 [00:07<00:21,  2.30it/s] 30%|███       | 21/69 [00:08<00:20,  2.30it/s] 32%|███▏      | 22/69 [00:08<00:20,  2.25it/s] 33%|███▎      | 23/69 [00:09<00:20,  2.19it/s] 35%|███▍      | 24/69 [00:09<00:21,  2.13it/s] 36%|███▌      | 25/69 [00:10<00:20,  2.14it/s] 38%|███▊      | 26/69 [00:10<00:20,  2.10it/s] 39%|███▉      | 27/69 [00:11<00:20,  2.05it/s] 41%|████      | 28/69 [00:11<00:19,  2.10it/s] 42%|████▏     | 29/69 [00:11<00:19,  2.09it/s] 43%|████▎     | 30/69 [00:12<00:18,  2.09it/s] 45%|████▍     | 31/69 [00:12<00:17,  2.14it/s] 46%|████▋     | 32/69 [00:13<00:17,  2.10it/s] 48%|████▊     | 33/69 [00:13<00:16,  2.14it/s] 49%|████▉     | 34/69 [00:14<00:16,  2.12it/s] 51%|█████     | 35/69 [00:14<00:16,  2.10it/s] 52%|█████▏    | 36/69 [00:15<00:16,  2.00it/s] 54%|█████▎    | 37/69 [00:15<00:15,  2.05it/s] 55%|█████▌    | 38/69 [00:16<00:15,  2.02it/s] 57%|█████▋    | 39/69 [00:16<00:14,  2.09it/s] 58%|█████▊    | 40/69 [00:17<00:14,  2.02it/s] 59%|█████▉    | 41/69 [00:17<00:13,  2.01it/s] 61%|██████    | 42/69 [00:18<00:13,  1.99it/s] 62%|██████▏   | 43/69 [00:18<00:13,  1.96it/s] 64%|██████▍   | 44/69 [00:19<00:12,  1.98it/s] 65%|██████▌   | 45/69 [00:19<00:12,  1.96it/s] 67%|██████▋   | 46/69 [00:20<00:11,  1.96it/s] 68%|██████▊   | 47/69 [00:20<00:11,  1.93it/s] 70%|██████▉   | 48/69 [00:21<00:10,  1.93it/s] 71%|███████   | 49/69 [00:21<00:09,  2.02it/s] 72%|███████▏  | 50/69 [00:22<00:09,  1.97it/s] 74%|███████▍  | 51/69 [00:22<00:09,  1.94it/s] 75%|███████▌  | 52/69 [00:23<00:08,  1.90it/s] 77%|███████▋  | 53/69 [00:23<00:07,  2.21it/s] 78%|███████▊  | 54/69 [00:24<00:06,  2.46it/s] 80%|███████▉  | 55/69 [00:24<00:05,  2.45it/s] 81%|████████  | 56/69 [00:24<00:04,  2.66it/s] 83%|████████▎ | 57/69 [00:25<00:04,  2.62it/s] 84%|████████▍ | 58/69 [00:25<00:04,  2.71it/s] 86%|████████▌ | 59/69 [00:25<00:03,  2.66it/s] 87%|████████▋ | 60/69 [00:26<00:03,  2.33it/s] 88%|████████▊ | 61/69 [00:26<00:03,  2.17it/s] 90%|████████▉ | 62/69 [00:27<00:03,  2.13it/s] 91%|█████████▏| 63/69 [00:28<00:03,  1.99it/s] 93%|█████████▎| 64/69 [00:28<00:02,  2.01it/s] 94%|█████████▍| 65/69 [00:28<00:01,  2.11it/s] 96%|█████████▌| 66/69 [00:29<00:01,  2.26it/s] 97%|█████████▋| 67/69 [00:29<00:00,  2.24it/s] 99%|█████████▊| 68/69 [00:30<00:00,  2.23it/s]100%|██████████| 69/69 [00:30<00:00,  2.26it/s]100%|██████████| 69/69 [00:30<00:00,  2.25it/s]
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
