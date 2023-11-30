@@ -1,0 +1,83 @@
+nohup: ignoring input
+findfont: Font family ['Raleway'] not found. Falling back to DejaVu Sans.
+findfont: Font family ['Lato'] not found. Falling back to DejaVu Sans.
+SPARSE AND GPU
+TRYING SEACellsGPU
+Welcome to SEACells GPU!
+build_graph.SEACellGraph completed
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+NOT SPARSE AND GPU
+TRYING SEACellsGPUDense
+Welcome to SEACells GPU!
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 643 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/33 [00:00<?, ?it/s]  6%|▌         | 2/33 [00:00<00:03,  9.45it/s]  9%|▉         | 3/33 [00:00<00:04,  7.04it/s] 12%|█▏        | 4/33 [00:00<00:04,  6.47it/s] 15%|█▌        | 5/33 [00:00<00:04,  6.35it/s] 18%|█▊        | 6/33 [00:00<00:04,  6.18it/s] 21%|██        | 7/33 [00:01<00:04,  5.64it/s] 24%|██▍       | 8/33 [00:01<00:04,  5.25it/s] 27%|██▋       | 9/33 [00:01<00:04,  4.84it/s] 30%|███       | 10/33 [00:01<00:04,  4.82it/s] 33%|███▎      | 11/33 [00:02<00:05,  4.33it/s] 36%|███▋      | 12/33 [00:02<00:04,  4.69it/s] 39%|███▉      | 13/33 [00:02<00:04,  4.84it/s] 42%|████▏     | 14/33 [00:02<00:03,  4.76it/s] 45%|████▌     | 15/33 [00:02<00:03,  4.57it/s] 48%|████▊     | 16/33 [00:03<00:04,  4.22it/s] 52%|█████▏    | 17/33 [00:03<00:03,  4.19it/s] 55%|█████▍    | 18/33 [00:03<00:03,  4.46it/s] 58%|█████▊    | 19/33 [00:03<00:03,  4.29it/s] 61%|██████    | 20/33 [00:04<00:03,  4.12it/s] 64%|██████▎   | 21/33 [00:04<00:03,  3.75it/s] 67%|██████▋   | 22/33 [00:04<00:03,  3.62it/s] 70%|██████▉   | 23/33 [00:05<00:02,  3.55it/s] 73%|███████▎  | 24/33 [00:05<00:02,  3.41it/s] 76%|███████▌  | 25/33 [00:05<00:02,  3.43it/s] 79%|███████▉  | 26/33 [00:06<00:02,  3.14it/s] 82%|████████▏ | 27/33 [00:06<00:01,  3.41it/s] 85%|████████▍ | 28/33 [00:06<00:01,  3.40it/s] 88%|████████▊ | 29/33 [00:06<00:01,  3.48it/s] 91%|█████████ | 30/33 [00:07<00:00,  3.41it/s] 94%|█████████▍| 31/33 [00:07<00:00,  3.53it/s] 97%|█████████▋| 32/33 [00:07<00:00,  3.09it/s]100%|██████████| 33/33 [00:08<00:00,  2.92it/s]100%|██████████| 33/33 [00:08<00:00,  4.02it/s]
+Selecting 23 cells from greedy initialization.
+Randomly initialized A matrix.
+SPARSE AND NOT GPU
+TRYING SEACellsCPU
+Welcome to SEACells!
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 643 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/33 [00:00<?, ?it/s]  6%|▌         | 2/33 [00:00<00:02, 11.56it/s] 12%|█▏        | 4/33 [00:00<00:03,  8.45it/s] 15%|█▌        | 5/33 [00:00<00:03,  7.67it/s] 18%|█▊        | 6/33 [00:00<00:03,  6.92it/s] 21%|██        | 7/33 [00:00<00:04,  6.44it/s] 24%|██▍       | 8/33 [00:01<00:04,  5.93it/s] 27%|██▋       | 9/33 [00:01<00:03,  6.18it/s] 30%|███       | 10/33 [00:01<00:03,  6.34it/s] 33%|███▎      | 11/33 [00:01<00:03,  5.80it/s] 36%|███▋      | 12/33 [00:01<00:03,  5.38it/s] 39%|███▉      | 13/33 [00:02<00:03,  5.30it/s] 42%|████▏     | 14/33 [00:02<00:03,  4.98it/s] 45%|████▌     | 15/33 [00:02<00:04,  4.31it/s] 48%|████▊     | 16/33 [00:02<00:04,  4.18it/s] 52%|█████▏    | 17/33 [00:03<00:03,  4.22it/s] 55%|█████▍    | 18/33 [00:03<00:03,  4.06it/s] 58%|█████▊    | 19/33 [00:03<00:03,  4.05it/s] 61%|██████    | 20/33 [00:03<00:03,  3.93it/s] 64%|██████▎   | 21/33 [00:04<00:03,  3.58it/s] 67%|██████▋   | 22/33 [00:04<00:02,  3.92it/s] 70%|██████▉   | 23/33 [00:04<00:02,  3.71it/s] 73%|███████▎  | 24/33 [00:04<00:02,  3.73it/s] 76%|███████▌  | 25/33 [00:05<00:02,  3.88it/s] 79%|███████▉  | 26/33 [00:05<00:01,  3.71it/s] 82%|████████▏ | 27/33 [00:05<00:01,  3.80it/s] 85%|████████▍ | 28/33 [00:05<00:01,  4.00it/s] 88%|████████▊ | 29/33 [00:06<00:01,  3.68it/s] 91%|█████████ | 30/33 [00:06<00:00,  3.57it/s] 94%|█████████▍| 31/33 [00:06<00:00,  3.40it/s] 97%|█████████▋| 32/33 [00:07<00:00,  3.18it/s]100%|██████████| 33/33 [00:07<00:00,  3.09it/s]100%|██████████| 33/33 [00:07<00:00,  4.31it/s]
+Selecting 23 cells from greedy initialization.
+Randomly initialized A matrix.
+Setting convergence threshold at 0.00407
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Starting iteration 20.
+Completed iteration 20.
+Starting iteration 30.
+Completed iteration 30.
+Converged after 36 iterations.
+Traceback (most recent call last):
+  File "/data/aparna/aparnakumar/github clone/SEACells/create_results.py", line 165, in <module>
+    get_results(num_cells)
+  File "/data/aparna/aparnakumar/github clone/SEACells/create_results.py", line 155, in get_results
+    assignments[i].to_csv(f"results/{num_cell}_cells/assignments_v4_{trial}.csv")
+AttributeError: 'list' object has no attribute 'to_csv'

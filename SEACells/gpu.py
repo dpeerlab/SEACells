@@ -113,6 +113,10 @@ class SEACellsGPU:
         self.A0 = None
         self.B0 = None
 
+        # TODO: Remove this later ------- 
+        # Create a new dataframe that will hold the sparsity ratios of A, B, K
+        self.sparsity_ratios = pd.DataFrame(columns = ["A", "B", "K"]) 
+
         return
 
     def add_precomputed_kernel_matrix(self, K):
@@ -412,6 +416,11 @@ class SEACellsGPU:
         # ATA = M.T @ M
         ATA = self.K
 
+        # Find out how many non-zero entries there are in ATA 
+        # ic(ATA.nnz)
+        # ic(ATA.shape)
+        # ic(ATA.nnz/ATA.shape[0]**2)
+
         if self.verbose:
             print("Initializing f and g...")
 
@@ -471,7 +480,7 @@ class SEACellsGPU:
 
         return centers
 
-    def _updateA(self, B, A_prev):
+    def _updateA(self, Bg, Ag):
         """Compute assignment matrix A using constrained gradient descent via Frank-Wolfe algorithm.
 
         Given archetype matrix B and using kernel matrix K, compute assignment matrix A using constrained gradient
@@ -482,17 +491,17 @@ class SEACellsGPU:
         :return: (n x k csr_matrix) defining updated weights used for assigning cells to SEACells
         """
        # ic("updateA")
-        n, k = B.shape
+        n, k = Bg.shape
         # print(n, k)
-        A = A_prev
+        # A = A_prev
         # ic(type(A))
 
         t = 0  # current iteration (determine multiplicative update)
 
         # print("bookmark")
-        Ag = A
-        # ic(type(A))
-        Bg = B
+        # Ag = A
+        # # ic(type(A))
+        # Bg = B
         # print(type(self.K))
         Kg = self.K
         # ic(type(Kg))
@@ -531,6 +540,13 @@ class SEACellsGPU:
             eg = cp.zeros((k, n))
             eg[amins, cp.arange(n)] = 1.0
             eg = cupyx.scipy.sparse.csr_matrix(eg) 
+
+            # row_indices = cp.array(amins)
+            # col_indices = cp.arange(n) 
+            # data = cp.ones_like(row_indices, dtype = cp.float64) 
+            # eg = cupyx.scipy.sparse.coo_matrix((data, (row_indices, col_indices)), shape=(k, n))
+            # eg = eg.tocsr()
+
             # print("eg")
 
             f = 2.0 / (t + 2.0)
@@ -541,16 +557,16 @@ class SEACellsGPU:
 
 
         # A = Ag.get()
-        A = Ag
+        # A = Ag
 
 
-        del t1g, t2g, Ag, Kg, Gg, Bg, eg, amins
+        del t1g, t2g, Kg, Gg, Bg, eg, amins
         cp._default_memory_pool.free_all_blocks()
 
         # ic(type(A))
-        return A
+        return Ag
 
-    def _updateB(self, A, B_prev):
+    def _updateB(self, Ag, Bg):
         """Compute archetype matrix B using constrained gradient descent via Frank-Wolfe algorithm.
 
         Given assignment matrix A and using kernel matrix K, compute archetype matrix B using constrained gradient
@@ -561,15 +577,11 @@ class SEACellsGPU:
         :return: (n x k csr_matrix) defining updated SEACells as weighted combinations of cells
         """
         # ic("_updateB")
-        k, n = A.shape
-
-        B = B_prev
+        k, n = Ag.shape
 
         # keep track of error
         t = 0
 
-        Ag = A
-        Bg = B
         Kg = self.K
         # precompute some terms
         t1g = Ag.dot(Ag.T)
@@ -592,7 +604,6 @@ class SEACellsGPU:
 
             t += 1
 
-        B = Bg
 
         del (
             t1g,
@@ -600,13 +611,12 @@ class SEACellsGPU:
             Ag,
             Kg,
             Gg,
-            Bg,
             eg,
             amins,
         )
         cp._default_memory_pool.free_all_blocks()
 
-        return B
+        return Bg
 
     def compute_reconstruction(self, A=None, B=None):
         """Compute reconstructed data matrix using learned archetypes (SEACells) and assignments.
@@ -627,7 +637,32 @@ class SEACellsGPU:
                 "Either assignment matrix A or archetype matrix B is None."
             )
 
-        return (self.kernel_matrix.dot(B)).dot(A)
+        # ic(type(A))
+        # ic(type(B))
+        # ic(type(self.kernel_matrix))
+
+        # Print proportion of non-zero entries in A and B and self.kernel_matrix 
+        # ic(A.nnz / (A.shape[0]*A.shape[1]))
+        # ic(B.nnz / (B.shape[0]*B.shape[1]))
+        # ic(self.kernel_matrix.nnz / (self.kernel_matrix.shape[0]*self.kernel_matrix.shape[1]))
+
+        # Add the sparsity ratios to the dataframe 
+        self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]), 
+                                                            "B": B.nnz / (B.shape[0]*B.shape[1]), 
+                                                            "K": self.kernel_matrix.nnz / (self.kernel_matrix.shape[0]*self.kernel_matrix.shape[1])}, 
+                                                            ignore_index = True)
+
+        # turn this to a dense calculation 
+
+        # turn A, B, and self.kernel_matrix to dense matrices 
+        # A = A.todense()
+        # B = B.todense()
+        # K = self.kernel_matrix.todense()
+        A = A.get().todense() 
+        B = B.get().todense() 
+        K = self.kernel_matrix.get().todense()
+
+        return (K.dot(B)).dot(A)
 
     def compute_RSS(self, A=None, B=None):
         """Compute residual sum of squares error in difference between reconstruction and true data matrix.
@@ -646,12 +681,21 @@ class SEACellsGPU:
         
         # print("COMPUTE RECONSTRUCTION")
         reconstruction = self.compute_reconstruction(A, B)
+
+        # Print proportion of nonzero values in reconstruction 
+        # ic(reconstruction.nnz / (reconstruction.shape[0]*reconstruction.shape[1]))
+        # ic(type(reconstruction))
+
         # print("FINISHED COMPUTE RECONSTRUCTION")
 
         assert reconstruction.shape == self.kernel_matrix.shape
         assert reconstruction.shape == (self.n_cells, self.n_cells), 'reconstruction.shape != (self.n_cells, self.n_cells)'
 
-        diff = self.kernel_matrix - reconstruction 
+
+        # Densify the kernel matrix 
+        # kernel_matrix = self.kernel_matrix.todense()
+        kernel_matrix = self.kernel_matrix.get().todense()
+        diff = kernel_matrix - reconstruction 
         # ic(type(diff))
 
         # Want to free up memory for A, B, and reconstruction 
@@ -665,7 +709,7 @@ class SEACellsGPU:
         # ic(cp.linalg.norm(diff))
         # ic(np.linalg.norm(diff))
 
-        return norm(diff)
+        return np.linalg.norm(diff)
 
     def plot_convergence(self, save_as=None, show=True):
         """Plot behaviour of squared error over iterations.
@@ -687,46 +731,48 @@ class SEACellsGPU:
             plt.show()
         plt.close()
 
-    def step(self):
+    def step(self, iteration = None):
         """Perform one iteration of SEACell algorithm. Update assignment matrix A and archetype matrix B.
+
+        If iterations = None, it checks if the RSS has converged every time. Else, it checks every 5th iteration.
 
         :return: None.
         """
-        # ic("step")
-        A = self.A_
-        B = self.B_
+        if iteration is None or (iteration is not None and iteration % 3 == 0):
+            A = self.A_
+            B = self.B_
 
-        if self.K is None:
-            raise RuntimeError(
-                "Kernel matrix has not been computed. Run model.construct_kernel_matrix() first."
-            )
+            if self.K is None:
+                raise RuntimeError(
+                    "Kernel matrix has not been computed. Run model.construct_kernel_matrix() first."
+                )
 
-        if A is None:
-            raise RuntimeError(
-                "Cell to SEACell assignment matrix has not been initialised. Run model.initialize() first."
-            )
+            if A is None:
+                raise RuntimeError(
+                    "Cell to SEACell assignment matrix has not been initialised. Run model.initialize() first."
+                )
 
-        if B is None:
-            raise RuntimeError(
-                "Archetype matrix has not been initialised. Run model.initialize() first."
-            )
+            if B is None:
+                raise RuntimeError(
+                    "Archetype matrix has not been initialised. Run model.initialize() first."
+                )
 
-        A = self._updateA(B, A)
-        B = self._updateB(A, B)
+            A = self._updateA(B, A)
+            B = self._updateB(A, B)
 
-        # ic(self.RSS_iters)
-        RSS = self.compute_RSS(A, B)
-        self.RSS_iters.append(RSS)
-        # ic(self.RSS_iters)
+            # ic(self.RSS_iters)
+            RSS = self.compute_RSS(A, B)
+            self.RSS_iters.append(RSS)
+            # ic(self.RSS_iters)
 
-        self.A_ = A
-        self.B_ = B
+            self.A_ = A
+            self.B_ = B
 
-        del A, B, RSS
+            del A, B, RSS
 
-        # Label cells by SEACells assignment
-        labels = self.get_hard_assignments()
-        self.ad.obs["SEACell"] = labels["SEACell"]
+            # Label cells by SEACells assignment
+            labels = self.get_hard_assignments()
+            self.ad.obs["SEACell"] = labels["SEACell"]
 
         return
 
@@ -763,20 +809,23 @@ class SEACellsGPU:
             if n_iter == 1 or (n_iter) % 10 == 0:
                 if self.verbose:
                     print(f"Starting iteration {n_iter}.")
-            self.step()
+            self.step(iteration = n_iter)
 
             if n_iter == 1 or (n_iter) % 10 == 0:
                 if self.verbose:
                     print(f"Completed iteration {n_iter}.")
 
             # Check for convergence
-            if (
-                cp.abs(self.RSS_iters[-2] - self.RSS_iters[-1])
-                < self.convergence_threshold
-            ):
-                if self.verbose:
-                    print(f"Converged after {n_iter} iterations.")
-                converged = True
+            if (len(self.RSS_iters) > 1): 
+                # ic(self.RSS_iters[-2] - self.RSS_iters[-1])
+                # ic(self.convergence_threshold)
+                if (
+                    cp.abs(self.RSS_iters[-2] - self.RSS_iters[-1])
+                    < self.convergence_threshold
+                ):
+                    if self.verbose:
+                        print(f"Converged after {n_iter} iterations.")
+                    converged = True
 
         self.Z_ = self.B_.T @ self.K
 

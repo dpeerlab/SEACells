@@ -110,6 +110,10 @@ class SEACellsCPU:
         self.A0 = None
         self.B0 = None
 
+        # TODO: Remove this later ------- 
+        # Create a new dataframe that will hold the sparsity ratios of A, B, K
+        self.sparsity_ratios = pd.DataFrame(columns = ["A", "B", "K"]) 
+
         return
 
     def add_precomputed_kernel_matrix(self, K):
@@ -515,6 +519,13 @@ class SEACellsCPU:
             raise RuntimeError(
                 "Either assignment matrix A or archetype matrix B is None."
             )
+        
+        # Add the sparsity ratios to the dataframe 
+        self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]), 
+                                                            "B": B.nnz / (B.shape[0]*B.shape[1]), 
+                                                            "K": self.kernel_matrix.nnz / (self.kernel_matrix.shape[0]*self.kernel_matrix.shape[1])}, 
+                                                            ignore_index = True)
+        
         return (self.kernel_matrix.dot(B)).dot(A)
 
     def compute_RSS(self, A=None, B=None):
