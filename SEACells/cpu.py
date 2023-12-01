@@ -129,7 +129,7 @@ class SEACellsCPU:
         self.kernel_matrix = K
 
         # Pre-compute dot product
-        self.K = self.kernel_matrix @ self.kernel_matrix.T
+        self.K = self.kernel_matrix.dot(self.kernel_matrix.transpose())
 
     def construct_kernel_matrix(
         self, n_neighbors: int = None, graph_construction="union"
@@ -521,10 +521,21 @@ class SEACellsCPU:
             )
         
         # Add the sparsity ratios to the dataframe 
-        self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]), 
-                                                            "B": B.nnz / (B.shape[0]*B.shape[1]), 
-                                                            "K": self.kernel_matrix.nnz / (self.kernel_matrix.shape[0]*self.kernel_matrix.shape[1])}, 
-                                                            ignore_index = True)
+        self.sparsity_ratios = pd.concat(
+            [
+                self.sparsity_ratios,
+                pd.DataFrame(
+                    {
+                        "A": A.nnz / (A.shape[0] * A.shape[1]),
+                        "B": B.nnz / (B.shape[0] * B.shape[1]),
+                        "K": self.kernel_matrix.nnz
+                        / (self.kernel_matrix.shape[0] * self.kernel_matrix.shape[1]),
+                    },
+                    index=[0],
+                ),
+            ],
+            ignore_index=True,
+        )
         
         return (self.kernel_matrix.dot(B)).dot(A)
 

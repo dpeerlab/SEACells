@@ -929,7 +929,7 @@
         "kind": 2,
         "importPath": "create_results",
         "description": "create_results",
-        "peekOfCode": "def get_data(ad, num_cells, use_gpu, use_sparse):\n    ## User defined parameters\n    ## Core parameters\n    # number of SEACells\n    n_SEACells = num_cells // 75\n    build_kernel_on = \"X_pca\"  # key in ad.obsm to use for computing metacells\n    # This would be replaced by 'X_svd' for ATAC data\n    ## Additional parameters\n    n_waypoint_eigs = (\n        10  # Number of eigenvalues to consider when initializing metacells",
+        "peekOfCode": "def get_data(ad, num_cells, use_gpu, use_sparse, A_init = None, B_init = None, K_init = None):\n    ## User defined parameters\n    ## Core parameters\n    # number of SEACells\n    n_SEACells = num_cells // 75\n    build_kernel_on = \"X_pca\"  # key in ad.obsm to use for computing metacells\n    # This would be replaced by 'X_svd' for ATAC data\n    ## Additional parameters\n    n_waypoint_eigs = (\n        10  # Number of eigenvalues to consider when initializing metacells",
         "detail": "create_results",
         "documentation": {}
     },
@@ -938,7 +938,7 @@
         "kind": 2,
         "importPath": "create_results",
         "description": "create_results",
-        "peekOfCode": "def gpu_versions(ad, num_cells):\n    try:\n        assignments4, time4, mem4, A, B, sparsity = get_data(\n            ad, num_cells=num_cells, use_gpu=True, use_sparse=True\n        )\n        # If successful, write the time and memory a file \"{num_cells}_cells/v4_{timestamp}.txt\"\n        # Get the timestamp as a number\n        timestamp = time.time()\n        # Write the time and memory data\n        with open(f\"results2/{num_cells}_cells/v4_{timestamp}.txt\", \"w\") as f:",
+        "peekOfCode": "def gpu_versions(ad, num_cells):\n    assignments2, time2, mem2, A_init, B_init, K_init, sparsity = get_data(\n            ad, num_cells=num_cells, use_gpu=False, use_sparse=False\n        )\n    try:\n        assignments4, time4, mem4, A, B, K, sparsity = get_data(\n            ad, num_cells=num_cells, use_gpu=True, use_sparse=True, A_init = A_init, B_init = B_init, K_init = K_init\n        )\n        # If successful, write the time and memory a file \"{num_cells}_cells/v4_{timestamp}.txt\"\n        # Get the timestamp as a number",
         "detail": "create_results",
         "documentation": {}
     },
@@ -947,7 +947,7 @@
         "kind": 2,
         "importPath": "create_results",
         "description": "create_results",
-        "peekOfCode": "def get_results(num_cell):\n    #    potential_num_cells = [5000, 10000, 50000, 100000, 150000, 200000]\n    #    for num_cell in potential_num_cells:\n    ad = sc.read(\"/home/aparna/DATA/aparnakumar/150000_cells/mouse_marioni_150k.h5ad\")\n    ad = ad[:num_cell]\n    for trial in range(5):\n        gpu_versions(ad, num_cell)\n        # assignments, comparisons = gpu_versions(ad, num_cell)\n        # comparisons.to_csv(f\"results/{num_cell}_cells/comparisons_{trial}.csv\")\n        # for i in range(len(assignments)):",
+        "peekOfCode": "def get_results(num_cell):\n    #    potential_num_cells = [5000, 10000, 50000, 100000, 150000, 200000]\n    #    for num_cell in potential_num_cells:\n    ad = sc.read(\"/home/aparna/DATA/aparnakumar/150000_cells/mouse_marioni_150k.h5ad\")\n    ad = ad[:num_cell]\n    for trial in range(5):\n        gpu_versions(ad, num_cell)\n        # assignments, comparisons = gpu_versions(ad, num_cell)\n        # try:\n        #     comparisons.to_csv(f\"results/{num_cell}_cells/comparisons_{trial}.csv\")",
         "detail": "create_results",
         "documentation": {}
     },

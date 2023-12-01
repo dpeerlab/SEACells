@@ -108,6 +108,10 @@ class SEACellsGPUDense:
         self.B_ = None
         self.B0 = None
 
+        # TODO: Remove this later ------- 
+        # Create a new dataframe that will hold the sparsity ratios of A, B, K
+        self.sparsity_ratios = pd.DataFrame(columns = ["A", "B", "K"]) 
+
         return
 
     def add_precomputed_kernel_matrix(self, K):
@@ -521,6 +525,25 @@ class SEACellsGPUDense:
             A = self.A_
         if B is None:
             B = self.B_
+
+        try: 
+            self.sparsity_ratios = pd.concat(
+                [
+                    self.sparsity_ratios,
+                    pd.DataFrame(
+                        {
+                            "A": A.nnz / (A.shape[0] * A.shape[1]),
+                            "B": B.nnz / (B.shape[0] * B.shape[1]),
+                            "K": self.kernel_matrix.nnz
+                            / (self.kernel_matrix.shape[0] * self.kernel_matrix.shape[1]),
+                        },
+                        index=[0],
+                    ),
+                ],
+                ignore_index=True,
+            )
+        except Exception:
+            pass
 
         if A is None or B is None:
             raise RuntimeError(

@@ -21,7 +21,7 @@ from SEACells.core import SEACells
 # ad = ad[:num_cells]
 
 
-def get_data(ad, num_cells, use_gpu, use_sparse):
+def get_data(ad, num_cells, use_gpu, use_sparse, A_init = None, B_init = None, K_init = None):
     ## User defined parameters
 
     ## Core parameters
@@ -44,8 +44,17 @@ def get_data(ad, num_cells, use_gpu, use_sparse):
         n_waypoint_eigs=n_waypoint_eigs,
         convergence_epsilon=1e-5,
     )
-    model.construct_kernel_matrix()
+    if K_init is None:
+        model.construct_kernel_matrix()
+    else: 
+        model.add_precomputed_kernel_matrix(K_init)
     model.initialize_archetypes()
+    model.initialize() 
+
+    if A_init is not None:
+        model.A_ = A_init 
+    if B_init is not None:
+        model.B_ = B_init
 
     start = time.time()
     tracemalloc.start()
@@ -63,33 +72,39 @@ def get_data(ad, num_cells, use_gpu, use_sparse):
     # Get the final A and B matrices
     A = model.A_
     B = model.B_
+    K = model.kernel_matrix
 
     #   Get the sparsity dataframe
     sparsity = model.sparsity_ratios
 
-    return assignments, tot_time, mem, A, B, sparsity
+    return assignments, tot_time, mem, A, B, K, sparsity
 
 
 def gpu_versions(ad, num_cells):
+    assignments2, time2, mem2, A_init, B_init, K_init, sparsity = get_data(
+            ad, num_cells=num_cells, use_gpu=False, use_sparse=False
+        )
+
     try:
-        assignments4, time4, mem4, A, B, sparsity = get_data(
-            ad, num_cells=num_cells, use_gpu=True, use_sparse=True
+
+        assignments4, time4, mem4, A, B, K, sparsity = get_data(
+            ad, num_cells=num_cells, use_gpu=True, use_sparse=True, A_init = A_init, B_init = B_init, K_init = K_init
         )
         # If successful, write the time and memory a file "{num_cells}_cells/v4_{timestamp}.txt"
         # Get the timestamp as a number
         timestamp = time.time()
 
         # Write the time and memory data
-        with open(f"results2/{num_cells}_cells/v4_{timestamp}.txt", "w") as f:
+        with open(f"results4/{num_cells}_cells/v4_{timestamp}.txt", "w") as f:
             f.write(f"Time: {time4}\n")
             f.write(f"Memory: {mem4}\n")
 
         # Write the A and B matrices
-        np.save(f"results2/{num_cells}_cells/A_v4_{timestamp}.npy", A)
-        np.save(f"results2/{num_cells}_cells/B_v4_{timestamp}.npy", B)
+        np.save(f"results4/{num_cells}_cells/A_v4_{timestamp}.npy", A)
+        np.save(f"results4/{num_cells}_cells/B_v4_{timestamp}.npy", B)
 
         # Write the sparsity dataframe
-        sparsity.to_csv(f"results2/{num_cells}_cells/sparsity_v4_{timestamp}.csv")
+        sparsity.to_csv(f"results4/{num_cells}_cells/sparsity_v4_{timestamp}.csv")
 
         # Clear the GPU memory
         cp.get_default_memory_pool().free_all_blocks()
@@ -103,67 +118,77 @@ def gpu_versions(ad, num_cells):
         timestamp = time.time()
 
         # Write the error to a file
-        with open(f"results2/{num_cells}_cells/v4_{timestamp}.txt", "w") as f:
+        with open(f"results4/{num_cells}_cells/v4_{timestamp}.txt", "w") as f:
             f.write(f"Error: {e}\n")
 
-    # try:
-    #     assignments3, time3, mem3 = get_data(ad, num_cells = num_cells, use_gpu=True, use_sparse=False)
-
-    #     # If successful, write the time and memory a file "{num_cells}_cells/v3_{timestamp}.txt"
-    #     # Get the timestamp as a number
-    #     timestamp = time.time()
-
-    #     # Write the time and memory data
-    #     with open(f"results/{num_cells}_cells/v3_{timestamp}.txt", "w") as f:
-    #         f.write(f"Time: {time3}\n")
-    #         f.write(f"Memory: {mem3}\n")
-
-    # except Exception as e:
-    #     # fill with nans if it fails
-    #     assignments3, time3, mem3 =  ([np.nan, np.nan, np.nan], np.nan, [np.nan, np.nan])
-
-    #     # If it fails, write the error to a file "{num_cells}_cells/v3_{timestamp}.txt"
-    #     # Get the timestamp as a number
-    #     timestamp = time.time()
-
-    #     # Write the error to a file
-    #     with open(f"results/{num_cells}_cells/v3_{timestamp}.txt", "w") as f:
-    #         f.write(f"Error: {e}\n")
-
     try:
-        assignments2, time2, mem2, A, B, sparsity = get_data(
-            ad, num_cells=num_cells, use_gpu=False, use_sparse=True
-        )
+        assignments3, time3, mem3, A, B, K, sparsity = get_data(ad, num_cells = num_cells, use_gpu=False, use_sparse=True, A_init = A_init, B_init = B_init, K_init = K_init)
         # If successful, write the time and memory a file "{num_cells}_cells/v4_{timestamp}.txt"
-        # Get the timestamp as a number
+        # Get the timestamp as a number 
 
         timestamp = time.time()
 
-        # Write the time and memory data
-        with open(f"results2/{num_cells}_cells/v2_{timestamp}.txt", "w") as f:
-            f.write(f"Time: {time2}\n")
-            f.write(f"Memory: {mem2}\n")
+        # Write the time and memory data 
+        with open(f"results4/{num_cells}_cells/v3_{timestamp}.txt", "w") as f: 
+            f.write(f"Time: {time3}\n")
+            f.write(f"Memory: {mem3}\n")
 
-        # Write the A and B matrixes
-        np.save(f"results2/{num_cells}_cells/A_v2_{timestamp}.npy", A)
-        np.save(f"results2/{num_cells}_cells/B_v2_{timestamp}.npy", B)
+        # Write the A and B matrixes 
+        np.save(f"/{num_cells}_cells/A_v3_{timestamp}.npy", A)
+        np.save(f"results4/{num_cells}_cells/B_v3_{timestamp}.npy", B)
 
-        # Write the sparsity dataframe
-        sparsity.to_csv(f"results2/{num_cells}_cells/sparsity_v2_{timestamp}.csv")
+        # Write the sparsity dataframe 
+        sparsity.to_csv(f"results4/{num_cells}_cells/sparsity_v3_{timestamp}.csv")
+
+        # Clear the GPU memory
+        cp.get_default_memory_pool().free_all_blocks()
 
     except Exception as e:
         # fill with nans if it fails
-        assignments2, time2, mem2 = ([np.nan, np.nan, np.nan], np.nan, [np.nan, np.nan])
+        assignments3, time3, mem3 =  ([np.nan, np.nan, np.nan], np.nan, [np.nan, np.nan])
 
-        # If it fails, write the error to a file "{num_cells}_cells/v2_{timestamp}.txt"
+        # If it fails, write the error to a file "{num_cells}_cells/v3_{timestamp}.txt"
         # Get the timestamp as a number
         timestamp = time.time()
 
         # Write the error to a file
-        with open(f"results2/{num_cells}_cells/v2_{timestamp}.txt", "w") as f:
+        with open(f"results4/{num_cells}_cells/v3_{timestamp}.txt", "w") as f:
             f.write(f"Error: {e}\n")
 
-    # # Write the assignments
+    # try:
+    #     assignments2, time2, mem2, A, B, sparsity = get_data(
+    #         ad, num_cells=num_cells, use_gpu=False, use_sparse=True
+    #     )
+    #     # If successful, write the time and memory a file "{num_cells}_cells/v4_{timestamp}.txt"
+    #     # Get the timestamp as a number
+
+    #     timestamp = time.time()
+
+    #     # Write the time and memory data
+    #     with open(f"results2/{num_cells}_cells/v2_{timestamp}.txt", "w") as f:
+    #         f.write(f"Time: {time2}\n")
+    #         f.write(f"Memory: {mem2}\n")
+
+    #     # Write the A and B matrixes
+    #     np.save(f"results2/{num_cells}_cells/A_v2_{timestamp}.npy", A)
+    #     np.save(f"results2/{num_cells}_cells/B_v2_{timestamp}.npy", B)
+
+    #     # Write the sparsity dataframe
+    #     sparsity.to_csv(f"results2/{num_cells}_cells/sparsity_v2_{timestamp}.csv")
+
+    # except Exception as e:
+    #     # fill with nans if it fails
+    #     assignments2, time2, mem2 = ([np.nan, np.nan, np.nan], np.nan, [np.nan, np.nan])
+
+    #     # If it fails, write the error to a file "{num_cells}_cells/v2_{timestamp}.txt"
+    #     # Get the timestamp as a number
+    #     timestamp = time.time()
+
+    #     # Write the error to a file
+    #     with open(f"results2/{num_cells}_cells/v2_{timestamp}.txt", "w") as f:
+    #         f.write(f"Error: {e}\n")
+
+    # Write the assignments
     # assignments = [assignments2, assignments3, assignments4]
 
     # # Write the time and memory data
@@ -183,15 +208,29 @@ def get_results(num_cell):
         gpu_versions(ad, num_cell)
 
         # assignments, comparisons = gpu_versions(ad, num_cell)
-        # comparisons.to_csv(f"results/{num_cell}_cells/comparisons_{trial}.csv")
+
+        # try:
+        #     comparisons.to_csv(f"results/{num_cell}_cells/comparisons_{trial}.csv")
+        # except:
+        #     pass
 
         # for i in range(len(assignments)):
         #     if i == 0:
-        #         assignments[i].to_csv(f"results/{num_cell}_cells/assignments_v2_{trial}.csv")
+        #         try: 
+        #             assignments[i].to_csv(f"results/{num_cell}_cells/assignments_v2_{trial}.csv")
+        #         except:
+        #             pass
         #     elif i == 1:
-        #         assignments[i].to_csv(f"results/{num_cell}_cells/assignments_v3_{trial}.csv")
+        #         try: 
+        #             assignments[i].to_csv(f"results/{num_cell}_cells/assignments_v3_{trial}.csv")
+        #         except:
+        #             pass
         #     elif i == 2:
-        #         assignments[i].to_csv(f"results/{num_cell}_cells/assignments_v4_{trial}.csv")
+        #         try: 
+        #             assignments[i].to_csv(f"results/{num_cell}_cells/assignments_v4_{trial}.csv")
+        #         except:
+        #             pass
+                
 
         print(f"Done with {num_cell} cells, trial {trial + 1}")
 

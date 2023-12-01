@@ -1236,3 +1236,1442 @@ Initializing f and g...
   self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
 /data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
   self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+Selecting 23 cells from greedy initialization.
+Randomly initialized A matrix.
+Setting convergence threshold at 0.00407
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Starting iteration 20.
+Completed iteration 20.
+Starting iteration 30.
+Completed iteration 30.
+Converged after 36 iterations.
+Done with 50000 cells, trial 2
+SPARSE AND GPU
+TRYING SEACellsGPU
+Welcome to SEACells GPU!
+build_graph.SEACellGraph completed
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 643 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/33 [00:00<?, ?it/s]/home/aparna/miniconda3/lib/python3.9/site-packages/cupyx/scipy/sparse/_compressed.py:545: SparseEfficiencyWarning: Changing the sparsity structure of a csr_matrix is expensive.
+  warnings.warn('Changing the sparsity structure of a '
+  9%|▉         | 3/33 [00:00<00:01, 26.58it/s] 18%|█▊        | 6/33 [00:00<00:01, 22.72it/s] 27%|██▋       | 9/33 [00:00<00:01, 21.13it/s] 36%|███▋      | 12/33 [00:00<00:01, 19.66it/s] 42%|████▏     | 14/33 [00:00<00:01, 18.84it/s] 48%|████▊     | 16/33 [00:00<00:00, 17.92it/s] 55%|█████▍    | 18/33 [00:00<00:00, 16.67it/s] 61%|██████    | 20/33 [00:01<00:00, 15.93it/s] 67%|██████▋   | 22/33 [00:01<00:00, 14.90it/s] 73%|███████▎  | 24/33 [00:01<00:00, 14.33it/s] 79%|███████▉  | 26/33 [00:01<00:00, 13.63it/s] 85%|████████▍ | 28/33 [00:01<00:00, 13.02it/s] 91%|█████████ | 30/33 [00:01<00:00, 12.46it/s] 97%|█████████▋| 32/33 [00:02<00:00, 11.88it/s]100%|██████████| 33/33 [00:02<00:00, 15.05it/s]
+Selecting 23 cells from greedy initialization.
+Randomly initialized A matrix.
+SPARSE AND NOT GPU
+TRYING SEACellsCPU
+Welcome to SEACells!
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 643 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/33 [00:00<?, ?it/s]  6%|▌         | 2/33 [00:00<00:02, 10.84it/s] 12%|█▏        | 4/33 [00:00<00:03,  8.57it/s] 15%|█▌        | 5/33 [00:00<00:03,  8.26it/s] 18%|█▊        | 6/33 [00:00<00:03,  7.99it/s] 21%|██        | 7/33 [00:00<00:03,  7.46it/s] 24%|██▍       | 8/33 [00:01<00:03,  7.11it/s] 27%|██▋       | 9/33 [00:01<00:03,  6.15it/s] 30%|███       | 10/33 [00:01<00:04,  5.49it/s] 33%|███▎      | 11/33 [00:01<00:04,  5.18it/s] 36%|███▋      | 12/33 [00:01<00:03,  5.40it/s] 39%|███▉      | 13/33 [00:02<00:03,  5.42it/s] 42%|████▏     | 14/33 [00:02<00:03,  5.52it/s] 45%|████▌     | 15/33 [00:02<00:03,  5.18it/s] 48%|████▊     | 16/33 [00:02<00:03,  4.98it/s] 52%|█████▏    | 17/33 [00:02<00:03,  5.13it/s] 55%|█████▍    | 18/33 [00:03<00:02,  5.06it/s] 58%|█████▊    | 19/33 [00:03<00:02,  4.83it/s] 61%|██████    | 20/33 [00:03<00:02,  4.92it/s] 64%|██████▎   | 21/33 [00:03<00:02,  4.82it/s] 67%|██████▋   | 22/33 [00:03<00:02,  4.74it/s] 70%|██████▉   | 23/33 [00:04<00:02,  4.53it/s] 73%|███████▎  | 24/33 [00:04<00:02,  4.44it/s] 76%|███████▌  | 25/33 [00:04<00:01,  4.04it/s] 79%|███████▉  | 26/33 [00:04<00:01,  3.99it/s] 82%|████████▏ | 27/33 [00:05<00:01,  3.83it/s] 85%|████████▍ | 28/33 [00:05<00:01,  3.87it/s] 88%|████████▊ | 29/33 [00:05<00:01,  3.86it/s] 91%|█████████ | 30/33 [00:05<00:00,  3.90it/s] 94%|█████████▍| 31/33 [00:06<00:00,  3.59it/s] 97%|█████████▋| 32/33 [00:06<00:00,  3.51it/s]100%|██████████| 33/33 [00:06<00:00,  3.46it/s]100%|██████████| 33/33 [00:06<00:00,  4.77it/s]
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+Selecting 23 cells from greedy initialization.
+Randomly initialized A matrix.
+Setting convergence threshold at 0.00407
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Starting iteration 20.
+Completed iteration 20.
+Starting iteration 30.
+Completed iteration 30.
+Converged after 36 iterations.
+Done with 50000 cells, trial 3
+SPARSE AND GPU
+TRYING SEACellsGPU
+Welcome to SEACells GPU!
+build_graph.SEACellGraph completed
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 643 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/33 [00:00<?, ?it/s]/home/aparna/miniconda3/lib/python3.9/site-packages/cupyx/scipy/sparse/_compressed.py:545: SparseEfficiencyWarning: Changing the sparsity structure of a csr_matrix is expensive.
+  warnings.warn('Changing the sparsity structure of a '
+  9%|▉         | 3/33 [00:00<00:01, 25.83it/s] 18%|█▊        | 6/33 [00:00<00:01, 22.84it/s] 27%|██▋       | 9/33 [00:00<00:01, 21.26it/s] 36%|███▋      | 12/33 [00:00<00:01, 19.37it/s] 42%|████▏     | 14/33 [00:00<00:01, 18.63it/s] 48%|████▊     | 16/33 [00:00<00:00, 17.60it/s] 55%|█████▍    | 18/33 [00:00<00:00, 16.73it/s] 61%|██████    | 20/33 [00:01<00:00, 15.95it/s] 67%|██████▋   | 22/33 [00:01<00:00, 14.90it/s] 73%|███████▎  | 24/33 [00:01<00:00, 14.28it/s] 79%|███████▉  | 26/33 [00:01<00:00, 13.58it/s] 85%|████████▍ | 28/33 [00:01<00:00, 13.03it/s] 91%|█████████ | 30/33 [00:01<00:00, 12.35it/s] 97%|█████████▋| 32/33 [00:02<00:00, 11.80it/s]100%|██████████| 33/33 [00:02<00:00, 14.97it/s]
+Selecting 23 cells from greedy initialization.
+Randomly initialized A matrix.
+SPARSE AND NOT GPU
+TRYING SEACellsCPU
+Welcome to SEACells!
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 643 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/33 [00:00<?, ?it/s]  6%|▌         | 2/33 [00:00<00:03,  9.96it/s]  9%|▉         | 3/33 [00:00<00:03,  8.94it/s] 12%|█▏        | 4/33 [00:00<00:03,  8.31it/s] 15%|█▌        | 5/33 [00:00<00:03,  8.03it/s] 18%|█▊        | 6/33 [00:00<00:03,  7.43it/s] 21%|██        | 7/33 [00:00<00:03,  6.73it/s] 24%|██▍       | 8/33 [00:01<00:04,  6.16it/s] 27%|██▋       | 9/33 [00:01<00:04,  5.80it/s] 30%|███       | 10/33 [00:01<00:04,  5.34it/s] 33%|███▎      | 11/33 [00:01<00:04,  5.22it/s] 36%|███▋      | 12/33 [00:02<00:04,  4.68it/s] 39%|███▉      | 13/33 [00:02<00:04,  4.79it/s] 42%|████▏     | 14/33 [00:02<00:04,  4.65it/s] 45%|████▌     | 15/33 [00:02<00:03,  4.61it/s] 48%|████▊     | 16/33 [00:02<00:03,  4.70it/s] 52%|█████▏    | 17/33 [00:03<00:03,  4.73it/s] 55%|█████▍    | 18/33 [00:03<00:03,  4.51it/s] 58%|█████▊    | 19/33 [00:03<00:03,  4.39it/s] 61%|██████    | 20/33 [00:03<00:02,  4.39it/s] 64%|██████▎   | 21/33 [00:04<00:02,  4.13it/s] 67%|██████▋   | 22/33 [00:04<00:02,  3.97it/s] 70%|██████▉   | 23/33 [00:04<00:02,  3.80it/s] 73%|███████▎  | 24/33 [00:04<00:02,  3.81it/s] 76%|███████▌  | 25/33 [00:05<00:02,  3.76it/s] 79%|███████▉  | 26/33 [00:05<00:01,  3.57it/s] 82%|████████▏ | 27/33 [00:05<00:01,  3.49it/s] 85%|████████▍ | 28/33 [00:06<00:01,  3.60it/s] 88%|████████▊ | 29/33 [00:06<00:01,  3.55it/s] 91%|█████████ | 30/33 [00:06<00:00,  3.49it/s] 94%|█████████▍| 31/33 [00:06<00:00,  3.43it/s] 97%|█████████▋| 32/33 [00:07<00:00,  3.27it/s]100%|██████████| 33/33 [00:07<00:00,  3.29it/s]100%|██████████| 33/33 [00:07<00:00,  4.37it/s]
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+nohup: ignoring input
+findfont: Font family ['Raleway'] not found. Falling back to DejaVu Sans.
+findfont: Font family ['Lato'] not found. Falling back to DejaVu Sans.
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+nohup: ignoring input
+findfont: Font family ['Raleway'] not found. Falling back to DejaVu Sans.
+findfont: Font family ['Lato'] not found. Falling back to DejaVu Sans.
+/data/aparna/aparnakumar/github clone/SEACells/SEACells/cpu.py:524: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+  self.sparsity_ratios = self.sparsity_ratios.append({"A": A.nnz / (A.shape[0]*A.shape[1]),
+SPARSE AND GPU
+TRYING SEACellsGPU
+Welcome to SEACells GPU!
+build_graph.SEACellGraph completed
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 643 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/33 [00:00<?, ?it/s]/home/aparna/miniconda3/lib/python3.9/site-packages/cupyx/scipy/sparse/_compressed.py:545: SparseEfficiencyWarning: Changing the sparsity structure of a csr_matrix is expensive.
+  warnings.warn('Changing the sparsity structure of a '
+  3%|▎         | 1/33 [00:00<00:03,  9.31it/s]  9%|▉         | 3/33 [00:00<00:02, 14.78it/s] 15%|█▌        | 5/33 [00:00<00:01, 16.41it/s] 21%|██        | 7/33 [00:00<00:01, 16.75it/s] 27%|██▋       | 9/33 [00:00<00:01, 15.94it/s] 33%|███▎      | 11/33 [00:00<00:01, 15.76it/s] 39%|███▉      | 13/33 [00:00<00:01, 15.36it/s] 45%|████▌     | 15/33 [00:00<00:01, 14.89it/s] 52%|█████▏    | 17/33 [00:01<00:01, 14.39it/s] 58%|█████▊    | 19/33 [00:01<00:01, 12.39it/s] 64%|██████▎   | 21/33 [00:01<00:01, 11.06it/s] 70%|██████▉   | 23/33 [00:01<00:00, 11.21it/s] 76%|███████▌  | 25/33 [00:01<00:00, 11.18it/s] 82%|████████▏ | 27/33 [00:02<00:00, 10.94it/s] 88%|████████▊ | 29/33 [00:02<00:00, 10.73it/s] 94%|█████████▍| 31/33 [00:02<00:00, 10.53it/s]100%|██████████| 33/33 [00:02<00:00, 10.44it/s]100%|██████████| 33/33 [00:02<00:00, 12.21it/s]
+SPARSE AND GPU
+TRYING SEACellsGPU
+Welcome to SEACells GPU!
+build_graph.SEACellGraph completed
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+SPARSE AND NOT GPU
+TRYING SEACellsCPU
+Welcome to SEACells!
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 643 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/33 [00:00<?, ?it/s]  3%|▎         | 1/33 [00:00<00:11,  2.88it/s]  6%|▌         | 2/33 [00:00<00:10,  2.86it/s]  9%|▉         | 3/33 [00:01<00:10,  2.86it/s] 12%|█▏        | 4/33 [00:01<00:09,  2.96it/s] 15%|█▌        | 5/33 [00:01<00:09,  3.06it/s] 18%|█▊        | 6/33 [00:02<00:09,  2.89it/s] 21%|██        | 7/33 [00:02<00:08,  3.05it/s] 24%|██▍       | 8/33 [00:02<00:08,  3.09it/s] 27%|██▋       | 9/33 [00:03<00:08,  2.72it/s] 30%|███       | 10/33 [00:04<00:17,  1.34it/s] 33%|███▎      | 11/33 [00:05<00:15,  1.38it/s] 36%|███▋      | 12/33 [00:06<00:14,  1.44it/s] 39%|███▉      | 13/33 [00:06<00:12,  1.56it/s] 42%|████▏     | 14/33 [00:06<00:10,  1.76it/s] 45%|████▌     | 15/33 [00:07<00:09,  1.84it/s] 48%|████▊     | 16/33 [00:07<00:08,  1.91it/s] 52%|█████▏    | 17/33 [00:08<00:07,  2.10it/s] 55%|█████▍    | 18/33 [00:08<00:06,  2.18it/s] 58%|█████▊    | 19/33 [00:09<00:06,  2.22it/s] 61%|██████    | 20/33 [00:09<00:05,  2.20it/s] 64%|██████▎   | 21/33 [00:10<00:05,  2.17it/s] 67%|██████▋   | 22/33 [00:10<00:05,  2.18it/s] 70%|██████▉   | 23/33 [00:10<00:04,  2.38it/s] 73%|███████▎  | 24/33 [00:11<00:04,  2.06it/s] 76%|███████▌  | 25/33 [00:11<00:03,  2.09it/s]Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+ 79%|███████▉  | 26/33 [00:12<00:03,  2.03it/s] 82%|████████▏ | 27/33 [00:13<00:03,  1.84it/s] 85%|████████▍ | 28/33 [00:13<00:02,  1.77it/s] 88%|████████▊ | 29/33 [00:14<00:02,  1.70it/s] 91%|█████████ | 30/33 [00:15<00:01,  1.66it/s] 94%|█████████▍| 31/33 [00:15<00:01,  1.67it/s] 97%|█████████▋| 32/33 [00:16<00:00,  1.72it/s]100%|██████████| 33/33 [00:16<00:00,  1.76it/s]100%|██████████| 33/33 [00:16<00:00,  1.98it/s]
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+Exception ignored in: 'cupy_backends.cuda.libs.cusparse.spGEMM_workEstimation'
+Traceback (most recent call last):
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1544, in cupy_backends.cuda.libs.cusparse.check_status
+  File "cupy_backends/cuda/libs/cusparse.pyx", line 1534, in cupy_backends.cuda.libs.cusparse.CuSparseError.__init__
+KeyError: 11
+nohup: ignoring input
+findfont: Font family ['Raleway'] not found. Falling back to DejaVu Sans.
+findfont: Font family ['Lato'] not found. Falling back to DejaVu Sans.
+Selecting 23 cells from greedy initialization.
+Randomly initialized A matrix.
+Convergence threshold set to 0.004070181504769367 based on epsilon = 1e-05
+Starting iteration 1.
+Completed iteration 1.
+Converged after 6 iterations.
+Converged after 7 iterations.
+Converged after 8 iterations.
+Converged after 9 iterations.
+Starting iteration 10.
+Completed iteration 10.
+Converged after 10 iterations.
+SPARSE AND NOT GPU
+TRYING SEACellsCPU
+Welcome to SEACells!
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 643 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/33 [00:00<?, ?it/s]  3%|▎         | 1/33 [00:00<00:04,  6.62it/s]  6%|▌         | 2/33 [00:00<00:05,  5.32it/s]  9%|▉         | 3/33 [00:00<00:06,  4.98it/s] 12%|█▏        | 4/33 [00:00<00:06,  4.27it/s] 15%|█▌        | 5/33 [00:01<00:06,  4.18it/s] 18%|█▊        | 6/33 [00:01<00:06,  3.89it/s] 21%|██        | 7/33 [00:01<00:06,  3.82it/s] 24%|██▍       | 8/33 [00:01<00:06,  3.84it/s] 27%|██▋       | 9/33 [00:02<00:06,  3.53it/s] 30%|███       | 10/33 [00:02<00:06,  3.51it/s] 33%|███▎      | 11/33 [00:02<00:06,  3.38it/s] 36%|███▋      | 12/33 [00:03<00:06,  3.14it/s] 39%|███▉      | 13/33 [00:03<00:06,  3.25it/s] 42%|████▏     | 14/33 [00:03<00:06,  2.81it/s] 45%|████▌     | 15/33 [00:04<00:06,  2.74it/s] 48%|████▊     | 16/33 [00:04<00:06,  2.67it/s] 52%|█████▏    | 17/33 [00:05<00:05,  2.80it/s] 55%|█████▍    | 18/33 [00:05<00:06,  2.48it/s] 58%|█████▊    | 19/33 [00:06<00:05,  2.47it/s] 61%|██████    | 20/33 [00:06<00:04,  2.71it/s] 64%|██████▎   | 21/33 [00:06<00:04,  2.43it/s] 67%|██████▋   | 22/33 [00:07<00:04,  2.54it/s] 70%|██████▉   | 23/33 [00:07<00:03,  2.74it/s] 73%|███████▎  | 24/33 [00:07<00:03,  2.77it/s] 76%|███████▌  | 25/33 [00:08<00:02,  2.88it/s] 79%|███████▉  | 26/33 [00:08<00:02,  2.88it/s] 82%|████████▏ | 27/33 [00:08<00:02,  2.75it/s] 85%|████████▍ | 28/33 [00:09<00:01,  2.68it/s] 88%|████████▊ | 29/33 [00:09<00:01,  2.80it/s] 91%|█████████ | 30/33 [00:09<00:01,  2.73it/s] 94%|█████████▍| 31/33 [00:10<00:00,  2.65it/s] 97%|█████████▋| 32/33 [00:10<00:00,  2.65it/s]100%|██████████| 33/33 [00:11<00:00,  2.50it/s]100%|██████████| 33/33 [00:11<00:00,  2.94it/s]
+SPARSE AND GPU
+TRYING SEACellsGPU
+Welcome to SEACells GPU!
+build_graph.SEACellGraph completed
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 643 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/33 [00:00<?, ?it/s]/home/aparna/miniconda3/lib/python3.9/site-packages/cupyx/scipy/sparse/_compressed.py:545: SparseEfficiencyWarning: Changing the sparsity structure of a csr_matrix is expensive.
+  warnings.warn('Changing the sparsity structure of a '
+  3%|▎         | 1/33 [00:00<00:04,  7.30it/s] 12%|█▏        | 4/33 [00:00<00:01, 16.52it/s] 21%|██        | 7/33 [00:00<00:01, 18.64it/s] 27%|██▋       | 9/33 [00:00<00:01, 18.24it/s] 33%|███▎      | 11/33 [00:00<00:01, 17.88it/s] 39%|███▉      | 13/33 [00:00<00:01, 17.51it/s] 45%|████▌     | 15/33 [00:00<00:01, 16.82it/s] 52%|█████▏    | 17/33 [00:01<00:00, 16.14it/s] 58%|█████▊    | 19/33 [00:01<00:00, 15.35it/s] 64%|██████▎   | 21/33 [00:01<00:00, 14.66it/s] 70%|██████▉   | 23/33 [00:01<00:00, 14.14it/s] 76%|███████▌  | 25/33 [00:01<00:00, 13.44it/s] 82%|████████▏ | 27/33 [00:01<00:00, 12.85it/s] 88%|████████▊ | 29/33 [00:01<00:00, 12.31it/s] 94%|█████████▍| 31/33 [00:02<00:00, 11.73it/s]100%|██████████| 33/33 [00:02<00:00, 11.58it/s]100%|██████████| 33/33 [00:02<00:00, 14.02it/s]
+Selecting 23 cells from greedy initialization.
+Randomly initialized A matrix.
+SPARSE AND NOT GPU
+TRYING SEACellsCPU
+Welcome to SEACells!
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 643 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/33 [00:00<?, ?it/s]  3%|▎         | 1/33 [00:00<00:04,  7.44it/s]  6%|▌         | 2/33 [00:00<00:05,  5.48it/s]  9%|▉         | 3/33 [00:00<00:06,  4.61it/s] 12%|█▏        | 4/33 [00:00<00:06,  4.28it/s] 15%|█▌        | 5/33 [00:01<00:06,  4.06it/s] 18%|█▊        | 6/33 [00:01<00:06,  3.88it/s] 21%|██        | 7/33 [00:01<00:06,  3.93it/s] 24%|██▍       | 8/33 [00:01<00:06,  3.62it/s] 27%|██▋       | 9/33 [00:02<00:07,  3.19it/s] 30%|███       | 10/33 [00:02<00:07,  2.96it/s] 33%|███▎      | 11/33 [00:03<00:07,  2.83it/s] 36%|███▋      | 12/33 [00:03<00:07,  2.78it/s] 39%|███▉      | 13/33 [00:03<00:07,  2.70it/s] 42%|████▏     | 14/33 [00:04<00:08,  2.35it/s] 45%|████▌     | 15/33 [00:04<00:08,  2.22it/s] 48%|████▊     | 16/33 [00:05<00:07,  2.18it/s] 52%|█████▏    | 17/33 [00:05<00:07,  2.19it/s] 55%|█████▍    | 18/33 [00:06<00:07,  2.13it/s] 58%|█████▊    | 19/33 [00:06<00:06,  2.07it/s] 61%|██████    | 20/33 [00:07<00:06,  2.04it/s] 64%|██████▎   | 21/33 [00:07<00:06,  1.98it/s] 67%|██████▋   | 22/33 [00:08<00:05,  2.03it/s] 70%|██████▉   | 23/33 [00:08<00:04,  2.06it/s] 73%|███████▎  | 24/33 [00:09<00:04,  1.81it/s] 76%|███████▌  | 25/33 [00:10<00:04,  1.72it/s] 79%|███████▉  | 26/33 [00:10<00:04,  1.60it/s] 82%|████████▏ | 27/33 [00:11<00:04,  1.47it/s] 85%|████████▍ | 28/33 [00:12<00:03,  1.38it/s] 88%|████████▊ | 29/33 [00:13<00:02,  1.38it/s] 91%|█████████ | 30/33 [00:14<00:02,  1.41it/s] 94%|█████████▍| 31/33 [00:14<00:01,  1.38it/s] 97%|█████████▋| 32/33 [00:15<00:00,  1.26it/s]100%|██████████| 33/33 [00:16<00:00,  1.21it/s]100%|██████████| 33/33 [00:16<00:00,  1.98it/s]
+Selecting 23 cells from greedy initialization.
+Randomly initialized A matrix.
+Setting convergence threshold at 0.00407
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Starting iteration 20.
+Completed iteration 20.
+Starting iteration 30.
+Completed iteration 30.
+Converged after 36 iterations.
+SPARSE AND NOT GPU
+TRYING SEACellsCPU
+Welcome to SEACells!
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 643 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/33 [00:00<?, ?it/s]  3%|▎         | 1/33 [00:00<00:03,  9.07it/s]  6%|▌         | 2/33 [00:00<00:05,  5.77it/s]  9%|▉         | 3/33 [00:00<00:06,  4.57it/s] 12%|█▏        | 4/33 [00:00<00:06,  4.22it/s] 15%|█▌        | 5/33 [00:01<00:06,  4.29it/s] 18%|█▊        | 6/33 [00:01<00:06,  4.11it/s] 21%|██        | 7/33 [00:01<00:06,  3.82it/s] 24%|██▍       | 8/33 [00:01<00:06,  3.90it/s] 27%|██▋       | 9/33 [00:02<00:06,  3.63it/s] 30%|███       | 10/33 [00:02<00:07,  3.18it/s] 33%|███▎      | 11/33 [00:02<00:06,  3.20it/s] 36%|███▋      | 12/33 [00:03<00:06,  3.42it/s] 39%|███▉      | 13/33 [00:03<00:05,  3.44it/s] 42%|████▏     | 14/33 [00:03<00:05,  3.57it/s] 45%|████▌     | 15/33 [00:03<00:04,  3.79it/s] 48%|████▊     | 16/33 [00:04<00:04,  3.57it/s] 52%|█████▏    | 17/33 [00:04<00:04,  3.61it/s] 55%|█████▍    | 18/33 [00:04<00:04,  3.69it/s] 58%|█████▊    | 19/33 [00:05<00:04,  3.44it/s] 61%|██████    | 20/33 [00:05<00:03,  3.33it/s] 64%|██████▎   | 21/33 [00:05<00:03,  3.25it/s] 67%|██████▋   | 22/33 [00:06<00:03,  3.18it/s] 70%|██████▉   | 23/33 [00:06<00:03,  3.09it/s] 73%|███████▎  | 24/33 [00:06<00:02,  3.34it/s] 76%|███████▌  | 25/33 [00:07<00:02,  3.07it/s] 79%|███████▉  | 26/33 [00:07<00:02,  2.82it/s] 82%|████████▏ | 27/33 [00:07<00:02,  2.75it/s] 85%|████████▍ | 28/33 [00:08<00:01,  2.72it/s] 88%|████████▊ | 29/33 [00:08<00:01,  2.63it/s] 91%|█████████ | 30/33 [00:09<00:01,  2.68it/s] 94%|█████████▍| 31/33 [00:09<00:00,  2.67it/s] 97%|█████████▋| 32/33 [00:09<00:00,  2.70it/s]100%|██████████| 33/33 [00:10<00:00,  2.54it/s]100%|██████████| 33/33 [00:10<00:00,  3.23it/s]
+Selecting 23 cells from greedy initialization.
+Randomly initialized A matrix.
+Setting convergence threshold at 0.00407
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Starting iteration 20.
+Completed iteration 20.
+Starting iteration 30.
+Completed iteration 30.
+Converged after 36 iterations.
+SPARSE AND NOT GPU
+TRYING SEACellsCPU
+Welcome to SEACells!
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 643 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/33 [00:00<?, ?it/s]  3%|▎         | 1/33 [00:00<00:05,  5.40it/s]  6%|▌         | 2/33 [00:00<00:06,  4.96it/s]  9%|▉         | 3/33 [00:00<00:06,  4.88it/s] 12%|█▏        | 4/33 [00:00<00:06,  4.78it/s] 15%|█▌        | 5/33 [00:01<00:05,  4.79it/s] 18%|█▊        | 6/33 [00:01<00:06,  4.09it/s] 21%|██        | 7/33 [00:01<00:08,  3.18it/s] 24%|██▍       | 8/33 [00:02<00:07,  3.18it/s] 27%|██▋       | 9/33 [00:02<00:06,  3.46it/s] 30%|███       | 10/33 [00:02<00:06,  3.82it/s] 33%|███▎      | 11/33 [00:02<00:06,  3.53it/s] 36%|███▋      | 12/33 [00:03<00:06,  3.48it/s] 39%|███▉      | 13/33 [00:03<00:05,  3.36it/s] 42%|████▏     | 14/33 [00:03<00:05,  3.34it/s] 45%|████▌     | 15/33 [00:04<00:04,  3.60it/s] 48%|████▊     | 16/33 [00:04<00:04,  3.54it/s] 52%|█████▏    | 17/33 [00:04<00:04,  3.51it/s] 55%|█████▍    | 18/33 [00:04<00:04,  3.45it/s] 58%|█████▊    | 19/33 [00:05<00:04,  3.39it/s] 61%|██████    | 20/33 [00:05<00:03,  3.45it/s] 64%|██████▎   | 21/33 [00:05<00:03,  3.71it/s] 67%|██████▋   | 22/33 [00:06<00:03,  3.61it/s] 70%|██████▉   | 23/33 [00:06<00:02,  3.39it/s] 73%|███████▎  | 24/33 [00:06<00:02,  3.13it/s] 76%|███████▌  | 25/33 [00:07<00:02,  3.15it/s] 79%|███████▉  | 26/33 [00:07<00:02,  3.41it/s] 82%|████████▏ | 27/33 [00:07<00:01,  3.44it/s] 85%|████████▍ | 28/33 [00:07<00:01,  3.96it/s] 88%|████████▊ | 29/33 [00:08<00:01,  3.62it/s] 91%|█████████ | 30/33 [00:08<00:00,  3.54it/s] 94%|█████████▍| 31/33 [00:08<00:00,  3.38it/s] 97%|█████████▋| 32/33 [00:09<00:00,  2.87it/s]100%|██████████| 33/33 [00:09<00:00,  3.03it/s]100%|██████████| 33/33 [00:09<00:00,  3.49it/s]
+Selecting 23 cells from greedy initialization.
+Randomly initialized A matrix.
+Setting convergence threshold at 0.00407
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Starting iteration 20.
+Completed iteration 20.
+Starting iteration 30.
+Completed iteration 30.
+Converged after 36 iterations.
+SPARSE AND NOT GPU
+TRYING SEACellsCPU
+Welcome to SEACells!
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 643 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/33 [00:00<?, ?it/s]  3%|▎         | 1/33 [00:00<00:03,  8.88it/s]  6%|▌         | 2/33 [00:00<00:04,  7.09it/s]  9%|▉         | 3/33 [00:00<00:04,  6.70it/s] 12%|█▏        | 4/33 [00:00<00:04,  6.20it/s] 15%|█▌        | 5/33 [00:00<00:04,  6.18it/s] 18%|█▊        | 6/33 [00:00<00:04,  5.62it/s] 21%|██        | 7/33 [00:01<00:05,  4.82it/s] 24%|██▍       | 8/33 [00:01<00:05,  4.72it/s] 27%|██▋       | 9/33 [00:01<00:05,  4.70it/s] 30%|███       | 10/33 [00:01<00:05,  4.47it/s] 33%|███▎      | 11/33 [00:02<00:05,  4.26it/s] 36%|███▋      | 12/33 [00:02<00:04,  4.46it/s] 39%|███▉      | 13/33 [00:02<00:04,  4.55it/s] 42%|████▏     | 14/33 [00:02<00:04,  4.45it/s] 45%|████▌     | 15/33 [00:03<00:04,  4.23it/s] 48%|████▊     | 16/33 [00:03<00:04,  4.15it/s] 52%|█████▏    | 17/33 [00:03<00:04,  3.79it/s] 55%|█████▍    | 18/33 [00:03<00:03,  3.75it/s] 58%|█████▊    | 19/33 [00:04<00:03,  3.65it/s] 61%|██████    | 20/33 [00:04<00:03,  3.46it/s] 64%|██████▎   | 21/33 [00:04<00:03,  3.41it/s] 67%|██████▋   | 22/33 [00:05<00:03,  3.30it/s] 70%|██████▉   | 23/33 [00:05<00:02,  3.44it/s] 73%|███████▎  | 24/33 [00:05<00:02,  3.39it/s] 76%|███████▌  | 25/33 [00:06<00:02,  3.15it/s] 79%|███████▉  | 26/33 [00:06<00:02,  3.17it/s] 82%|████████▏ | 27/33 [00:06<00:01,  3.24it/s] 85%|████████▍ | 28/33 [00:07<00:01,  3.07it/s] 88%|████████▊ | 29/33 [00:07<00:01,  2.99it/s] 91%|█████████ | 30/33 [00:07<00:01,  2.82it/s] 94%|█████████▍| 31/33 [00:08<00:00,  2.55it/s] 97%|█████████▋| 32/33 [00:08<00:00,  2.54it/s]100%|██████████| 33/33 [00:09<00:00,  2.60it/s]100%|██████████| 33/33 [00:09<00:00,  3.63it/s]
