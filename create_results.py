@@ -82,7 +82,7 @@ def get_data(ad, num_cells, use_gpu, use_sparse, A_init = None, B_init = None, K
 
 def gpu_versions(ad, num_cells):
     assignments2, time2, mem2, A_init, B_init, K_init, sparsity = get_data(
-            ad, num_cells=num_cells, use_gpu=False, use_sparse=False
+            ad, num_cells=num_cells, use_gpu=False, use_sparse=True
         )
 
     try:

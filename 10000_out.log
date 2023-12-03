@@ -2162,3 +2162,55 @@ Selecting 119 cells from waypoint initialization.
 Initializing residual matrix using greedy column selection
 Initializing f and g...
   0%|          | 0/24 [00:00<?, ?it/s] 29%|██▉       | 7/24 [00:00<00:00, 64.70it/s] 62%|██████▎   | 15/24 [00:00<00:00, 69.40it/s] 96%|█████████▌| 23/24 [00:00<00:00, 71.52it/s]100%|██████████| 24/24 [00:00<00:00, 70.17it/s]
+Selecting 14 cells from greedy initialization.
+Randomly initialized A matrix.
+Setting convergence threshold at 0.00178
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Starting iteration 20.
+Completed iteration 20.
+Starting iteration 30.
+Completed iteration 30.
+Starting iteration 40.
+Completed iteration 40.
+Converged after 41 iterations.
+SPARSE AND NOT GPU
+TRYING SEACellsCPU
+Welcome to SEACells!
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/10000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/10000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/10000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 119 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/24 [00:00<?, ?it/s] 29%|██▉       | 7/24 [00:00<00:00, 60.87it/s] 62%|██████▎   | 15/24 [00:00<00:00, 66.64it/s] 96%|█████████▌| 23/24 [00:00<00:00, 72.16it/s]100%|██████████| 24/24 [00:00<00:00, 70.63it/s]
+Selecting 14 cells from greedy initialization.
+Randomly initialized A matrix.
+Setting convergence threshold at 0.00178
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Starting iteration 20.
+Completed iteration 20.
+Starting iteration 30.
+Completed iteration 30.
+Starting iteration 40.
+Completed iteration 40.
+Converged after 41 iterations.
+Done with 10000 cells, trial 5
