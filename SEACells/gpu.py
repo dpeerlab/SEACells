@@ -290,7 +290,10 @@ class SEACellsGPU:
                 n,
             ), f"Initial assignment matrix should be of shape (k={k} x n={n})"
             A0 = cupyx.scipy.sparse.csr_matrix(A0)
-            A0 = normalize(A0, axis=0, norm="l1")
+            # Normalize axis 0 with l1 norm
+            l1_norms  = norm(A0, ord=1, axis=0)
+            l1_norms[l1_norms == 0] = 1.0
+            A0 = A0.multiply(1.0 / l1_norms)
 
         else:
             # Need to ensure each cell is assigned to at least one archetype
@@ -302,13 +305,23 @@ class SEACellsGPU:
             # print(type(rows))
             # print(type(columns))
 
+            # ic(rows.shape)
+            # ic(columns.shape)
+            # ic(cp.random.random(len(rows)).shape)
+            # ic((k, n))
+
+            # data = cp.random.random(len(rows))
+
+            # Ensure that rows, columns, and data are 1D 
+            # rows = rows.ravel()
+            # columns = columns.ravel()
+            # data = data.ravel()
+
             A0 = scipy.sparse.csr_matrix(
                 (np.random.random(len(rows)), (rows, columns)), shape=(k, n)
             )
-            # print(type(A0))
-            # print("STARTING NORMALIZE")
-            A0 = cupyx.scipy.sparse.csr_matrix(normalize(A0, axis=0, norm="l1"))
-            # print("COMPLETED NORMALIZE")
+            # Normalize axis 0 with l1 norm
+            A0 = cupyx.scipy.sparse.csr_matrix(normalize(A0, norm="l1", axis=0))
 
             if self.verbose:
                 print("Randomly initialized A matrix.")
@@ -496,54 +509,42 @@ class SEACellsGPU:
         """
         # ic("updateA")
         n, k = Bg.shape
-        # print(n, k)
-        # A = A_prev
-        # ic(type(A))
 
         t = 0  # current iteration (determine multiplicative update)
-
-        # print("bookmark")
-        # Ag = A
-        # # ic(type(A))
-        # Bg = B
-        # print(type(self.K))
         Kg = self.K
-        # ic(type(Kg))
-        # ic("computed Ag, Bg, Kg")
 
         # precompute some gradient terms
-        t2g = Kg.dot(Bg).T
+        t2g = (Kg.dot(Bg)).T
         t1g = t2g.dot(Bg)
-        # ic("computed t2g, t1g")
-        # ic(type(t2g), type(t1g))
+
+        lambda_l1 = 0.1  
+        lambda_l2 = 0.1
+
+        # Make sure all the datatypes are float64
+        t1g = t1g.astype(cp.float64)
+        t2g = t2g.astype(cp.float64)
+        Kg = Kg.astype(cp.float64)
+        Bg = Bg.astype(cp.float64)
+        Ag = Ag.astype(cp.float64)
 
         # update rows of A for given number of iterations
         while t < self.max_FW_iter:
-            # compute gradient (must convert matrix to ndarray)
-            # X = t1g.dot(Ag)
-            # print(X.shape)
-            # print(type(X))
-            # print(t2g.shape)
-            # print(type(t2g))
-            # Y = X - t2g
-            # print(Y.shape)
-            # print(type(Y))
-            # Z = 2.0 *Y
-            # print(Z.shape)
-            # print(type(Z))
-            # print((cp.subtract(t1g.dot(Ag), t2g)).shape)
-            # print((cp.multiply(2, cp.subtract(t1g.dot(Ag), t2g))).shape)
-            Gg = 2.0 * (t1g.dot(Ag) - t2g)
-            # ic(Gg.shape)
-            # ic(type(Gg))
-            # get argmins
+            # L1 regularization term: the weight times the L1 norm of the matrix
+            l1_term = lambda_l1 * norm(Ag, ord=1)
+            # L2 regularization term: 0.5 times the weight times the L2 norm of the matrix squared
+            l2_term = 0.5 * lambda_l2 * norm(Ag, ord = 'fro')**2
+
+            # compute gradient
+            Gg = 2.0 * (t1g.dot(Ag) - t2g) + l1_term + l2_term
             amins = Gg.argmin(axis=0)
             # ic(amins.shape)
             # ic(type(amins))
             # loop free implementaton
-            eg = cp.zeros((k, n))
-            eg[amins, cp.arange(n)] = 1.0
-            eg = cupyx.scipy.sparse.csr_matrix(eg)
+            # eg = cp.zeros((k, n))
+            # eg[amins, cp.arange(n)] = 1.0
+            # eg = cupyx.scipy.sparse.csr_matrix(eg)
+
+            eg = cupyx.scipy.sparse.csr_matrix((cp.ones(len(amins)), (amins, cp.arange(n))), shape=Ag.shape)
 
             # row_indices = cp.array(amins)
             # col_indices = cp.arange(n)
@@ -553,8 +554,8 @@ class SEACellsGPU:
 
             # print("eg")
 
-            f = 2.0 / (t + 2.0)
-            Ag = Ag + (f * (eg - Ag))
+
+            Ag += 2.0/(t+2.0) * (eg - Ag)
             # Ag = cp.add(Ag, cp.multiply(f, cp.subtract(eg, Ag)))
             t += 1
             # print("f, Ag, t")
@@ -565,7 +566,7 @@ class SEACellsGPU:
         del t1g, t2g, Kg, Gg, Bg, eg, amins
         cp._default_memory_pool.free_all_blocks()
 
-        # Ag.data[Ag.data < 1e-15] = 0
+        Ag.data[Ag.data < 1e-12] = 0
 
         # ic(type(A))
         return Ag

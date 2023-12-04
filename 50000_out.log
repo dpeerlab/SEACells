@@ -12631,3 +12631,66 @@ Selecting 643 cells from waypoint initialization.
 Initializing residual matrix using greedy column selection
 Initializing f and g...
   0%|          | 0/33 [00:00<?, ?it/s]  3%|▎         | 1/33 [00:00<00:04,  6.41it/s]  6%|▌         | 2/33 [00:00<00:05,  5.96it/s]  9%|▉         | 3/33 [00:00<00:05,  5.46it/s] 12%|█▏        | 4/33 [00:00<00:05,  5.65it/s] 15%|█▌        | 5/33 [00:00<00:04,  5.68it/s] 18%|█▊        | 6/33 [00:01<00:05,  5.25it/s] 21%|██        | 7/33 [00:01<00:04,  5.24it/s] 24%|██▍       | 8/33 [00:01<00:04,  5.04it/s] 27%|██▋       | 9/33 [00:01<00:05,  4.33it/s] 30%|███       | 10/33 [00:02<00:05,  4.12it/s] 33%|███▎      | 11/33 [00:02<00:06,  3.44it/s] 36%|███▋      | 12/33 [00:02<00:06,  3.42it/s] 39%|███▉      | 13/33 [00:03<00:05,  3.49it/s] 42%|████▏     | 14/33 [00:03<00:05,  3.32it/s] 45%|████▌     | 15/33 [00:03<00:05,  3.24it/s] 48%|████▊     | 16/33 [00:03<00:05,  3.31it/s] 52%|█████▏    | 17/33 [00:04<00:04,  3.25it/s] 55%|█████▍    | 18/33 [00:04<00:04,  3.40it/s] 58%|█████▊    | 19/33 [00:04<00:04,  3.33it/s] 61%|██████    | 20/33 [00:05<00:04,  3.23it/s] 64%|██████▎   | 21/33 [00:05<00:04,  2.98it/s] 67%|██████▋   | 22/33 [00:05<00:03,  3.22it/s] 70%|██████▉   | 23/33 [00:06<00:03,  3.07it/s] 73%|███████▎  | 24/33 [00:06<00:02,  3.15it/s] 76%|███████▌  | 25/33 [00:06<00:02,  3.05it/s] 79%|███████▉  | 26/33 [00:07<00:02,  2.93it/s] 82%|████████▏ | 27/33 [00:07<00:02,  2.84it/s] 85%|████████▍ | 28/33 [00:07<00:01,  2.84it/s] 88%|████████▊ | 29/33 [00:08<00:01,  2.68it/s] 91%|█████████ | 30/33 [00:08<00:01,  2.64it/s] 94%|█████████▍| 31/33 [00:09<00:00,  2.71it/s] 97%|█████████▋| 32/33 [00:09<00:00,  2.73it/s]100%|██████████| 33/33 [00:09<00:00,  2.48it/s]100%|██████████| 33/33 [00:09<00:00,  3.30it/s]
+Selecting 23 cells from greedy initialization.
+Randomly initialized A matrix.
+Setting convergence threshold at 0.00407
+Starting iteration 1.
+Completed iteration 1.
+Starting iteration 10.
+Completed iteration 10.
+Starting iteration 20.
+Completed iteration 20.
+Starting iteration 30.
+Completed iteration 30.
+Converged after 36 iterations.
+SPARSE AND GPU
+TRYING SEACellsGPU
+Welcome to SEACells GPU!
+build_graph.SEACellGraph completed
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 643 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/33 [00:00<?, ?it/s]/home/aparna/miniconda3/lib/python3.9/site-packages/cupyx/scipy/sparse/_compressed.py:545: SparseEfficiencyWarning: Changing the sparsity structure of a csr_matrix is expensive.
+  warnings.warn('Changing the sparsity structure of a '
+  9%|▉         | 3/33 [00:00<00:01, 24.52it/s] 18%|█▊        | 6/33 [00:00<00:01, 21.94it/s] 27%|██▋       | 9/33 [00:00<00:01, 20.11it/s] 36%|███▋      | 12/33 [00:00<00:01, 19.01it/s] 42%|████▏     | 14/33 [00:00<00:01, 17.62it/s] 48%|████▊     | 16/33 [00:00<00:01, 16.88it/s] 55%|█████▍    | 18/33 [00:01<00:00, 16.19it/s] 61%|██████    | 20/33 [00:01<00:00, 15.15it/s] 67%|██████▋   | 22/33 [00:01<00:00, 14.59it/s] 73%|███████▎  | 24/33 [00:01<00:00, 13.97it/s] 79%|███████▉  | 26/33 [00:01<00:00, 13.38it/s] 85%|████████▍ | 28/33 [00:01<00:00, 12.69it/s] 91%|█████████ | 30/33 [00:01<00:00, 12.20it/s] 97%|█████████▋| 32/33 [00:02<00:00, 11.74it/s]100%|██████████| 33/33 [00:02<00:00, 14.60it/s]
+Selecting 23 cells from greedy initialization.
+Randomly initialized A matrix.
+SPARSE AND NOT GPU
+TRYING SEACellsCPU
+Welcome to SEACells!
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 643 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/33 [00:00<?, ?it/s]  6%|▌         | 2/33 [00:00<00:03,  8.99it/s]  9%|▉         | 3/33 [00:00<00:03,  8.25it/s] 12%|█▏        | 4/33 [00:00<00:04,  6.93it/s] 15%|█▌        | 5/33 [00:00<00:05,  5.57it/s] 18%|█▊        | 6/33 [00:00<00:04,  5.42it/s] 21%|██        | 7/33 [00:01<00:04,  5.72it/s] 24%|██▍       | 8/33 [00:01<00:04,  5.52it/s] 27%|██▋       | 9/33 [00:01<00:04,  5.49it/s] 30%|███       | 10/33 [00:01<00:04,  5.60it/s] 33%|███▎      | 11/33 [00:01<00:03,  5.51it/s] 36%|███▋      | 12/33 [00:02<00:03,  5.34it/s] 39%|███▉      | 13/33 [00:02<00:03,  5.17it/s] 42%|████▏     | 14/33 [00:02<00:04,  4.44it/s] 45%|████▌     | 15/33 [00:02<00:03,  4.59it/s] 48%|████▊     | 16/33 [00:02<00:03,  5.00it/s] 52%|█████▏    | 17/33 [00:03<00:03,  4.74it/s] 55%|█████▍    | 18/33 [00:03<00:03,  4.59it/s] 58%|█████▊    | 19/33 [00:03<00:03,  4.66it/s] 61%|██████    | 20/33 [00:03<00:02,  4.66it/s] 64%|██████▎   | 21/33 [00:04<00:02,  4.70it/s] 67%|██████▋   | 22/33 [00:04<00:02,  4.41it/s] 70%|██████▉   | 23/33 [00:04<00:02,  4.18it/s] 73%|███████▎  | 24/33 [00:04<00:02,  3.96it/s] 76%|███████▌  | 25/33 [00:05<00:01,  4.24it/s] 79%|███████▉  | 26/33 [00:05<00:01,  3.94it/s] 82%|████████▏ | 27/33 [00:05<00:01,  3.74it/s] 85%|████████▍ | 28/33 [00:05<00:01,  3.71it/s] 88%|████████▊ | 29/33 [00:06<00:01,  3.86it/s] 91%|█████████ | 30/33 [00:06<00:00,  3.64it/s] 94%|█████████▍| 31/33 [00:06<00:00,  3.38it/s] 97%|█████████▋| 32/33 [00:07<00:00,  3.02it/s]100%|██████████| 33/33 [00:07<00:00,  2.91it/s]100%|██████████| 33/33 [00:07<00:00,  4.35it/s]
