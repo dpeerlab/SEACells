@@ -321,7 +321,7 @@ class SEACellsGPU:
                 (np.random.random(len(rows)), (rows, columns)), shape=(k, n)
             )
             # Normalize axis 0 with l1 norm
-            A0 = cupyx.scipy.sparse.csc_matrix(normalize(A0, norm="l1", axis=0))
+            A0 = cupyx.scipy.sparse.csr_matrix(normalize(A0, norm="l1", axis=0))
 
             if self.verbose:
                 print("Randomly initialized A matrix.")
@@ -349,10 +349,10 @@ class SEACellsGPU:
         if self.convergence_threshold is None:
             self.convergence_threshold = self.convergence_epsilon * RSS
             # ic(type(self.convergence_threshold))
-            # if self.verbose:
-            #     print(
-            #         f"Convergence threshold set to {self.convergence_threshold} based on epsilon = {self.convergence_epsilon}"
-            #     )
+            if self.verbose:
+                print(
+                    f"Convergence threshold set to {self.convergence_threshold} based on epsilon = {self.convergence_epsilon}"
+                )
 
     def _get_waypoint_centers(self, n_waypoints=None):
         """Initialize B matrix using waypoint analysis, as described in Palantir.
@@ -511,10 +511,9 @@ class SEACellsGPU:
         n, k = Bg.shape
 
         t = 0  # current iteration (determine multiplicative update)
-        # Kg = self.K.get() 
-        Kg = self.K
+        Kg = self.K.get() 
 
-        # Bg = Bg.get()
+        Bg = Bg.get()
 
         # precompute some gradient terms
         t2g = (Kg.dot(Bg)).T
@@ -530,7 +529,7 @@ class SEACellsGPU:
         # Bg = Bg.astype(cp.float64)
         # Ag = Ag.astype(cp.float64)
 
-        # Ag = Ag.get()
+        Ag = Ag.get()
 
         # update rows of A for given number of iterations
         while t < self.max_FW_iter:
@@ -540,9 +539,9 @@ class SEACellsGPU:
             # l2_term = 0.5 * lambda_l2 * norm(Ag, ord = 'fro')**2
 
             # compute gradient
-            Gg = 2.0 * (t1g @ Ag - t2g).get().toarray()
-            amins = Gg.argmin(axis=0)
-            amins = cp.array(amins).reshape(-1)
+            Gg = 2.0 * np.array(t1g @ Ag - t2g)
+            amins = np.argmin(Gg, axis=0)
+            amins = np.array(amins).reshape(-1)
             # ic(amins.shape)
             # ic(type(amins))
             # loop free implementaton
@@ -551,7 +550,7 @@ class SEACellsGPU:
             # eg = cupyx.scipy.sparse.csr_matrix(eg)
 
             # eg = cupyx.scipy.sparse.csr_matrix((cp.ones(len(amins)), (amins, cp.arange(n))), shape=Ag.shape)
-            eg = cupyx.scipy.sparse.csr_matrix((cp.ones(len(amins)), (amins, cp.arange(n))), shape=Ag.shape)
+            eg = scipy.sparse.csr_matrix((np.ones(len(amins)), (amins, np.arange(n))), shape=Ag.shape)
 
             # row_indices = cp.array(amins)
             # col_indices = cp.arange(n)
@@ -568,8 +567,7 @@ class SEACellsGPU:
             # print("f, Ag, t")
 
         # A = Ag.get()
-        # A = cupyx.scipy.sparse.csr_matrix(Ag)
-        A = Ag
+        A = cupyx.scipy.sparse.csr_matrix(Ag)
 
         del t1g, t2g, Kg, Gg, Bg, eg, amins, Ag
         cp._default_memory_pool.free_all_blocks()
@@ -679,14 +677,12 @@ class SEACellsGPU:
         # turn this to a dense calculation
 
         # turn A, B, and self.kernel_matrix to dense matrices
-        A = A.todense()
-        B = B.todense()
-        K = self.kernel_matrix.todense()
-        # A = A.get().todense()
-        # B = B.get().todense()
-        # K = self.kernel_matrix.get().todense()
-
-        # K = self.kernel_matrix
+        # A = A.todense()
+        # B = B.todense()
+        # K = self.kernel_matrix.todense()
+        A = A.get().todense()
+        B = B.get().todense()
+        K = self.kernel_matrix.get().todense()
 
         return (K.dot(B)).dot(A)
 
@@ -721,8 +717,8 @@ class SEACellsGPU:
         ), "reconstruction.shape != (self.n_cells, self.n_cells)"
 
         # Densify the kernel matrix
-        kernel_matrix = self.kernel_matrix.todense()
-        # kernel_matrix = self.kernel_matrix
+        # kernel_matrix = self.kernel_matrix.todense()
+        kernel_matrix = self.kernel_matrix.get().todense()
         diff = kernel_matrix - reconstruction
         # ic(type(diff))
 
@@ -843,16 +839,16 @@ class SEACellsGPU:
                     print(f"Completed iteration {n_iter}.")
 
             # Check for convergence
-            # if len(self.RSS_iters) > 1:
+            if len(self.RSS_iters) > 1:
                 # ic(self.RSS_iters[-2] - self.RSS_iters[-1])
                 # ic(self.convergence_threshold)
-            if (
-                cp.abs(self.RSS_iters[-2] - self.RSS_iters[-1])
-                < self.convergence_threshold
-            ):
-                if self.verbose:
-                    print(f"Converged after {n_iter} iterations.")
-                converged = True
+                if (
+                    cp.abs(self.RSS_iters[-2] - self.RSS_iters[-1])
+                    < self.convergence_threshold
+                ):
+                    if self.verbose:
+                        print(f"Converged after {n_iter} iterations.")
+                    converged = True
 
         self.Z_ = self.B_.T @ self.K
 

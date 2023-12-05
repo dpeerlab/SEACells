@@ -86,7 +86,7 @@ def gpu_versions(ad, num_cells):
     # )
     # Clear the GPU memory
     cp.get_default_memory_pool().free_all_blocks() 
-    
+
     try:
         assignments4, time4, mem4, A, B, K, sparsity = get_data(
             ad,
@@ -102,22 +102,22 @@ def gpu_versions(ad, num_cells):
         timestamp = time.time()
 
         # Write the time and memory data
-        with open(f"results9/{num_cells}_cells/v4_{timestamp}.txt", "w") as f:
+        with open(f"results10/{num_cells}_cells/v4_{timestamp}.txt", "w") as f:
             f.write(f"Time: {time4}\n")
             f.write(f"Memory: {mem4}\n")
 
         # If assignments is not None, write it to a file
         if assignments4 is not None:
             assignments4.to_csv(
-                f"results9/{num_cells}_cells/assignments_v4_{timestamp}.csv"
+                f"results10/{num_cells}_cells/assignments_v4_{timestamp}.csv"
             )
 
         # Write the A and B matrices
-        np.save(f"results9/{num_cells}_cells/A_v4_{timestamp}.npy", A)
-        np.save(f"results9/{num_cells}_cells/B_v4_{timestamp}.npy", B)
+        np.save(f"results10/{num_cells}_cells/A_v4_{timestamp}.npy", A)
+        np.save(f"results10/{num_cells}_cells/B_v4_{timestamp}.npy", B)
 
         # Write the sparsity dataframe
-        sparsity.to_csv(f"results9/{num_cells}_cells/sparsity_v4_{timestamp}.csv")
+        sparsity.to_csv(f"results10/{num_cells}_cells/sparsity_v4_{timestamp}.csv")
 
         # Clear the GPU memory
         cp.get_default_memory_pool().free_all_blocks()
@@ -131,7 +131,7 @@ def gpu_versions(ad, num_cells):
         timestamp = time.time()
 
         # Write the error to a file
-        with open(f"results9/{num_cells}_cells/v4_{timestamp}.txt", "w") as f:
+        with open(f"results10/{num_cells}_cells/v4_{timestamp}.txt", "w") as f:
             f.write(f"Error: {e}\n")
 
     # try:
@@ -142,16 +142,16 @@ def gpu_versions(ad, num_cells):
     #     timestamp = time.time()
 
     #     # Write the time and memory data
-    #     with open(f"results9/{num_cells}_cells/v3_{timestamp}.txt", "w") as f:
+    #     with open(f"results10/{num_cells}_cells/v3_{timestamp}.txt", "w") as f:
     #         f.write(f"Time: {time3}\n")
     #         f.write(f"Memory: {mem3}\n")
 
     #     # Write the A and B matrixes
     #     np.save(f"/{num_cells}_cells/A_v3_{timestamp}.npy", A)
-    #     np.save(f"results9/{num_cells}_cells/B_v3_{timestamp}.npy", B)
+    #     np.save(f"results10/{num_cells}_cells/B_v3_{timestamp}.npy", B)
 
     #     # Write the sparsity dataframe
-    #     sparsity.to_csv(f"results9/{num_cells}_cells/sparsity_v3_{timestamp}.csv")
+    #     sparsity.to_csv(f"results10/{num_cells}_cells/sparsity_v3_{timestamp}.csv")
 
     #     # Clear the GPU memory
     #     cp.get_default_memory_pool().free_all_blocks()
@@ -165,7 +165,7 @@ def gpu_versions(ad, num_cells):
     #     timestamp = time.time()
 
     #     # Write the error to a file
-    #     with open(f"results9/{num_cells}_cells/v3_{timestamp}.txt", "w") as f:
+    #     with open(f"results10/{num_cells}_cells/v3_{timestamp}.txt", "w") as f:
     #         f.write(f"Error: {e}\n")
 
     # try:
