@@ -217,7 +217,7 @@ def get_results(num_cell):
     #    for num_cell in potential_num_cells:
     ad = sc.read("/home/aparna/DATA/aparnakumar/150000_cells/mouse_marioni_150k.h5ad")
     ad = ad[:num_cell]
-    for trial in range(3):
+    for trial in range(5):
         gpu_versions(ad, num_cell)
 
         # assignments, comparisons = gpu_versions(ad, num_cell)

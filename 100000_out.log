@@ -521,3 +521,102 @@ findfont: Font family ['Lato'] not found. Falling back to DejaVu Sans.
 nohup: ignoring input
 findfont: Font family ['Raleway'] not found. Falling back to DejaVu Sans.
 findfont: Font family ['Lato'] not found. Falling back to DejaVu Sans.
+SPARSE AND GPU
+TRYING SEACellsGPU
+Welcome to SEACells GPU!
+build_graph.SEACellGraph completed
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/100000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/100000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/100000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 1274 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/69 [00:00<?, ?it/s]/home/aparna/miniconda3/lib/python3.9/site-packages/cupyx/scipy/sparse/_compressed.py:545: SparseEfficiencyWarning: Changing the sparsity structure of a csr_matrix is expensive.
+  warnings.warn('Changing the sparsity structure of a '
+  3%|▎         | 2/69 [00:00<00:05, 12.98it/s]  6%|▌         | 4/69 [00:00<00:05, 12.95it/s]  9%|▊         | 6/69 [00:00<00:04, 12.73it/s] 12%|█▏        | 8/69 [00:00<00:04, 12.33it/s] 14%|█▍        | 10/69 [00:00<00:04, 11.89it/s] 17%|█▋        | 12/69 [00:01<00:05, 11.33it/s] 20%|██        | 14/69 [00:01<00:05, 10.65it/s] 23%|██▎       | 16/69 [00:01<00:05, 10.09it/s] 26%|██▌       | 18/69 [00:01<00:05,  9.55it/s] 28%|██▊       | 19/69 [00:01<00:05,  9.28it/s] 29%|██▉       | 20/69 [00:01<00:05,  9.00it/s] 30%|███       | 21/69 [00:02<00:05,  8.68it/s] 32%|███▏      | 22/69 [00:02<00:05,  8.35it/s] 33%|███▎      | 23/69 [00:02<00:05,  8.04it/s] 35%|███▍      | 24/69 [00:02<00:06,  7.10it/s] 36%|███▌      | 25/69 [00:02<00:07,  5.99it/s] 38%|███▊      | 26/69 [00:02<00:07,  5.42it/s] 39%|███▉      | 27/69 [00:03<00:08,  4.95it/s] 41%|████      | 28/69 [00:03<00:08,  4.58it/s] 42%|████▏     | 29/69 [00:03<00:08,  4.47it/s] 43%|████▎     | 30/69 [00:03<00:08,  4.36it/s] 45%|████▍     | 31/69 [00:04<00:08,  4.33it/s] 46%|████▋     | 32/69 [00:04<00:08,  4.47it/s] 48%|████▊     | 33/69 [00:04<00:07,  4.92it/s] 49%|████▉     | 34/69 [00:04<00:06,  5.25it/s] 51%|█████     | 35/69 [00:04<00:06,  5.56it/s] 52%|█████▏    | 36/69 [00:05<00:05,  5.80it/s] 54%|█████▎    | 37/69 [00:05<00:05,  5.91it/s] 55%|█████▌    | 38/69 [00:05<00:05,  6.04it/s] 57%|█████▋    | 39/69 [00:05<00:04,  6.12it/s] 58%|█████▊    | 40/69 [00:05<00:04,  6.13it/s] 59%|█████▉    | 41/69 [00:05<00:04,  6.10it/s] 61%|██████    | 42/69 [00:05<00:04,  6.04it/s] 62%|██████▏   | 43/69 [00:06<00:04,  6.04it/s] 64%|██████▍   | 44/69 [00:06<00:04,  5.99it/s] 65%|██████▌   | 45/69 [00:06<00:04,  5.85it/s] 67%|██████▋   | 46/69 [00:06<00:04,  5.72it/s] 68%|██████▊   | 47/69 [00:06<00:03,  5.62it/s] 70%|██████▉   | 48/69 [00:07<00:03,  5.50it/s] 71%|███████   | 49/69 [00:07<00:03,  5.42it/s] 72%|███████▏  | 50/69 [00:07<00:03,  5.35it/s] 74%|███████▍  | 51/69 [00:07<00:03,  5.24it/s] 75%|███████▌  | 52/69 [00:07<00:03,  5.18it/s] 77%|███████▋  | 53/69 [00:08<00:03,  5.08it/s] 78%|███████▊  | 54/69 [00:08<00:03,  4.97it/s] 80%|███████▉  | 55/69 [00:08<00:02,  4.88it/s] 81%|████████  | 56/69 [00:08<00:02,  4.85it/s] 83%|████████▎ | 57/69 [00:08<00:02,  4.74it/s] 84%|████████▍ | 58/69 [00:09<00:02,  4.63it/s] 86%|████████▌ | 59/69 [00:09<00:02,  4.54it/s] 87%|████████▋ | 60/69 [00:09<00:02,  4.39it/s] 88%|████████▊ | 61/69 [00:09<00:01,  4.24it/s] 90%|████████▉ | 62/69 [00:10<00:01,  4.22it/s] 91%|█████████▏| 63/69 [00:10<00:01,  4.17it/s] 93%|█████████▎| 64/69 [00:10<00:01,  4.15it/s] 94%|█████████▍| 65/69 [00:10<00:00,  4.21it/s] 96%|█████████▌| 66/69 [00:11<00:00,  4.22it/s] 97%|█████████▋| 67/69 [00:11<00:00,  4.22it/s] 99%|█████████▊| 68/69 [00:11<00:00,  4.26it/s]100%|██████████| 69/69 [00:11<00:00,  4.20it/s]100%|██████████| 69/69 [00:11<00:00,  5.86it/s]
+SPARSE AND GPU
+TRYING SEACellsGPU
+Welcome to SEACells GPU!
+build_graph.SEACellGraph completed
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/100000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/100000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/100000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 1274 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/69 [00:00<?, ?it/s]/home/aparna/miniconda3/lib/python3.9/site-packages/cupyx/scipy/sparse/_compressed.py:545: SparseEfficiencyWarning: Changing the sparsity structure of a csr_matrix is expensive.
+  warnings.warn('Changing the sparsity structure of a '
+  3%|▎         | 2/69 [00:00<00:05, 12.41it/s]  6%|▌         | 4/69 [00:00<00:05, 12.26it/s]  9%|▊         | 6/69 [00:00<00:05, 12.06it/s] 12%|█▏        | 8/69 [00:00<00:05, 11.87it/s] 14%|█▍        | 10/69 [00:00<00:05, 11.51it/s] 17%|█▋        | 12/69 [00:01<00:05, 11.11it/s] 20%|██        | 14/69 [00:01<00:05, 10.43it/s] 23%|██▎       | 16/69 [00:01<00:05,  9.95it/s] 26%|██▌       | 18/69 [00:01<00:05,  9.35it/s] 28%|██▊       | 19/69 [00:01<00:05,  9.12it/s] 29%|██▉       | 20/69 [00:01<00:05,  8.79it/s] 30%|███       | 21/69 [00:02<00:05,  8.05it/s] 32%|███▏      | 22/69 [00:02<00:06,  7.07it/s] 33%|███▎      | 23/69 [00:02<00:07,  6.45it/s] 35%|███▍      | 24/69 [00:02<00:07,  5.99it/s] 36%|███▌      | 25/69 [00:02<00:07,  5.61it/s] 38%|███▊      | 26/69 [00:03<00:08,  5.32it/s] 39%|███▉      | 27/69 [00:03<00:08,  5.09it/s] 41%|████      | 28/69 [00:03<00:07,  5.35it/s] 42%|████▏     | 29/69 [00:03<00:07,  5.54it/s] 43%|████▎     | 30/69 [00:03<00:06,  5.69it/s] 45%|████▍     | 31/69 [00:04<00:06,  5.79it/s] 46%|████▋     | 32/69 [00:04<00:06,  5.81it/s] 48%|████▊     | 33/69 [00:04<00:05,  6.07it/s] 49%|████▉     | 34/69 [00:04<00:05,  6.21it/s] 51%|█████     | 35/69 [00:04<00:05,  6.26it/s] 52%|█████▏    | 36/69 [00:04<00:05,  6.25it/s] 54%|█████▎    | 37/69 [00:04<00:05,  6.12it/s] 55%|█████▌    | 38/69 [00:05<00:05,  6.14it/s] 57%|█████▋    | 39/69 [00:05<00:04,  6.12it/s] 58%|█████▊    | 40/69 [00:05<00:04,  6.07it/s] 59%|█████▉    | 41/69 [00:05<00:04,  6.02it/s] 61%|██████    | 42/69 [00:05<00:04,  5.93it/s] 62%|██████▏   | 43/69 [00:05<00:04,  5.89it/s] 64%|██████▍   | 44/69 [00:06<00:04,  5.76it/s] 65%|██████▌   | 45/69 [00:06<00:04,  5.72it/s] 67%|██████▋   | 46/69 [00:06<00:04,  5.59it/s] 68%|██████▊   | 47/69 [00:06<00:03,  5.55it/s] 70%|██████▉   | 48/69 [00:06<00:03,  5.47it/s] 71%|███████   | 49/69 [00:07<00:03,  5.01it/s] 72%|███████▏  | 50/69 [00:07<00:04,  4.41it/s] 74%|███████▍  | 51/69 [00:07<00:04,  4.07it/s] 75%|███████▌  | 52/69 [00:08<00:04,  3.83it/s] 77%|███████▋  | 53/69 [00:08<00:04,  3.66it/s] 78%|███████▊  | 54/69 [00:08<00:03,  3.81it/s] 80%|███████▉  | 55/69 [00:08<00:03,  4.03it/s] 81%|████████  | 56/69 [00:08<00:03,  4.24it/s] 83%|████████▎ | 57/69 [00:09<00:02,  4.34it/s] 84%|████████▍ | 58/69 [00:09<00:02,  4.40it/s] 86%|████████▌ | 59/69 [00:09<00:02,  4.40it/s] 87%|████████▋ | 60/69 [00:09<00:02,  4.40it/s] 88%|████████▊ | 61/69 [00:10<00:01,  4.40it/s] 90%|████████▉ | 62/69 [00:10<00:01,  4.41it/s] 91%|█████████▏| 63/69 [00:10<00:01,  4.36it/s] 93%|█████████▎| 64/69 [00:10<00:01,  4.33it/s] 94%|█████████▍| 65/69 [00:11<00:00,  4.35it/s] 96%|█████████▌| 66/69 [00:11<00:00,  4.36it/s] 97%|█████████▋| 67/69 [00:11<00:00,  4.35it/s] 99%|█████████▊| 68/69 [00:11<00:00,  4.36it/s]100%|██████████| 69/69 [00:11<00:00,  4.32it/s]100%|██████████| 69/69 [00:11<00:00,  5.77it/s]
+Selecting 59 cells from greedy initialization.
+Randomly initialized A matrix.
+Done with 100000 cells, trial 1
+SPARSE AND GPU
+TRYING SEACellsGPU
+Welcome to SEACells GPU!
+build_graph.SEACellGraph completed
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/100000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/100000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/100000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Done with 100000 cells, trial 2
+SPARSE AND GPU
+TRYING SEACellsGPU
+Welcome to SEACells GPU!
+build_graph.SEACellGraph completed
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/100000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/100000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/100000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 1274 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/69 [00:00<?, ?it/s]/home/aparna/miniconda3/lib/python3.9/site-packages/cupyx/scipy/sparse/_compressed.py:545: SparseEfficiencyWarning: Changing the sparsity structure of a csr_matrix is expensive.
+  warnings.warn('Changing the sparsity structure of a '
+  3%|▎         | 2/69 [00:00<00:03, 17.55it/s]  6%|▌         | 4/69 [00:00<00:04, 14.95it/s]  9%|▊         | 6/69 [00:00<00:04, 13.70it/s] 12%|█▏        | 8/69 [00:00<00:04, 12.91it/s] 14%|█▍        | 10/69 [00:00<00:04, 12.22it/s] 17%|█▋        | 12/69 [00:00<00:04, 11.41it/s] 20%|██        | 14/69 [00:01<00:05, 10.75it/s] 23%|██▎       | 16/69 [00:01<00:05, 10.20it/s] 26%|██▌       | 18/69 [00:01<00:05,  9.56it/s] 28%|██▊       | 19/69 [00:01<00:05,  9.29it/s] 29%|██▉       | 20/69 [00:01<00:05,  8.99it/s] 30%|███       | 21/69 [00:02<00:05,  8.70it/s] 32%|███▏      | 22/69 [00:02<00:05,  8.25it/s] 33%|███▎      | 23/69 [00:02<00:05,  8.00it/s] 35%|███▍      | 24/69 [00:02<00:05,  7.77it/s] 36%|███▌      | 25/69 [00:02<00:05,  7.54it/s] 38%|███▊      | 26/69 [00:02<00:05,  7.36it/s] 39%|███▉      | 27/69 [00:02<00:05,  7.16it/s] 41%|████      | 28/69 [00:03<00:05,  6.98it/s] 42%|████▏     | 29/69 [00:03<00:05,  6.76it/s] 43%|████▎     | 30/69 [00:03<00:05,  6.50it/s] 45%|████▍     | 31/69 [00:03<00:05,  6.42it/s] 46%|████▋     | 32/69 [00:03<00:05,  6.28it/s] 48%|████▊     | 33/69 [00:03<00:05,  6.41it/s] 49%|████▉     | 34/69 [00:03<00:05,  6.45it/s] 51%|█████     | 35/69 [00:04<00:05,  6.43it/s] 52%|█████▏    | 36/69 [00:04<00:05,  6.44it/s] 54%|█████▎    | 37/69 [00:04<00:05,  6.38it/s] 55%|█████▌    | 38/69 [00:04<00:04,  6.32it/s] 57%|█████▋    | 39/69 [00:04<00:04,  6.18it/s] 58%|█████▊    | 40/69 [00:04<00:04,  6.14it/s] 59%|█████▉    | 41/69 [00:05<00:04,  6.09it/s] 61%|██████    | 42/69 [00:05<00:04,  6.05it/s] 62%|██████▏   | 43/69 [00:05<00:04,  5.92it/s] 64%|██████▍   | 44/69 [00:05<00:04,  5.80it/s] 65%|██████▌   | 45/69 [00:05<00:04,  5.72it/s] 67%|██████▋   | 46/69 [00:05<00:04,  5.62it/s] 68%|██████▊   | 47/69 [00:06<00:04,  5.50it/s] 70%|██████▉   | 48/69 [00:06<00:03,  5.43it/s] 71%|███████   | 49/69 [00:06<00:03,  5.34it/s] 72%|███████▏  | 50/69 [00:06<00:03,  5.26it/s] 74%|███████▍  | 51/69 [00:06<00:03,  5.16it/s] 75%|███████▌  | 52/69 [00:07<00:03,  5.12it/s] 77%|███████▋  | 53/69 [00:07<00:03,  5.03it/s] 78%|███████▊  | 54/69 [00:07<00:03,  4.95it/s] 80%|███████▉  | 55/69 [00:07<00:02,  4.86it/s] 81%|████████  | 56/69 [00:08<00:02,  4.74it/s] 83%|████████▎ | 57/69 [00:08<00:02,  4.68it/s] 84%|████████▍ | 58/69 [00:08<00:02,  4.62it/s] 86%|████████▌ | 59/69 [00:08<00:02,  4.53it/s] 87%|████████▋ | 60/69 [00:08<00:02,  4.48it/s] 88%|████████▊ | 61/69 [00:09<00:01,  4.37it/s] 90%|████████▉ | 62/69 [00:09<00:01,  4.31it/s] 91%|█████████▏| 63/69 [00:09<00:01,  4.25it/s] 93%|█████████▎| 64/69 [00:09<00:01,  4.20it/s] 94%|█████████▍| 65/69 [00:10<00:00,  4.22it/s] 96%|█████████▌| 66/69 [00:10<00:00,  4.26it/s] 97%|█████████▋| 67/69 [00:10<00:00,  4.27it/s] 99%|█████████▊| 68/69 [00:10<00:00,  4.27it/s]100%|██████████| 69/69 [00:11<00:00,  4.22it/s]100%|██████████| 69/69 [00:11<00:00,  6.23it/s]
+Selecting 59 cells from greedy initialization.
+Randomly initialized A matrix.
+Done with 100000 cells, trial 3

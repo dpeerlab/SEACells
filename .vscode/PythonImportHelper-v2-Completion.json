@@ -963,7 +963,7 @@
         "kind": 2,
         "importPath": "create_results",
         "description": "create_results",
-        "peekOfCode": "def get_results(num_cell):\n    #    potential_num_cells = [5000, 10000, 50000, 100000, 150000, 200000]\n    #    for num_cell in potential_num_cells:\n    ad = sc.read(\"/home/aparna/DATA/aparnakumar/150000_cells/mouse_marioni_150k.h5ad\")\n    ad = ad[:num_cell]\n    for trial in range(3):\n        gpu_versions(ad, num_cell)\n        # assignments, comparisons = gpu_versions(ad, num_cell)\n        # try:\n        #     comparisons.to_csv(f\"results/{num_cell}_cells/comparisons_{trial}.csv\")",
+        "peekOfCode": "def get_results(num_cell):\n    #    potential_num_cells = [5000, 10000, 50000, 100000, 150000, 200000]\n    #    for num_cell in potential_num_cells:\n    ad = sc.read(\"/home/aparna/DATA/aparnakumar/150000_cells/mouse_marioni_150k.h5ad\")\n    ad = ad[:num_cell]\n    for trial in range(5):\n        gpu_versions(ad, num_cell)\n        # assignments, comparisons = gpu_versions(ad, num_cell)\n        # try:\n        #     comparisons.to_csv(f\"results/{num_cell}_cells/comparisons_{trial}.csv\")",
         "detail": "create_results",
         "documentation": {}
     },

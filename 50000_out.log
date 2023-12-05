@@ -12755,3 +12755,131 @@ Initializing f and g...
   0%|          | 0/33 [00:00<?, ?it/s]/home/aparna/miniconda3/lib/python3.9/site-packages/cupyx/scipy/sparse/_compressed.py:545: SparseEfficiencyWarning: Changing the sparsity structure of a csr_matrix is expensive.
   warnings.warn('Changing the sparsity structure of a '
   9%|▉         | 3/33 [00:00<00:01, 25.68it/s] 18%|█▊        | 6/33 [00:00<00:01, 21.76it/s] 27%|██▋       | 9/33 [00:00<00:01, 19.80it/s] 36%|███▋      | 12/33 [00:00<00:01, 18.71it/s] 42%|████▏     | 14/33 [00:00<00:01, 18.07it/s] 48%|████▊     | 16/33 [00:00<00:01, 16.96it/s] 55%|█████▍    | 18/33 [00:01<00:00, 15.79it/s] 61%|██████    | 20/33 [00:01<00:00, 14.60it/s] 67%|██████▋   | 22/33 [00:01<00:00, 12.79it/s] 73%|███████▎  | 24/33 [00:01<00:00, 11.93it/s] 79%|███████▉  | 26/33 [00:01<00:00, 11.42it/s] 85%|████████▍ | 28/33 [00:01<00:00, 11.27it/s] 91%|█████████ | 30/33 [00:02<00:00, 11.23it/s] 97%|█████████▋| 32/33 [00:02<00:00, 10.77it/s]100%|██████████| 33/33 [00:02<00:00, 13.63it/s]
+SPARSE AND GPU
+TRYING SEACellsGPU
+Welcome to SEACells GPU!
+build_graph.SEACellGraph completed
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 643 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/33 [00:00<?, ?it/s]/home/aparna/miniconda3/lib/python3.9/site-packages/cupyx/scipy/sparse/_compressed.py:545: SparseEfficiencyWarning: Changing the sparsity structure of a csr_matrix is expensive.
+  warnings.warn('Changing the sparsity structure of a '
+  6%|▌         | 2/33 [00:00<00:01, 17.29it/s] 15%|█▌        | 5/33 [00:00<00:01, 19.60it/s] 21%|██        | 7/33 [00:00<00:01, 19.72it/s] 27%|██▋       | 9/33 [00:00<00:01, 18.92it/s] 33%|███▎      | 11/33 [00:00<00:01, 18.21it/s] 39%|███▉      | 13/33 [00:00<00:01, 17.40it/s] 45%|████▌     | 15/33 [00:00<00:01, 16.50it/s] 52%|█████▏    | 17/33 [00:00<00:01, 15.87it/s] 58%|█████▊    | 19/33 [00:01<00:00, 15.30it/s] 64%|██████▎   | 21/33 [00:01<00:00, 14.66it/s] 70%|██████▉   | 23/33 [00:01<00:00, 14.12it/s] 76%|███████▌  | 25/33 [00:01<00:00, 13.38it/s] 82%|████████▏ | 27/33 [00:01<00:00, 12.90it/s] 88%|████████▊ | 29/33 [00:01<00:00, 12.40it/s] 94%|█████████▍| 31/33 [00:02<00:00, 11.74it/s]100%|██████████| 33/33 [00:02<00:00, 10.28it/s]100%|██████████| 33/33 [00:02<00:00, 13.83it/s]
+Selecting 23 cells from greedy initialization.
+Randomly initialized A matrix.
+Done with 50000 cells, trial 2
+SPARSE AND GPU
+TRYING SEACellsGPU
+Welcome to SEACells GPU!
+build_graph.SEACellGraph completed
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 643 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/33 [00:00<?, ?it/s]/home/aparna/miniconda3/lib/python3.9/site-packages/cupyx/scipy/sparse/_compressed.py:545: SparseEfficiencyWarning: Changing the sparsity structure of a csr_matrix is expensive.
+  warnings.warn('Changing the sparsity structure of a '
+  9%|▉         | 3/33 [00:00<00:01, 23.01it/s] 18%|█▊        | 6/33 [00:00<00:01, 21.43it/s] 27%|██▋       | 9/33 [00:00<00:01, 19.40it/s] 33%|███▎      | 11/33 [00:00<00:01, 18.47it/s] 39%|███▉      | 13/33 [00:00<00:01, 17.68it/s] 45%|████▌     | 15/33 [00:00<00:01, 16.78it/s] 52%|█████▏    | 17/33 [00:00<00:00, 16.13it/s] 58%|█████▊    | 19/33 [00:01<00:00, 15.41it/s] 64%|██████▎   | 21/33 [00:01<00:00, 14.55it/s] 70%|██████▉   | 23/33 [00:01<00:00, 13.57it/s] 76%|███████▌  | 25/33 [00:01<00:00, 12.96it/s] 82%|████████▏ | 27/33 [00:01<00:00, 12.38it/s] 88%|████████▊ | 29/33 [00:01<00:00, 11.89it/s] 94%|█████████▍| 31/33 [00:02<00:00, 10.74it/s]100%|██████████| 33/33 [00:02<00:00,  9.49it/s]100%|██████████| 33/33 [00:02<00:00, 13.41it/s]
+Selecting 23 cells from greedy initialization.
+Randomly initialized A matrix.
+Done with 50000 cells, trial 3
+Selecting 23 cells from greedy initialization.
+Randomly initialized A matrix.
+Convergence threshold set to 0.0040718039215027375 based on epsilon = 1e-05
+Randomly initialized A matrix.
+Starting iteration 1.
+Done with 50000 cells, trial 1
+SPARSE AND GPU
+TRYING SEACellsGPU
+Welcome to SEACells GPU!
+build_graph.SEACellGraph completed
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 643 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/33 [00:00<?, ?it/s]/home/aparna/miniconda3/lib/python3.9/site-packages/cupyx/scipy/sparse/_compressed.py:545: SparseEfficiencyWarning: Changing the sparsity structure of a csr_matrix is expensive.
+  warnings.warn('Changing the sparsity structure of a '
+  6%|▌         | 2/33 [00:00<00:01, 18.82it/s] 12%|█▏        | 4/33 [00:00<00:01, 16.73it/s] 18%|█▊        | 6/33 [00:00<00:01, 15.56it/s] 24%|██▍       | 8/33 [00:00<00:01, 14.59it/s] 30%|███       | 10/33 [00:00<00:01, 14.07it/s] 36%|███▋      | 12/33 [00:00<00:01, 13.47it/s] 42%|████▏     | 14/33 [00:01<00:01, 12.92it/s] 48%|████▊     | 16/33 [00:01<00:01, 12.30it/s] 55%|█████▍    | 18/33 [00:01<00:01, 11.76it/s] 61%|██████    | 20/33 [00:01<00:01, 11.05it/s] 67%|██████▋   | 22/33 [00:01<00:01, 10.47it/s] 73%|███████▎  | 24/33 [00:02<00:00, 10.04it/s] 79%|███████▉  | 26/33 [00:02<00:00,  9.60it/s] 82%|████████▏ | 27/33 [00:02<00:00,  9.35it/s] 85%|████████▍ | 28/33 [00:02<00:00,  9.06it/s] 88%|████████▊ | 29/33 [00:02<00:00,  8.89it/s] 91%|█████████ | 30/33 [00:02<00:00,  8.59it/s] 94%|█████████▍| 31/33 [00:02<00:00,  8.46it/s] 97%|█████████▋| 32/33 [00:02<00:00,  8.29it/s]100%|██████████| 33/33 [00:03<00:00,  8.29it/s]100%|██████████| 33/33 [00:03<00:00, 10.64it/s]
+Selecting 23 cells from greedy initialization.
+Randomly initialized A matrix.
+Convergence threshold set to 0.0040718039215027375 based on epsilon = 1e-05
+Randomly initialized A matrix.
+Starting iteration 1.
+Done with 50000 cells, trial 2
+SPARSE AND GPU
+TRYING SEACellsGPU
+Welcome to SEACells GPU!
+build_graph.SEACellGraph completed
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/50000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 643 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/33 [00:00<?, ?it/s]/home/aparna/miniconda3/lib/python3.9/site-packages/cupyx/scipy/sparse/_compressed.py:545: SparseEfficiencyWarning: Changing the sparsity structure of a csr_matrix is expensive.
+  warnings.warn('Changing the sparsity structure of a '
+  6%|▌         | 2/33 [00:00<00:01, 18.56it/s] 12%|█▏        | 4/33 [00:00<00:01, 16.47it/s] 18%|█▊        | 6/33 [00:00<00:01, 15.31it/s] 24%|██▍       | 8/33 [00:00<00:01, 14.68it/s] 30%|███       | 10/33 [00:00<00:01, 13.87it/s] 36%|███▋      | 12/33 [00:00<00:01, 13.25it/s] 42%|████▏     | 14/33 [00:01<00:01, 12.79it/s] 48%|████▊     | 16/33 [00:01<00:01, 12.10it/s] 55%|█████▍    | 18/33 [00:01<00:01, 11.41it/s] 61%|██████    | 20/33 [00:01<00:01, 10.82it/s] 67%|██████▋   | 22/33 [00:01<00:01, 10.14it/s] 73%|███████▎  | 24/33 [00:02<00:00,  9.81it/s] 76%|███████▌  | 25/33 [00:02<00:00,  9.65it/s] 79%|███████▉  | 26/33 [00:02<00:00,  9.34it/s] 82%|████████▏ | 27/33 [00:02<00:00,  9.17it/s] 85%|████████▍ | 28/33 [00:02<00:00,  8.78it/s] 88%|████████▊ | 29/33 [00:02<00:00,  8.63it/s] 91%|█████████ | 30/33 [00:02<00:00,  8.43it/s] 94%|█████████▍| 31/33 [00:02<00:00,  8.29it/s] 97%|█████████▋| 32/33 [00:03<00:00,  8.15it/s]100%|██████████| 33/33 [00:03<00:00,  8.23it/s]100%|██████████| 33/33 [00:03<00:00, 10.49it/s]
+Selecting 23 cells from greedy initialization.
+Randomly initialized A matrix.
+Convergence threshold set to 0.0040718039215027375 based on epsilon = 1e-05
+Randomly initialized A matrix.
+Starting iteration 1.
+Done with 50000 cells, trial 3
