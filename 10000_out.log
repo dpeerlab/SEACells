@@ -2214,3 +2214,32 @@ Starting iteration 40.
 Completed iteration 40.
 Converged after 41 iterations.
 Done with 10000 cells, trial 5
+nohup: ignoring input
+findfont: Font family ['Raleway'] not found. Falling back to DejaVu Sans.
+findfont: Font family ['Lato'] not found. Falling back to DejaVu Sans.
+SPARSE AND GPU
+TRYING SEACellsGPU
+Welcome to SEACells GPU!
+build_graph.SEACellGraph completed
+Computing kNN graph using scanpy NN ...
+Computing radius for adaptive bandwidth kernel...
+  0%|          | 0/10000 [00:00<?, ?it/s]
+Making graph symmetric...
+Parameter graph_construction = union being used to build KNN graph...
+Computing RBF kernel...
+  0%|          | 0/10000 [00:00<?, ?it/s]
+Building similarity LIL matrix...
+  0%|          | 0/10000 [00:00<?, ?it/s]
+Constructing CSR matrix...
+Building kernel on X_pca
+Computing diffusion components from X_pca for waypoint initialization ... 
+Determing nearest neighbor graph...
+Done.
+Sampling waypoints ...
+Done.
+Selecting 119 cells from waypoint initialization.
+Initializing residual matrix using greedy column selection
+Initializing f and g...
+  0%|          | 0/24 [00:00<?, ?it/s]/home/aparna/miniconda3/lib/python3.9/site-packages/cupyx/scipy/sparse/_compressed.py:545: SparseEfficiencyWarning: Changing the sparsity structure of a csr_matrix is expensive.
+  warnings.warn('Changing the sparsity structure of a '
+  4%|▍         | 1/24 [00:00<00:02,  8.03it/s] 21%|██        | 5/24 [00:00<00:00, 24.21it/s] 33%|███▎      | 8/24 [00:00<00:00, 21.76it/s] 50%|█████     | 12/24 [00:00<00:00, 27.09it/s] 62%|██████▎   | 15/24 [00:00<00:00, 23.06it/s] 79%|███████▉  | 19/24 [00:00<00:00, 25.48it/s] 92%|█████████▏| 22/24 [00:00<00:00, 21.66it/s]100%|██████████| 24/24 [00:01<00:00, 22.70it/s]
