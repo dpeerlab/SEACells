@@ -98,6 +98,22 @@
         "documentation": {}
     },
     {
+        "label": "tqdm",
+        "importPath": "tqdm",
+        "description": "tqdm",
+        "isExtraImport": true,
+        "detail": "tqdm",
+        "documentation": {}
+    },
+    {
+        "label": "tqdm",
+        "importPath": "tqdm",
+        "description": "tqdm",
+        "isExtraImport": true,
+        "detail": "tqdm",
+        "documentation": {}
+    },
+    {
         "label": "cpu_count",
         "importPath": "multiprocessing",
         "description": "multiprocessing",
@@ -229,6 +245,14 @@
         "documentation": {}
     },
     {
+        "label": "normalize",
+        "importPath": "sklearn.preprocessing",
+        "description": "sklearn.preprocessing",
+        "isExtraImport": true,
+        "detail": "sklearn.preprocessing",
+        "documentation": {}
+    },
+    {
         "label": "StandardScaler",
         "importPath": "sklearn.preprocessing",
         "description": "sklearn.preprocessing",
@@ -313,6 +337,14 @@
         "documentation": {}
     },
     {
+        "label": "norm",
+        "importPath": "cupyx.scipy.sparse.linalg",
+        "description": "cupyx.scipy.sparse.linalg",
+        "isExtraImport": true,
+        "detail": "cupyx.scipy.sparse.linalg",
+        "documentation": {}
+    },
+    {
         "label": "scipy",
         "kind": 6,
         "isExtraImport": true,
@@ -327,6 +359,14 @@
         "description": "scipy",
         "isExtraImport": true,
         "detail": "scipy",
+        "documentation": {}
+    },
+    {
+        "label": "ic",
+        "importPath": "icecream",
+        "description": "icecream",
+        "isExtraImport": true,
+        "detail": "icecream",
         "documentation": {}
     },
     {
@@ -449,10 +489,10 @@
     },
     {
         "label": "SEACells",
-        "importPath": "SEACells.core",
-        "description": "SEACells.core",
+        "importPath": "SEACells.core_copy",
+        "description": "SEACells.core_copy",
         "isExtraImport": true,
-        "detail": "SEACells.core",
+        "detail": "SEACells.core_copy",
         "documentation": {}
     },
     {
@@ -560,6 +600,42 @@
         "description": "SEACells.core",
         "peekOfCode": "def summarize_by_SEACell(\n    ad, SEACells_label=\"SEACell\", celltype_label=None, summarize_layer=\"raw\"\n):\n    \"\"\"Summary of SEACell assignment.\n    Aggregates cells within each SEACell, summing over all raw data for all cells belonging to a SEACell.\n    Data is unnormalized and raw aggregated counts are stored .layers['raw'].\n    Attributes associated with variables (.var) are copied over, but relevant per SEACell attributes must be\n    manually copied, since certain attributes may need to be summed, or averaged etc, depending on the attribute.\n    The output of this function is an anndata object of shape n_metacells x original_data_dimension.\n    :return: anndata.AnnData containing aggregated counts.",
         "detail": "SEACells.core",
+        "documentation": {}
+    },
+    {
+        "label": "SEACells",
+        "kind": 2,
+        "importPath": "SEACells.core_copy",
+        "description": "SEACells.core_copy",
+        "peekOfCode": "def SEACells(\n    ad,\n    build_kernel_on: str,\n    n_SEACells: int,\n    use_gpu: bool = False,\n    verbose: bool = True,\n    n_waypoint_eigs: int = 10,\n    n_neighbors: int = 15,\n    convergence_epsilon: float = 1e-3,\n    l2_penalty: float = 0,",
+        "detail": "SEACells.core_copy",
+        "documentation": {}
+    },
+    {
+        "label": "sparsify_assignments",
+        "kind": 2,
+        "importPath": "SEACells.core_copy",
+        "description": "SEACells.core_copy",
+        "peekOfCode": "def sparsify_assignments(A, thresh: float):\n    \"\"\"Zero out all values below a threshold in an assignment matrix.\n    :param A: (csr_matrix) of shape n_cells x n_SEACells containing assignment weights\n    :param thresh: (float) threshold below which to zero out assignment weights\n    :return: (np.array) of shape n_cells x n_SEACells containing assignment weights.\n    \"\"\"\n    A = copy.deepcopy(A)\n    A[A < thresh] = 0\n    # Renormalize\n    A = A / A.sum(1, keepdims=True)",
+        "detail": "SEACells.core_copy",
+        "documentation": {}
+    },
+    {
+        "label": "summarize_by_soft_SEACell",
+        "kind": 2,
+        "importPath": "SEACells.core_copy",
+        "description": "SEACells.core_copy",
+        "peekOfCode": "def summarize_by_soft_SEACell(\n    ad, A, celltype_label=None, summarize_layer=\"raw\", minimum_weight: float = 0.05\n):\n    \"\"\"Summary of soft SEACell assignment.\n    Aggregates cells within each SEACell, summing over all raw data x assignment weight for all cells belonging to a\n    SEACell. Data is un-normalized and pseudo-raw aggregated counts are stored in .layers['raw'].\n    Attributes associated with variables (.var) are copied over, but relevant per SEACell attributes must be\n    manually copied, since certain attributes may need to be summed, or averaged etc, depending on the attribute.\n    The output of this function is an anndata object of shape n_metacells x original_data_dimension.\n    @param ad: (sc.AnnData) containing raw counts for single-cell data",
+        "detail": "SEACells.core_copy",
+        "documentation": {}
+    },
+    {
+        "label": "summarize_by_SEACell",
+        "kind": 2,
+        "importPath": "SEACells.core_copy",
+        "description": "SEACells.core_copy",
+        "peekOfCode": "def summarize_by_SEACell(\n    ad, SEACells_label=\"SEACell\", celltype_label=None, summarize_layer=\"raw\"\n):\n    \"\"\"Summary of SEACell assignment.\n    Aggregates cells within each SEACell, summing over all raw data for all cells belonging to a SEACell.\n    Data is unnormalized and raw aggregated counts are stored .layers['raw'].\n    Attributes associated with variables (.var) are copied over, but relevant per SEACell attributes must be\n    manually copied, since certain attributes may need to be summed, or averaged etc, depending on the attribute.\n    The output of this function is an anndata object of shape n_metacells x original_data_dimension.\n    :return: anndata.AnnData containing aggregated counts.",
+        "detail": "SEACells.core_copy",
         "documentation": {}
     },
     {
@@ -722,6 +798,15 @@
         "description": "SEACells.gpu",
         "peekOfCode": "class SEACellsGPU:\n    \"\"\"GPU Implementation of SEACells algorithm.\n    The implementation uses fast kernel archetypal analysis to find SEACells - groupings\n    of cells that represent highly granular, distinct cell states. SEACells are found by solving a convex optimization\n    problem that minimizes the residual sum of squares between the kernel matrix and the weighted sum of the archetypes.\n    Modifies annotated data matrix in place to include SEACell assignments in ad.obs['SEACell']\n    \"\"\"\n    def __init__(\n        self,\n        ad,",
         "detail": "SEACells.gpu",
+        "documentation": {}
+    },
+    {
+        "label": "SEACellsGPU",
+        "kind": 6,
+        "importPath": "SEACells.gpu_copy",
+        "description": "SEACells.gpu_copy",
+        "peekOfCode": "class SEACellsGPU:\n    \"\"\"GPU Implementation of SEACells algorithm.\n    The implementation uses fast kernel archetypal analysis to find SEACells - groupings\n    of cells that represent highly granular, distinct cell states. SEACells are found by solving a convex optimization\n    problem that minimizes the residual sum of squares between the kernel matrix and the weighted sum of the archetypes.\n    Modifies annotated data matrix in place to include SEACell assignments in ad.obs['SEACell']\n    \"\"\"\n    def __init__(\n        self,\n        ad,",
+        "detail": "SEACells.gpu_copy",
         "documentation": {}
     },
     {
@@ -945,7 +1030,7 @@
         "kind": 2,
         "importPath": "create_results",
         "description": "create_results",
-        "peekOfCode": "def get_data(ad, num_cells, use_gpu, use_sparse, A_init=None, B_init=None, K_init=None):\n    ## User defined parameters\n    ## Core parameters\n    # number of SEACells\n    n_SEACells = num_cells // 75\n    build_kernel_on = \"X_pca\"  # key in ad.obsm to use for computing metacells\n    # This would be replaced by 'X_svd' for ATAC data\n    ## Additional parameters\n    n_waypoint_eigs = (\n        10  # Number of eigenvalues to consider when initializing metacells",
+        "peekOfCode": "def get_data(ad, num_cells, use_gpu, use_sparse, A_init=None, B_init=None, K_init=None, l1_penalty = 0):\n    ## User defined parameters\n    ## Core parameters\n    # number of SEACells\n    n_SEACells = num_cells // 75\n    build_kernel_on = \"X_pca\"  # key in ad.obsm to use for computing metacells\n    # This would be replaced by 'X_svd' for ATAC data\n    ## Additional parameters\n    n_waypoint_eigs = (\n        10  # Number of eigenvalues to consider when initializing metacells",
         "detail": "create_results",
         "documentation": {}
     },
@@ -963,35 +1048,35 @@
         "kind": 2,
         "importPath": "create_results",
         "description": "create_results",
-        "peekOfCode": "def get_results(num_cell):\n    #    potential_num_cells = [5000, 10000, 50000, 100000, 150000, 200000]\n    #    for num_cell in potential_num_cells:\n    ad = sc.read(\"/home/aparna/DATA/aparnakumar/150000_cells/mouse_marioni_150k.h5ad\")\n    ad = ad[:num_cell]\n    for trial in range(5):\n        gpu_versions(ad, num_cell)\n        # assignments, comparisons = gpu_versions(ad, num_cell)\n        # try:\n        #     comparisons.to_csv(f\"results/{num_cell}_cells/comparisons_{trial}.csv\")",
+        "peekOfCode": "def get_results(num_cell):\n    #    potential_num_cells = [5000, 10000, 50000, 100000, 150000, 200000]\n    #    for num_cell in potential_num_cells:\n    ad = sc.read(\"/home/aparna/DATA/aparnakumar/150000_cells/mouse_marioni_150k.h5ad\")\n    ad = ad[:num_cell]\n    # for l1_penalty in [0.1, 0.5, 1, 5]:\n    for trial in range(3):\n        # gpu_versions(ad, num_cell)\n        assignments, comparisons = gpu_versions(ad, num_cell)\n        try:",
         "detail": "create_results",
         "documentation": {}
     },
     {
         "label": "get_data",
         "kind": 2,
-        "importPath": "create_results2",
-        "description": "create_results2",
-        "peekOfCode": "def get_data(ad, num_cells, use_gpu, use_sparse, A_init = None, B_init = None, K_init = None):\n    ## User defined parameters\n    ## Core parameters\n    # number of SEACells\n    n_SEACells = num_cells // 75\n    build_kernel_on = \"X_pca\"  # key in ad.obsm to use for computing metacells\n    # This would be replaced by 'X_svd' for ATAC data\n    ## Additional parameters\n    n_waypoint_eigs = (\n        10  # Number of eigenvalues to consider when initializing metacells",
-        "detail": "create_results2",
+        "importPath": "create_results_copy",
+        "description": "create_results_copy",
+        "peekOfCode": "def get_data(ad, num_cells, use_gpu, use_sparse, A_init=None, B_init=None, K_init=None, l1_penalty = 0):\n    ## User defined parameters\n    ## Core parameters\n    # number of SEACells\n    n_SEACells = num_cells // 75\n    build_kernel_on = \"X_pca\"  # key in ad.obsm to use for computing metacells\n    # This would be replaced by 'X_svd' for ATAC data\n    ## Additional parameters\n    n_waypoint_eigs = (\n        10  # Number of eigenvalues to consider when initializing metacells",
+        "detail": "create_results_copy",
         "documentation": {}
     },
     {
         "label": "gpu_versions",
         "kind": 2,
-        "importPath": "create_results2",
-        "description": "create_results2",
-        "peekOfCode": "def gpu_versions(ad, num_cells):\n    # assignments2, time2, mem2, A_init, B_init, K_init, sparsity = get_data(\n    #         ad, num_cells=num_cells, use_gpu=False, use_sparse=True\n    #     )\n    try: \n        assignments, time, mem = get_data(ad, num_cells=num_cells, use_gpu=False, use_sparse=False)\n        # write the assignments to a csv file\n        assignments.to_csv(f\"results/{num_cells}_cells/assignments_v1.csv\")\n    except: \n        pass ",
-        "detail": "create_results2",
+        "importPath": "create_results_copy",
+        "description": "create_results_copy",
+        "peekOfCode": "def gpu_versions(ad, num_cells):\n    # assignments2, time2, mem2, A_init, B_init, K_init, sparsity = get_data(\n    #     ad, num_cells=num_cells, use_gpu=False, use_sparse=True\n    # )\n    # Clear the GPU memory\n    cp.get_default_memory_pool().free_all_blocks() \n    try:\n        assignments4, time4, mem4, A, B, K, sparsity = get_data(\n            ad,\n            num_cells=num_cells,",
+        "detail": "create_results_copy",
         "documentation": {}
     },
     {
         "label": "get_results",
         "kind": 2,
-        "importPath": "create_results2",
-        "description": "create_results2",
-        "peekOfCode": "def get_results(num_cell):\n    #    potential_num_cells = [5000, 10000, 50000, 100000, 150000, 200000]\n    #    for num_cell in potential_num_cells:\n    ad = sc.read(\"/home/aparna/DATA/aparnakumar/150000_cells/mouse_marioni_150k.h5ad\")\n    ad = ad[:num_cell]\n    for trial in range(1):\n        gpu_versions(ad, num_cell)\n        # assignments, comparisons = gpu_versions(ad, num_cell)\n        # try:\n        #     comparisons.to_csv(f\"results/{num_cell}_cells/comparisons_{trial}.csv\")",
-        "detail": "create_results2",
+        "importPath": "create_results_copy",
+        "description": "create_results_copy",
+        "peekOfCode": "def get_results(num_cell):\n    #    potential_num_cells = [5000, 10000, 50000, 100000, 150000, 200000]\n    #    for num_cell in potential_num_cells:\n    ad = sc.read(\"/home/aparna/DATA/aparnakumar/150000_cells/mouse_marioni_150k.h5ad\")\n    ad = ad[:num_cell]\n    # for l1_penalty in [0.1, 0.5, 1, 5]:\n    for trial in range(3):\n        # gpu_versions(ad, num_cell)\n        assignments, comparisons = gpu_versions(ad, num_cell)\n        try:",
+        "detail": "create_results_copy",
         "documentation": {}
     },
     {

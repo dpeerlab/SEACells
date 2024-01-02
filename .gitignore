@@ -7,5 +7,5 @@ SEACells.egg-info
 **/.DS_Store
 **/.idea
 notebooks/data/cd34_multiome_rna.h5ad
-# Add all .npy files in the results2 folder 
-results2/**/*.npy
+# Add all .npy files in any folder starting with "results"
+**/results*/**/*.npy

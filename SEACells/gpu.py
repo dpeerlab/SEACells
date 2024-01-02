@@ -37,6 +37,7 @@ class SEACellsGPU:
         n_neighbors: int = 15,
         convergence_epsilon: float = 1e-3,
         l2_penalty: float = 0,
+        l1_penalty: float = 0,
         max_franke_wolfe_iters: int = 50,
     ):
         """GPU Implementation of SEACells algorithm.
@@ -50,6 +51,7 @@ class SEACellsGPU:
         :param n_neighbors: (int) number of nearest neighbors to use for graph construction
         :param convergence_epsilon: (float) convergence threshold for Franke-Wolfe algorithm
         :param l2_penalty: (float) L2 penalty for Franke-Wolfe algorithm
+        :param l1_penalty: (float) L1 penalty for Franke-Wolfe algorithm    
         :param max_franke_wolfe_iters: (int) maximum number of iterations for Franke-Wolfe algorithm
 
         Class Attributes:
@@ -63,6 +65,7 @@ class SEACellsGPU:
             max_FW_iter: (int) maximum number of iterations for Franke-Wolfe algorithm
             verbose: (bool) whether to suppress verbose program logging
             l2_penalty: (float) L2 penalty for Franke-Wolfe algorithm
+            l1_penalty: (float) L1 penalty for Franke-Wolfe algorithm
             RSS_iters: (list) list of residual sum of squares at each iteration of Franke-Wolfe algorithm
             convergence_epsilon: (float) algorithm converges when RSS < convergence_epsilon * RSS(0)
             convergence_threshold: (float) convergence threshold for Franke-Wolfe algorithm
@@ -96,6 +99,7 @@ class SEACellsGPU:
         self.max_FW_iter = max_franke_wolfe_iters
         self.verbose = verbose
         self.l2_penalty = l2_penalty
+        self.l1_penalty = l1_penalty
 
         self.RSS_iters = []
         self.convergence_epsilon = convergence_epsilon
@@ -165,9 +169,6 @@ class SEACellsGPU:
 
         # Pre-compute dot product
         self.K = self.kernel_matrix.dot(self.kernel_matrix.transpose())
-        # ic(self.K.s)
-        # ic(sle)
-        # ic(type(self..))
         return
 
     def initialize_archetypes(self):
@@ -271,7 +272,6 @@ class SEACellsGPU:
         shape = (n, k)
         # print("shape")
         # print(shape)
-        data = cp.ones(len(rows))
         # print(type(data))
         B0 = cupyx.scipy.sparse.csr_matrix(
             (cp.ones(len(rows)), (rows, cols)), shape=shape
@@ -321,7 +321,7 @@ class SEACellsGPU:
                 (np.random.random(len(rows)), (rows, columns)), shape=(k, n)
             )
             # Normalize axis 0 with l1 norm
-            A0 = cupyx.scipy.sparse.csr_matrix(normalize(A0, norm="l1", axis=0))
+            A0 = cupyx.scipy.sparse.csc_matrix(normalize(A0, norm="l1", axis=0))
 
             if self.verbose:
                 print("Randomly initialized A matrix.")
@@ -351,8 +351,10 @@ class SEACellsGPU:
             # ic(type(self.convergence_threshold))
             if self.verbose:
                 print(
-                    f"Convergence threshold set to {self.convergence_threshold} based on epsilon = {self.convergence_epsilon}"
+                    f"Setting convergence threshold at {self.convergence_threshold:.5f}"
                 )
+
+        del A, B, RSS
 
     def _get_waypoint_centers(self, n_waypoints=None):
         """Initialize B matrix using waypoint analysis, as described in Palantir.
@@ -511,16 +513,17 @@ class SEACellsGPU:
         n, k = Bg.shape
 
         t = 0  # current iteration (determine multiplicative update)
+        # Let's use the non-GPU version of K, A, and B 
         Kg = self.K.get() 
-
         Bg = Bg.get()
+        Ag = Ag.get()
 
         # precompute some gradient terms
         t2g = (Kg.dot(Bg)).T
         t1g = t2g.dot(Bg)
 
-        lambda_l1 = 0  
-        lambda_l2 = 0
+        # lambda_l1 = 0.1  
+        # lambda_l2 = 0
 
         # Make sure all the datatypes are float64
         # t1g = t1g.astype(cp.float64)
@@ -528,8 +531,6 @@ class SEACellsGPU:
         # Kg = Kg.astype(cp.float64)
         # Bg = Bg.astype(cp.float64)
         # Ag = Ag.astype(cp.float64)
-
-        Ag = Ag.get()
 
         # update rows of A for given number of iterations
         while t < self.max_FW_iter:
@@ -539,10 +540,13 @@ class SEACellsGPU:
             # l2_term = 0.5 * lambda_l2 * norm(Ag, ord = 'fro')**2
 
             # compute gradient
+            # Gg = 2.0 * (t1g.dot(Ag) - t2g)
+            # amins = Gg.argmin(axis=0) 
+
             Gg = 2.0 * np.array(t1g @ Ag - t2g)
             amins = np.argmin(Gg, axis=0)
             amins = np.array(amins).reshape(-1)
-            # ic(amins.shape)
+            # # ic(amins.shape)
             # ic(type(amins))
             # loop free implementaton
             # eg = cp.zeros((k, n))
@@ -559,9 +563,9 @@ class SEACellsGPU:
             # eg = eg.tocsr()
 
             # print("eg")
+            # l1_penalty = self.l1_penalty * cp.linalg.norm(Ag, ord=1)
 
-
-            Ag += 2.0/(t+2.0) * (eg - Ag)
+            Ag += 2.0/(t+2.0) * (eg - Ag) 
             # Ag = cp.add(Ag, cp.multiply(f, cp.subtract(eg, Ag)))
             t += 1
             # print("f, Ag, t")
@@ -571,6 +575,7 @@ class SEACellsGPU:
 
         del t1g, t2g, Kg, Gg, Bg, eg, amins, Ag
         cp._default_memory_pool.free_all_blocks()
+        cp._default_pinned_memory_pool.free_all_blocks()
 
         # Ag.data[Ag.data < 0.04] = 0
 
@@ -626,6 +631,7 @@ class SEACellsGPU:
             amins,
         )
         cp._default_memory_pool.free_all_blocks()
+        cp._default_pinned_memory_pool.free_all_blocks()
 
         return Bg
 
@@ -680,9 +686,15 @@ class SEACellsGPU:
         # A = A.todense()
         # B = B.todense()
         # K = self.kernel_matrix.todense()
-        A = A.get().todense()
-        B = B.get().todense()
-        K = self.kernel_matrix.get().todense()
+        # A = A.get().todense()
+        # B = B.get().todense()
+        # K = self.kernel_matrix.get().todense()
+        # print(type(A))
+        # print(type(B))
+        # print(type(self.kernel_matrix))
+        K = self.kernel_matrix
+
+        # print(type((K.dot(B)).dot(A))) 
 
         return (K.dot(B)).dot(A)
 
@@ -710,21 +722,11 @@ class SEACellsGPU:
 
         # print("FINISHED COMPUTE RECONSTRUCTION")
 
-        assert reconstruction.shape == self.kernel_matrix.shape
-        assert reconstruction.shape == (
-            self.n_cells,
-            self.n_cells,
-        ), "reconstruction.shape != (self.n_cells, self.n_cells)"
-
         # Densify the kernel matrix
         # kernel_matrix = self.kernel_matrix.todense()
-        kernel_matrix = self.kernel_matrix.get().todense()
+        kernel_matrix = self.kernel_matrix
         diff = kernel_matrix - reconstruction
         # ic(type(diff))
-
-        # Want to free up memory for A, B, and reconstruction
-        del A, B, reconstruction
-        cp._default_memory_pool.free_all_blocks()
 
         # convert diff to array
         # diff = diff.get()
@@ -732,8 +734,13 @@ class SEACellsGPU:
         # ic(scipy.sparse.linalg.norm(self.kernel_matrix - reconstruction))
         # ic(cp.linalg.norm(diff))
         # ic(np.linalg.norm(diff))
+        
+        del A, B, reconstruction 
+        cp._default_memory_pool.free_all_blocks()
+        cp._default_pinned_memory_pool.free_all_blocks()
 
-        return np.linalg.norm(diff)
+        # ic(type(scipy.sparse.linalg.norm(diff.get())))
+        return scipy.sparse.linalg.norm(diff.get())
 
     def plot_convergence(self, save_as=None, show=True):
         """Plot behaviour of squared error over iterations.
@@ -762,41 +769,41 @@ class SEACellsGPU:
 
         :return: None.
         """
-        if iteration is None or (iteration is not None and iteration % 3 == 0):
-            A = self.A_
-            B = self.B_
+        #if iteration is None or (iteration is not None and iteration % 3 == 0):
+        A = self.A_
+        B = self.B_
 
-            if self.K is None:
-                raise RuntimeError(
-                    "Kernel matrix has not been computed. Run model.construct_kernel_matrix() first."
-                )
+        if self.K is None:
+            raise RuntimeError(
+                "Kernel matrix has not been computed. Run model.construct_kernel_matrix() first."
+            )
 
-            if A is None:
-                raise RuntimeError(
-                    "Cell to SEACell assignment matrix has not been initialised. Run model.initialize() first."
-                )
+        if A is None:
+            raise RuntimeError(
+                "Cell to SEACell assignment matrix has not been initialised. Run model.initialize() first."
+            )
 
-            if B is None:
-                raise RuntimeError(
-                    "Archetype matrix has not been initialised. Run model.initialize() first."
-                )
+        if B is None:
+            raise RuntimeError(
+                "Archetype matrix has not been initialised. Run model.initialize() first."
+            )
 
-            A = self._updateA(B, A)
-            B = self._updateB(A, B)
+        A = self._updateA(B, A)
+        B = self._updateB(A, B)
 
-            # ic(self.RSS_iters)
-            RSS = self.compute_RSS(A, B)
-            self.RSS_iters.append(RSS)
-            # ic(self.RSS_iters)
+        # ic(self.RSS_iters)
+        RSS = self.compute_RSS(A, B)
+        self.RSS_iters.append(RSS)
+        # ic(self.RSS_iters)
 
-            self.A_ = A
-            self.B_ = B
+        self.A_ = A
+        self.B_ = B
 
-            del A, B, RSS
+        del A, B, RSS
 
-            # Label cells by SEACells assignment
-            labels = self.get_hard_assignments()
-            self.ad.obs["SEACell"] = labels["SEACell"]
+        # Label cells by SEACells assignment
+        labels = self.get_hard_assignments()
+        self.ad.obs["SEACell"] = labels["SEACell"]
 
         return
 
@@ -839,16 +846,16 @@ class SEACellsGPU:
                     print(f"Completed iteration {n_iter}.")
 
             # Check for convergence
-            if len(self.RSS_iters) > 1:
+            #if len(self.RSS_iters) > 1:
                 # ic(self.RSS_iters[-2] - self.RSS_iters[-1])
                 # ic(self.convergence_threshold)
-                if (
-                    cp.abs(self.RSS_iters[-2] - self.RSS_iters[-1])
-                    < self.convergence_threshold
-                ):
-                    if self.verbose:
-                        print(f"Converged after {n_iter} iterations.")
-                    converged = True
+            if (
+                cp.abs(self.RSS_iters[-2] - self.RSS_iters[-1])
+                < self.convergence_threshold
+            ):
+                if self.verbose:
+                    print(f"Converged after {n_iter} iterations.")
+                converged = True
 
         self.Z_ = self.B_.T @ self.K
 
