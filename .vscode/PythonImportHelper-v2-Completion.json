@@ -1066,7 +1066,7 @@
         "kind": 2,
         "importPath": "create_results_copy",
         "description": "create_results_copy",
-        "peekOfCode": "def gpu_versions(ad, num_cells):\n    # assignments2, time2, mem2, A_init, B_init, K_init, sparsity = get_data(\n    #     ad, num_cells=num_cells, use_gpu=False, use_sparse=True\n    # )\n    # Clear the GPU memory\n    cp.get_default_memory_pool().free_all_blocks() \n    cp.get_default_pinned_memory_pool().free_all_blocks()\n    try:\n        assignments2, time2, mem2, A, B, K, sparsity = get_data(\n            ad,",
+        "peekOfCode": "def gpu_versions(ad, num_cells):\n    # assignments2, time2, mem2, A_init, B_init, K_init, sparsity = get_data(\n    #     ad, num_cells=num_cells, use_gpu=False, use_sparse=True\n    # )\n    # Clear the GPU memory\n    cp.get_default_memory_pool().free_all_blocks() \n    cp.get_default_pinned_memory_pool().free_all_blocks()\n    # try:\n    #     assignments2, time2, mem2, A, B, K, sparsity = get_data(\n    #         ad,",
         "detail": "create_results_copy",
         "documentation": {}
     },
