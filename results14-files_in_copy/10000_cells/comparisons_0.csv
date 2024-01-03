@@ -1,0 +1,4 @@
+,version,time (s),peak memory
+0,"v2: no GPU, yes sparse",986.296516418457,2709256461
+1,"v3: yes GPU, no sparse",65.25185203552246,2476266756
+2,"v4: yes GPU, yes sparse",32.08405804634094,133072104

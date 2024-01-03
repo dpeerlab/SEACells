@@ -89,52 +89,51 @@ def gpu_versions(ad, num_cells):
     cp.get_default_memory_pool().free_all_blocks() 
     cp.get_default_pinned_memory_pool().free_all_blocks()
 
-    try: 
-        assignments3, time3, mem3, A, B, K, sparsity = get_data(
+    try:
+        assignments2, time2, mem2, A, B, K, sparsity = get_data(
             ad,
             num_cells=num_cells,
-            use_gpu=True,
-            use_sparse=False,
+            use_gpu=False,
+            use_sparse=True,
             # A_init=cupyx.scipy.sparse.csr_matrix(A_init),
             # B_init=cupyx.scipy.sparse.csr_matrix(B_init),
             # K_init=cupyx.scipy.sparse.csr_matrix(K_init),
         )
-        # If successful, write the time and memory a file "{num_cells}_cells/v3_{timestamp}.txt"
+        # If successful, write the time and memory a file "{num_cells}_cells/v2_{timestamp}.txt"
         # Get the timestamp as a number
         timestamp = time.time()
 
         # Write the time and memory data
-        with open(f"results14-files_in_copy/{num_cells}_cells/v3_{timestamp}.txt", "w") as f:
-            f.write(f"Time: {time3}\n")
-            f.write(f"Memory: {mem3}\n")
+        with open(f"results14-files_in_copy/{num_cells}_cells/v2_{timestamp}.txt", "w") as f:
+            f.write(f"Time: {time2}\n")
+            f.write(f"Memory: {mem2}\n")
 
         # If assignments is not None, write it to a file
-        if assignments3 is not None:
-            assignments3.to_csv(
-                f"results14-files_in_copy/{num_cells}_cells/assignments_v3_{timestamp}.csv"
+        if assignments2 is not None:
+            assignments2.to_csv(
+                f"results14-files_in_copy/{num_cells}_cells/assignments_v2_{timestamp}.csv"
             )
 
         # Write the A and B matrices
-        np.save(f"results14-files_in_copy/{num_cells}_cells/A_v3_{timestamp}.npy", A)
-        np.save(f"results14-files_in_copy/{num_cells}_cells/B_v3_{timestamp}.npy", B)
+        np.save(f"results14-files_in_copy/{num_cells}_cells/A_v2_{timestamp}.npy", A)
+        np.save(f"results14-files_in_copy/{num_cells}_cells/B_v2_{timestamp}.npy", B)
 
         # Write the sparsity dataframe
-        sparsity.to_csv(f"results14-files_in_copy/{num_cells}_cells/sparsity_v3_{timestamp}.csv")
+        sparsity.to_csv(f"results14-files_in_copy/{num_cells}_cells/sparsity_v2_{timestamp}.csv")
 
         # Clear the GPU memory
         cp.get_default_memory_pool().free_all_blocks()
-        cp.get_default_pinned_memory_pool().free_all_blocks()
 
     except Exception as e:
         # fill with nans if it fails
-        assignments3, time3, mem3 = ([np.nan, np.nan, np.nan], np.nan, [np.nan, np.nan])
+        assignments2, time2, mem2 = ([np.nan, np.nan, np.nan], np.nan, [np.nan, np.nan])
 
-        # If it fails, write the error to a file "{num_cells}_cells/v3_{timestamp}.txt"
+        # If it fails, write the error to a file "{num_cells}_cells/v2_{timestamp}.txt"
         # Get the timestamp as a number
         timestamp = time.time()
 
         # Write the error to a file
-        with open(f"results14-files_in_copy/{num_cells}_cells/v3_{timestamp}.txt", "w") as f:
+        with open(f"results14-files_in_copy/{num_cells}_cells/v2_{timestamp}.txt", "w") as f:
             f.write(f"Error: {e}\n")
 
         # Clear the GPU memory
@@ -193,56 +192,58 @@ def gpu_versions(ad, num_cells):
         cp.get_default_memory_pool().free_all_blocks()
         cp.get_default_pinned_memory_pool().free_all_blocks()
 
-    try:
-        assignments2, time2, mem2, A, B, K, sparsity = get_data(
+    try: 
+        assignments3, time3, mem3, A, B, K, sparsity = get_data(
             ad,
             num_cells=num_cells,
-            use_gpu=False,
-            use_sparse=True,
+            use_gpu=True,
+            use_sparse=False,
             # A_init=cupyx.scipy.sparse.csr_matrix(A_init),
             # B_init=cupyx.scipy.sparse.csr_matrix(B_init),
             # K_init=cupyx.scipy.sparse.csr_matrix(K_init),
         )
-        # If successful, write the time and memory a file "{num_cells}_cells/v2_{timestamp}.txt"
+        # If successful, write the time and memory a file "{num_cells}_cells/v3_{timestamp}.txt"
         # Get the timestamp as a number
         timestamp = time.time()
 
         # Write the time and memory data
-        with open(f"results14-files_in_copy/{num_cells}_cells/v2_{timestamp}.txt", "w") as f:
-            f.write(f"Time: {time2}\n")
-            f.write(f"Memory: {mem2}\n")
+        with open(f"results14-files_in_copy/{num_cells}_cells/v3_{timestamp}.txt", "w") as f:
+            f.write(f"Time: {time3}\n")
+            f.write(f"Memory: {mem3}\n")
 
         # If assignments is not None, write it to a file
-        if assignments2 is not None:
-            assignments2.to_csv(
-                f"results14-files_in_copy/{num_cells}_cells/assignments_v2_{timestamp}.csv"
+        if assignments3 is not None:
+            assignments3.to_csv(
+                f"results14-files_in_copy/{num_cells}_cells/assignments_v3_{timestamp}.csv"
             )
 
         # Write the A and B matrices
-        np.save(f"results14-files_in_copy/{num_cells}_cells/A_v2_{timestamp}.npy", A)
-        np.save(f"results14-files_in_copy/{num_cells}_cells/B_v2_{timestamp}.npy", B)
+        np.save(f"results14-files_in_copy/{num_cells}_cells/A_v3_{timestamp}.npy", A)
+        np.save(f"results14-files_in_copy/{num_cells}_cells/B_v3_{timestamp}.npy", B)
 
         # Write the sparsity dataframe
-        sparsity.to_csv(f"results14-files_in_copy/{num_cells}_cells/sparsity_v2_{timestamp}.csv")
+        sparsity.to_csv(f"results14-files_in_copy/{num_cells}_cells/sparsity_v3_{timestamp}.csv")
 
         # Clear the GPU memory
         cp.get_default_memory_pool().free_all_blocks()
+        cp.get_default_pinned_memory_pool().free_all_blocks()
 
     except Exception as e:
         # fill with nans if it fails
-        assignments2, time2, mem2 = ([np.nan, np.nan, np.nan], np.nan, [np.nan, np.nan])
+        assignments3, time3, mem3 = ([np.nan, np.nan, np.nan], np.nan, [np.nan, np.nan])
 
-        # If it fails, write the error to a file "{num_cells}_cells/v2_{timestamp}.txt"
+        # If it fails, write the error to a file "{num_cells}_cells/v3_{timestamp}.txt"
         # Get the timestamp as a number
         timestamp = time.time()
 
         # Write the error to a file
-        with open(f"results14-files_in_copy/{num_cells}_cells/v2_{timestamp}.txt", "w") as f:
+        with open(f"results14-files_in_copy/{num_cells}_cells/v3_{timestamp}.txt", "w") as f:
             f.write(f"Error: {e}\n")
 
         # Clear the GPU memory
         cp.get_default_memory_pool().free_all_blocks()
         cp.get_default_pinned_memory_pool().free_all_blocks()
+
 
     # Write the assignments
     assignments = [assignments2, assignments3, assignments4]
@@ -295,9 +296,9 @@ def get_results(num_cell):
 # Create main function
 if __name__ == "__main__":
     # Runs get_data based on the num_cells given as command line input
-    num_cells = int(sys.argv[1])
-    get_results(num_cells)
+    # num_cells = int(sys.argv[1])
+    # get_results(num_cells)
     # print(type(num_cells))
-    # cells_list = [50000, 100000, 150000]
-    # for num_cells in cells_list:
-    #     get_results(num_cells)
+    cells_list = [50000, 100000, 150000]
+    for num_cells in cells_list:
+        get_results(num_cells)

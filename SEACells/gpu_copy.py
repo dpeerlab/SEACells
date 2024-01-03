@@ -483,7 +483,8 @@ class SEACellsGPU:
         while t < self.max_FW_iter:
             # compute gradient
             Gg = 2.0 * (t1g.dot(Ag) - t2g)
-            aminsG = cp.argmin(Gg.todense(), axis=0)
+            # aminsG = cp.argmin(Gg.todense(), axis=0)
+            aminsG = Gg.argmin(axis=0).ravel()
 
             # loop free implementaton
             eg = cupyx.scipy.sparse.csr_matrix((cp.ones(len(aminsG)), (aminsG, cp.arange(n))), shape=Ag.shape)
@@ -526,7 +527,8 @@ class SEACellsGPU:
             Gg = 2 * (Kg.dot(Bg).dot(t1g) - t2g)
 
             # get all argmins
-            amins = cp.argmin(Gg.todense(), axis=0)
+            # amins = cp.argmin(Gg.todense(), axis=0)
+            amins = Gg.argmin(axis=0).ravel()
 
             eg = cupyx.scipy.sparse.csr_matrix((cp.ones(len(amins)), (amins, cp.arange(k))), shape=Bg.shape)
 
