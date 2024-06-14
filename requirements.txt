@@ -25,7 +25,7 @@ scikit-learn
 scipy
 seaborn
 six==1.16
-sorted-nearest==0.0.33
+git+https://github.com/nbtm-sh/sorted_nearest
 statsmodels==0.13
 tables==3.6
 tabulate==0.8.9
