@@ -1,5 +1,5 @@
 alabaster==0.7.12
-anndata==0.80
+anndata==0.8.0
 cmake==3.22.3
 Cython==0.29
 h5py==3.6
