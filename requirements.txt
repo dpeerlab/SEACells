@@ -5,7 +5,7 @@ Cython==0.29
 h5py==3.6
 joblib==1.2.0
 kiwisolver==1.3.2
-legacy-api-wrap==0.0.0
+legacy-api-wrap==1.0
 leidenalg==0.8.9
 llvmlite==0.38.0
 louvain==0.7.1
@@ -25,7 +25,7 @@ scikit-learn
 scipy
 seaborn
 six==1.16
-sorted-nearest==0.0.33
+git+https://github.com/nbtm-sh/sorted_nearest
 statsmodels==0.13
 tables==3.6
 tabulate==0.8.9
