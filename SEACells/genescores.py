@@ -120,10 +120,20 @@ def _pyranges_to_strings(peaks):
 
 
 def load_transcripts(path_to_gtf):
-    """Load transcripts from GTF File. `chr` is preprended to each entry."""
+    """Load transcripts from GTF File. `chr` is prepended to each entry if not already present, and ensured to be lowercase if already present."""
     gtf = pr.read_gtf(path_to_gtf)
-    gtf.Chromosome = "chr" + gtf.Chromosome.astype(str)
+
+    # Vectorize chromosome formatting
+    # Use vectorized str methods to handle the 'chr' prefix and case conversion
+    gtf.Chromosome = "chr" + gtf.Chromosome.str.upper().str.replace("^CHR", "", regex=True, case=False)
+
+    # Check if 'transcript' is present in the 'Feature' column
+    if "transcript" not in gtf.Feature.unique():
+        raise ValueError("'transcript' not found in the 'Feature' column.")
+    
+    # Filter for transcripts only once and early
     transcripts = gtf[gtf.Feature == "transcript"]
+
     return transcripts
 
 
@@ -140,6 +150,7 @@ def _peaks_correlations_per_gene(
     # Gene transcript - use the longest transcript
     gene_transcripts = transcripts[transcripts.gene_name == gene]
     if len(gene_transcripts) == 0:
+        print(f"No transcripts found for gene: {gene}")
         return 0
     longest_transcript = gene_transcripts[
         np.arange(len(gene_transcripts))
