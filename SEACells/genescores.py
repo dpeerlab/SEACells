@@ -35,9 +35,11 @@ def prepare_multiome_anndata(
     # #################################################################################
     # Generate metacell matrices
 
-    # Set of metacells
-    metacells = atac_mod_ad.obs[SEACells_label].astype(str).unique()
-    metacells = metacells[atac_mod_ad.obs[SEACells_label].value_counts()[metacells] > 1]
+    # Set of metacells. Cast both sides to string so that integer-valued labels
+    # do not cause a KeyError when indexing value_counts() with `metacells`.
+    seacell_labels = atac_mod_ad.obs[SEACells_label].astype(str)
+    metacells = seacell_labels.unique()
+    metacells = metacells[seacell_labels.value_counts()[metacells] > 1]
 
     print("Generating Metacell matrices...")
     print(" ATAC")
@@ -129,14 +131,22 @@ def load_transcripts(path_to_gtf):
 
 def _peaks_correlations_per_gene(
     gene,
-    atac_exprs,
-    rna_exprs,
+    atac_ranks,
+    rna_ranks,
     atac_meta_ad,
     peaks_pr,
     transcripts,
     span,
     n_rand_sample=100,
 ):
+    """Compute peak-gene correlations using precomputed ranks.
+
+    `atac_ranks` is a (M, peaks) DataFrame whose columns are the ranks of
+    each peak across metacells. `rna_ranks` is a (M, genes) DataFrame, ranks
+    of each gene across metacells. Hoisting these out of this function
+    removes a per-gene and per-random-resample call to rankdata, which
+    otherwise dominates the multiome pipeline runtime.
+    """
     # Gene transcript - use the longest transcript
     gene_transcripts = transcripts[transcripts.gene_name == gene]
     if len(gene_transcripts) == 0:
@@ -161,14 +171,14 @@ def _peaks_correlations_per_gene(
         return 0
     gene_peaks_str = _pyranges_to_strings(gene_peaks)
 
-    # Compute correlations
-    X = atac_exprs.loc[:, gene_peaks_str].T
+    # Compute correlations using precomputed ranks. The original code did
+    # np.apply_along_axis(rankdata, 1, X.values) for X = atac_exprs[:, peaks].T;
+    # that is exactly atac_ranks[:, peaks].T (rows are peaks, columns are
+    # metacells, values are per-peak ranks across metacells).
+    gene_rna_ranks = rna_ranks[gene].values.reshape(1, -1)
+    peak_ranks = atac_ranks.loc[:, gene_peaks_str].values.T
     cors = 1 - np.ravel(
-        pairwise_distances(
-            np.apply_along_axis(rankdata, 1, X.values),
-            rankdata(rna_exprs[gene].T.values).reshape(1, -1),
-            metric="correlation",
-        )
+        pairwise_distances(peak_ranks, gene_rna_ranks, metric="correlation")
     )
     cors = pd.Series(cors, index=gene_peaks_str)
 
@@ -203,17 +213,9 @@ def _peaks_correlations_per_gene(
                 True,
             )
 
-        if type(atac_exprs) is sc.AnnData:
-            X = pd.DataFrame(atac_exprs[:, rand_peaks].X.todense().T)
-        else:
-            X = atac_exprs.loc[:, rand_peaks].T
-
+        rand_peak_ranks = atac_ranks.loc[:, rand_peaks].values.T
         rand_cors = 1 - np.ravel(
-            pairwise_distances(
-                np.apply_along_axis(rankdata, 1, X.values),
-                rankdata(rna_exprs[gene].T.values).reshape(1, -1),
-                metric="correlation",
-            )
+            pairwise_distances(rand_peak_ranks, gene_rna_ranks, metric="correlation")
         )
 
         m = np.mean(rand_cors)
@@ -267,6 +269,25 @@ def get_gene_peak_correlations(
     )
     peaks_pr = _pyranges_from_strings(atac_meta_ad.var_names)
 
+    # Hoist rankdata out of the per-gene loop. The original implementation
+    # ranked each gene's peaks (and each random-peak resample) on every call;
+    # since ranks are over metacells (axis 0) and the same matrices are reused
+    # for every gene, we precompute them once. The raw-expression DataFrames
+    # are no longer needed after this point and are freed to keep peak memory
+    # close to the prior implementation.
+    print("Precomputing rank matrices for Spearman correlation")
+    atac_ranks = pd.DataFrame(
+        rankdata(atac_exprs.values, axis=0),
+        index=atac_exprs.index,
+        columns=atac_exprs.columns,
+    )
+    rna_ranks = pd.DataFrame(
+        rankdata(rna_exprs.values, axis=0),
+        index=rna_exprs.index,
+        columns=rna_exprs.columns,
+    )
+    del atac_exprs, rna_exprs
+
     print("Computing peak-gene correlations")
     if gene_set is None:
         use_genes = rna_meta_ad.var_names
@@ -276,7 +297,7 @@ def get_gene_peak_correlations(
 
     gene_peak_correlations = Parallel(n_jobs=n_jobs)(
         delayed(_peaks_correlations_per_gene)(
-            gene, atac_exprs, rna_exprs, atac_meta_ad, peaks_pr, transcripts, span
+            gene, atac_ranks, rna_ranks, atac_meta_ad, peaks_pr, transcripts, span
         )
         for gene in tqdm(use_genes)
     )
