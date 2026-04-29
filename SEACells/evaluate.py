@@ -93,9 +93,9 @@ def get_density(ad, key, nth_neighbor=150):
 
     neigh = NearestNeighbors(n_neighbors=nth_neighbor)
 
-    if "key" in ad.obsm:
+    if key in ad.obsm:
         print(f"Using {key} to compute cell density")
-        components = pd.DataFrame(ad.obsm["X_pca"]).set_index(ad.obs_names)
+        components = pd.DataFrame(ad.obsm[key]).set_index(ad.obs_names)
     else:
         raise ValueError(f"Key {key} not present in ad.obsm.")
 

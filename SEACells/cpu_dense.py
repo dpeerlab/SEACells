@@ -550,8 +550,12 @@ class SEACellsCPUDense:
         self.ad.obs["SEACell"] = labels["SEACell"]
 
         if not converged:
-            raise RuntimeWarning(
-                "Warning: Algorithm has not converged - you may need to increase the maximum number of iterations"
+            import warnings
+
+            warnings.warn(
+                "Algorithm has not converged - you may need to increase the maximum number of iterations",
+                RuntimeWarning,
+                stacklevel=2,
             )
         return
 

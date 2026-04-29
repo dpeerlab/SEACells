@@ -4,7 +4,7 @@ from multiprocessing import cpu_count
 
 import numpy as np
 from joblib import Parallel, delayed
-from scipy.sparse import lil_matrix
+from scipy.sparse import csr_matrix, vstack
 from tqdm.notebook import tqdm
 
 # get number of cores for multiprocessing
@@ -37,28 +37,44 @@ def kth_neighbor_distance(distances, k, i):
 def rbf_for_row(G, data, median_distances, i):
     """Helper function for computing radial basis function kernel for each row of the data matrix.
 
-    :param G: (array) KNN graph representing nearest neighbour connections between cells
+    :param G: (CSR sparse) KNN graph representing nearest neighbour connections between cells
     :param data: (array) data matrix between which euclidean distances are computed for RBF
     :param median_distances: (array) radius for RBF - the median distance between cell and k nearest-neighbours
     :param i: (int) data row index for which RBF is calculated
-    :return: sparse matrix containing computed RBF for row
+    :return: 1 x n CSR row containing computed RBF values at neighbor positions
+
+    The previous implementation computed squared Euclidean distances from row
+    i to every cell, then masked by the kNN graph row. Since only neighbors
+    survive the mask, this restricts the distance computation to the row's
+    neighbors directly: O(|nbrs| * d) instead of O(n * d).
     """
-    # convert row to binary numpy array
-    row_as_array = G[i, :].toarray().ravel()
+    n = data.shape[0]
 
-    # compute distances ||x - y||^2 in PC/original X space
-    numerator = np.sum(np.square(data[i, :] - data), axis=1, keepdims=False)
+    # Indices of i's neighbors in the (symmetrized) kNN graph. G is expected
+    # to be CSR; direct indptr access avoids materializing a dense n-vector.
+    if hasattr(G, "indptr") and hasattr(G, "indices"):
+        nbrs = G.indices[G.indptr[i] : G.indptr[i + 1]]
+    else:
+        nbrs = G[i].nonzero()[1]
 
-    # compute radii - median distance is distance to kth nearest neighbor
-    denominator = median_distances[i] * median_distances
+    if len(nbrs) == 0:
+        return csr_matrix((1, n), dtype=float)
 
-    # exp
-    full_row = np.exp(-numerator / denominator)
+    # Squared Euclidean distances only to the neighbors.
+    diff = data[i, :] - data[nbrs, :]
+    numerator = np.einsum("ij,ij->i", diff, diff)
 
-    # masked row - to contain only indices captured by G matrix
-    masked_row = np.multiply(full_row, row_as_array)
+    # Adaptive bandwidth radii. Guard against zero (e.g. duplicate cells with
+    # zero kNN distance) to avoid NaN/Inf in the kernel.
+    denominator = median_distances[i] * median_distances[nbrs]
+    denominator = np.where(denominator > 0, denominator, np.finfo(float).eps)
 
-    return lil_matrix(masked_row)
+    similarities = np.exp(-numerator / denominator)
+
+    return csr_matrix(
+        (similarities, (np.zeros(len(nbrs), dtype=int), nbrs)),
+        shape=(1, n),
+    )
 
 
 ##########################################################
@@ -163,6 +179,9 @@ class SEACellGraph:
              Please select `union` or `intersection`"
             )
 
+        # rbf_for_row reads neighbor indices via CSR indptr; ensure that.
+        sym_graph = sym_graph.tocsr()
+
         self.sym_graph = sym_graph
         if self.verbose:
             print("Computing RBF kernel...")
@@ -176,14 +195,9 @@ class SEACellGraph:
             )
 
         if self.verbose:
-            print("Building similarity LIL matrix...")
+            print("Stacking similarity rows...")
 
-        similarity_matrix = lil_matrix((self.n, self.n))
-        for i in tqdm(range(self.n)):
-            similarity_matrix[i] = similarity_matrix_rows[i]
-
-        if self.verbose:
-            print("Constructing CSR matrix...")
-
-        self.M = (similarity_matrix).tocsr()
+        # vstack of CSR rows is a single allocation and avoids the per-row
+        # resize cost of the prior lil_matrix assignment loop.
+        self.M = vstack(similarity_matrix_rows, format="csr")
         return self.M

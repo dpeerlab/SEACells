@@ -110,9 +110,11 @@ def sparsify_assignments(A, thresh: float):
     A = copy.deepcopy(A)
     A[A < thresh] = 0
 
-    # Renormalize
-    A = A / A.sum(1, keepdims=True)
-    A.sum(1)
+    # Renormalize. Cells whose every weight was below threshold would otherwise
+    # produce NaN rows; leave their weights at zero so they contribute nothing.
+    row_sums = A.sum(1, keepdims=True)
+    row_sums = np.where(row_sums == 0, 1.0, row_sums)
+    A = A / row_sums
 
     return A
 
@@ -152,38 +154,63 @@ def summarize_by_soft_SEACell(
 
     A = sparsify_assignments(A.T, thresh=minimum_weight)
 
-    seacell_expressions = []
-    seacell_celltypes = []
-    seacell_purities = []
-    for ix in tqdm(range(A.shape[1])):
-        cell_weights = A[:, ix]
-        # Construct the SEACell expression using the
-        seacell_exp = (
-            data.multiply(cell_weights[:, np.newaxis]).toarray().sum(0)
-            / cell_weights.sum()
-        )
-        seacell_expressions.append(seacell_exp)
+    # Vectorized aggregation: a single sparse matmul replaces the per-metacell
+    # Python loop. Mathematically the same as
+    #     seacell_exp[m, :] = sum_c A[c, m] * data[c, :] / sum_c A[c, m]
+    # but expressed as (A.T @ data) / totals.
+    n_metacells = A.shape[1]
+    # Per-metacell weight totals; works uniformly for dense ndarray and sparse.
+    totals = np.asarray(A.sum(axis=0)).ravel()
+    totals_safe = np.where(totals > 0, totals, 1.0)
 
-        if compute_seacell_celltypes:
-            # Compute the consensus celltype and the celltype purity
-            cell_weights = pd.DataFrame(cell_weights)
-            cell_weights.index = ad.obs_names
-            purity = (
-                cell_weights.join(ad.obs[celltype_label])
-                .groupby(celltype_label)
-                .sum()
-                .sort_values(by=0, ascending=False)
-            )
-            purity = purity / purity.sum()
-            celltype = purity.iloc[0]
-            seacell_celltypes.append(celltype.name)
-            seacell_purities.append(celltype.values[0])
+    A_T = csr_matrix(A.T)  # (M, n_cells)
+    weighted_sum = A_T @ data  # (M, n_features)
+    if hasattr(weighted_sum, "toarray"):
+        weighted_sum_dense = weighted_sum.toarray()
+    else:
+        weighted_sum_dense = np.asarray(weighted_sum)
+    seacell_expressions_mat = weighted_sum_dense / totals_safe[:, np.newaxis]
+    # Rows whose total weight was zero produce all zeros (totals_safe = 1
+    # divides a zero numerator), matching the per-metacell zero fallback.
 
-    seacell_expressions = csr_matrix(np.array(seacell_expressions))
+    seacell_expressions = csr_matrix(seacell_expressions_mat)
     seacell_ad = sc.AnnData(seacell_expressions, dtype=seacell_expressions.dtype)
     seacell_ad.var_names = ad.var_names
-    seacell_ad.obs["Pseudo-sizes"] = A.sum(0)
+    seacell_ad.obs["Pseudo-sizes"] = totals
+
     if compute_seacell_celltypes:
+        # Vectorized celltype purity: build a cells x celltypes indicator and
+        # form purity = A.T @ indicator (M x C). The dominant celltype per
+        # metacell is argmax over rows; ties resolve to the first category, as
+        # in the original sort_values(...).iloc[0] path (categories are sorted).
+        celltype_col = ad.obs[celltype_label].astype("category")
+        celltype_codes = celltype_col.cat.codes.values
+        celltype_names = celltype_col.cat.categories
+        n_cells = len(celltype_codes)
+        celltype_indicator = csr_matrix(
+            (np.ones(n_cells), (np.arange(n_cells), celltype_codes)),
+            shape=(n_cells, len(celltype_names)),
+        )
+        purity_mat = A_T @ celltype_indicator  # (M, C)
+        if hasattr(purity_mat, "toarray"):
+            purity_mat = purity_mat.toarray()
+        purity_mat = np.asarray(purity_mat)
+
+        purity_row_sum = purity_mat.sum(axis=1)
+        nonempty = purity_row_sum > 0
+        # Avoid divide-by-zero rows; we'll mask their celltype to None below.
+        denom = np.where(nonempty, purity_row_sum, 1.0)
+        purity_norm = purity_mat / denom[:, np.newaxis]
+        argmax_ct = purity_norm.argmax(axis=1)
+
+        seacell_celltypes = [
+            celltype_names[idx] if nonempty[m] else None
+            for m, idx in enumerate(argmax_ct)
+        ]
+        seacell_purities = np.where(
+            nonempty, purity_norm[np.arange(n_metacells), argmax_ct], 0.0
+        ).tolist()
+
         seacell_ad.obs["celltype"] = seacell_celltypes
         seacell_ad.obs["celltype_purity"] = seacell_purities
     seacell_ad.var_names = ad.var_names
@@ -206,29 +233,35 @@ def summarize_by_SEACell(
     import scanpy as sc
     from scipy.sparse import csr_matrix
 
-    # Set of metacells
-    metacells = ad.obs[SEACells_label].unique()
+    # Pick the source data matrix once.
+    if summarize_layer == "X":
+        data = ad.X
+    elif summarize_layer == "raw" and ad.raw is not None:
+        data = ad.raw.X
+    else:
+        data = ad.layers[summarize_layer]
 
-    # Summary matrix
-    summ_matrix = pd.DataFrame(0.0, index=metacells, columns=ad.var_names)
+    # Build a cell-to-metacell indicator and aggregate in one sparse matmul.
+    # Preserves first-occurrence order of metacell labels (matches the prior
+    # use of pd.Series.unique() to seed summ_matrix.index).
+    labels = ad.obs[SEACells_label]
+    metacell_order = pd.Index(labels.unique())
+    code_lookup = pd.Series(np.arange(len(metacell_order)), index=metacell_order)
+    codes = code_lookup.loc[labels.values].values
+    n_cells = len(codes)
+    n_metacells = len(metacell_order)
 
-    for m in tqdm(summ_matrix.index):
-        cells = ad.obs_names[ad.obs[SEACells_label] == m]
-        if summarize_layer == "X":
-            summ_matrix.loc[m, :] = np.ravel(ad[cells, :].X.sum(axis=0))
-        elif summarize_layer == "raw" and ad.raw is not None:
-            summ_matrix.loc[m, :] = np.ravel(ad[cells, :].raw.X.sum(axis=0))
-        else:
-            summ_matrix.loc[m, :] = np.ravel(
-                ad[cells, :].layers[summarize_layer].sum(axis=0)
-            )
+    indicator = csr_matrix(
+        (np.ones(n_cells), (codes, np.arange(n_cells))),
+        shape=(n_metacells, n_cells),
+    )
+    summed = indicator @ data
+    summed = csr_matrix(summed)
 
-    # Ann data
-
-    # Counts
-    meta_ad = sc.AnnData(csr_matrix(summ_matrix), dtype=csr_matrix(summ_matrix).dtype)
-    meta_ad.obs_names, meta_ad.var_names = summ_matrix.index.astype(str), ad.var_names
-    meta_ad.layers["raw"] = csr_matrix(summ_matrix)
+    meta_ad = sc.AnnData(summed, dtype=summed.dtype)
+    meta_ad.obs_names = metacell_order.astype(str)
+    meta_ad.var_names = ad.var_names
+    meta_ad.layers["raw"] = summed
 
     # Also compute cell type purity
     if celltype_label is not None:

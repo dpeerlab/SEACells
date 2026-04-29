@@ -431,32 +431,54 @@ class SEACellsCPU:
         :param B: (n x k csr_matrix) defining SEACells as weighted combinations of cells
         :param A_prev: (n x k csr_matrix) defining previous weights used for assigning cells to SEACells
         :return: (n x k csr_matrix) defining updated weights used for assigning cells to SEACells
+
+        Implementation note: this routine is mathematically equivalent to the
+        prior version (A <- (1-alpha) A + alpha E with alpha = 2/(t+2) and E a
+        column-wise one-hot indicator at argmin G). It has been rewritten to
+        (a) operate on a dense A in-place rather than constructing a sparse
+        one-hot e per FW step, since A becomes dense within a few iterations
+        anyway, and (b) maintain t1 @ A incrementally so each FW step costs
+        O(k * n) instead of recomputing an O(k^2 * n) matmul.
         """
         n, k = B.shape
-        A = A_prev
 
-        t = 0  # current iteration (determine multiplicative update)
+        # Densify A for the inner loop. The CSR pattern from a one-hot rank-1
+        # update fills in within a few steps, so the sparse format provides no
+        # benefit here while preventing in-place updates.
+        A = A_prev.toarray() if hasattr(A_prev, "toarray") else np.asarray(A_prev, dtype=float)
+        A = np.ascontiguousarray(A, dtype=float)
 
-        # precompute some gradient terms
-        t2 = (self.K @ B).T
-        t1 = t2 @ B
+        # Precompute gradient terms; t1 (k x k) and t2 (k x n) materialized as
+        # dense once so every FW step is BLAS dense-matmul rather than a chain
+        # of sparse / dense conversions.
+        B_dense = B.toarray() if hasattr(B, "toarray") else np.asarray(B)
+        KB = self.K @ B
+        if hasattr(KB, "toarray"):
+            KB = KB.toarray()
+        KB = np.asarray(KB)
+        t2 = KB.T  # (k, n)
+        t1 = t2 @ B_dense  # (k, k)
 
-        # update rows of A for given number of iterations
-        while t < self.max_FW_iter:
-            # compute gradient (must convert matrix to ndarray)
-            G = 2.0 * np.array(t1 @ A - t2)
+        # Track t1 @ A incrementally. After A_new = (1-alpha) A + alpha E,
+        # t1 @ A_new = (1-alpha)(t1 @ A) + alpha t1[:, amins].
+        t1A = t1 @ A
 
-            # # get argmins - shape 1 x n
-            amins = np.argmin(G, axis=0)
-            amins = np.array(amins).reshape(-1)
+        arange_n = np.arange(n)
+        for t in range(self.max_FW_iter):
+            G = 2.0 * (t1A - t2)
+            amins = G.argmin(axis=0)
+            alpha = 2.0 / (t + 2.0)
 
-            # # loop free implementation
-            e = csr_matrix((np.ones(len(amins)), (amins, np.arange(n))), shape=A.shape)
+            # In-place rank-1 FW update on A.
+            A *= 1.0 - alpha
+            A[amins, arange_n] += alpha
 
-            A += 2.0 / (t + 2.0) * (e - A)
-            t += 1
+            # Same rank-1 update applied to t1A. t1[:, amins] selects the
+            # k columns of t1 indexed by amins (one per cell).
+            t1A *= 1.0 - alpha
+            t1A += alpha * t1[:, amins]
 
-        return A
+        return csr_matrix(A)
 
     def _updateB(self, A, B_prev):
         """Update step for archetype matrix B.
@@ -467,35 +489,55 @@ class SEACellsCPU:
         :param A: (n x k csr_matrix) defining weights used for assigning cells to SEACells
         :param B_prev: (n x k csr_matrix) defining previous SEACells as weighted combinations of cells
         :return: (n x k csr_matrix) defining updated SEACells as weighted combinations of cells
+
+        Same equivalence note as _updateA: in-place dense rank-1 updates and
+        incremental tracking of K @ B replace the sparse one-hot construction
+        and the per-step recomputation of K @ B.
         """
         K = self.K
         k, n = A.shape
 
-        B = B_prev
+        B = B_prev.toarray() if hasattr(B_prev, "toarray") else np.asarray(B_prev, dtype=float)
+        B = np.ascontiguousarray(B, dtype=float)
 
-        # keep track of error
-        t = 0
+        A_dense = A.toarray() if hasattr(A, "toarray") else np.asarray(A)
 
-        # precompute some terms
-        t1 = A @ A.T
-        t2 = K @ A.T
+        AAT = A_dense @ A_dense.T  # (k, k) dense
 
-        # update rows of B for a given number of iterations
-        while t < self.max_FW_iter:
-            # compute gradient (need to convert np.matrix to np.array)
-            G = 2.0 * np.array(K @ B @ t1 - t2)
+        KAT = K @ A_dense.T  # (n, k)
+        if hasattr(KAT, "toarray"):
+            KAT = KAT.toarray()
+        KAT = np.asarray(KAT)
 
-            # get all argmins
-            amins = np.argmin(G, axis=0)
-            amins = np.array(amins).reshape(-1)
+        # KB = K @ B, tracked incrementally to avoid recomputing the n x n
+        # sparse @ dense product on every FW step.
+        KB = K @ B
+        if hasattr(KB, "toarray"):
+            KB = KB.toarray()
+        KB = np.asarray(KB)
 
-            e = csr_matrix((np.ones(len(amins)), (amins, np.arange(k))), shape=B.shape)
+        # CSC view for fast column slicing K[:, amins] inside the loop.
+        K_csc = K.tocsc() if hasattr(K, "tocsc") else K
 
-            B += 2.0 / (t + 2.0) * (e - B)
+        arange_k = np.arange(k)
+        for t in range(self.max_FW_iter):
+            G = 2.0 * (KB @ AAT - KAT)
+            amins = G.argmin(axis=0)
+            alpha = 2.0 / (t + 2.0)
 
-            t += 1
+            # In-place rank-1 FW update on B.
+            B *= 1.0 - alpha
+            B[amins, arange_k] += alpha
 
-        return B
+            # KB_new = K @ B_new = (1-alpha) KB + alpha K[:, amins].
+            K_amins = K_csc[:, amins]
+            if hasattr(K_amins, "toarray"):
+                K_amins = K_amins.toarray()
+            K_amins = np.asarray(K_amins)
+            KB *= 1.0 - alpha
+            KB += alpha * K_amins
+
+        return csr_matrix(B)
 
     def compute_reconstruction(self, A=None, B=None):
         """Compute reconstructed data matrix using learned archetypes (SEACells) and assignments.
@@ -645,8 +687,12 @@ class SEACellsCPU:
         self.ad.obs["SEACell"] = labels["SEACell"]
 
         if not converged:
-            raise RuntimeWarning(
-                "Warning: Algorithm has not converged - you may need to increase the maximum number of iterations"
+            import warnings
+
+            warnings.warn(
+                "Algorithm has not converged - you may need to increase the maximum number of iterations",
+                RuntimeWarning,
+                stacklevel=2,
             )
         return
 
