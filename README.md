@@ -2,59 +2,71 @@
 
 **S**ingle-c**E**ll **A**ggregation for High Resolution **Cell S**tates
 
-#### Installation and dependencies
+SEACells identifies **metacells**: groups of cells in the same biological state, found by
+archetypal analysis on a nearest-neighbor kernel built from a low-dimensional embedding
+(`X_pca` for scRNA-seq, `X_svd` for scATAC-seq). This denoises the data while preserving
+heterogeneity, giving a high-resolution set of cell states for downstream analysis. See the
+[paper](https://www.nature.com/articles/s41587-023-01716-9) for the method.
 
-1.  SEACells has been implemented in Python3.8 can be installed via pip:
-    $> pip install cmake
-    $> pip install SEACells
-    It can also be installed directly from source.
+#### Installation
 
-        $> git clone https://github.com/dpeerlab/SEACells.git
-        $> cd SEACells
-        $> python setup.py install
-
-2.  If you are using `conda`, you can use the `environment.yaml` to create a new environment and install SEACells.
+Uses [**uv**](https://docs.astral.sh/uv/). Install uv once with
+`curl -LsSf https://astral.sh/uv/install.sh | sh`, then:
 
 ```
-conda env create -n seacells --file environment.yaml
-conda activate seacells
+git clone https://github.com/dpeerlab/SEACells.git && cd SEACells
+uv sync                 # CPU — works anywhere
+uv sync --extra gpu     # + RAPIDS/CuPy/FAISS (NVIDIA GPU, CUDA 13, Linux/x86_64)
+uv sync --extra dev     # + linting/pre-commit hooks
 ```
 
-3. You can also use `pip` to install the requirements
+This builds a `.venv` with SEACells installed editable. Run code with
+`uv run python ...` or `source .venv/bin/activate`. The GPU wheels come from the
+NVIDIA pip index (preconfigured in `pyproject.toml`); validated on A100 80GB.
 
+#### Running SEACells (CPU & GPU)
+
+The core API is unchanged. A minimal run:
+
+```python
+import SEACells
+
+# ad: AnnData with a low-dim embedding in ad.obsm ('X_pca' for RNA, 'X_svd' for ATAC)
+model = SEACells.core.SEACells(
+    ad,
+    build_kernel_on='X_pca',   # 'X_svd' for scATAC
+    n_SEACells=90,             # number of metacells (heuristic: ~1 per 75 cells)
+)
+model.construct_kernel_matrix()
+model.fit(min_iter=10, max_iter=100)   # converges in ~15-50 iterations
+
+# metacell assignments are written to ad.obs['SEACell']; aggregate raw counts:
+meta_ad = SEACells.core.summarize_by_SEACell(ad, SEACells_label='SEACell', summarize_layer='raw')
 ```
-pip install -r requirements.txt
+
+**GPU acceleration (optimized).** Pass `use_gpu=True, use_unified=True` to run the
+end-to-end GPU implementation (`SEACells.model.SEACellsModel`) — everything else is
+identical:
+
+```python
+model = SEACells.core.SEACells(
+    ad, build_kernel_on='X_pca', n_SEACells=90,
+    use_gpu=True,        # run on GPU (needs cupy + cuML / RAPIDS)
+    use_unified=True,    # use the optimized unified backend
+)
+model.construct_kernel_matrix()
+model.fit(min_iter=10, max_iter=100)
 ```
 
-And then follow step (1)
+It keeps the kernel and weight matrices resident on the GPU, uses exact GPU kNN
+(cuML) and a memory-scalable reconstruction error, and scales to ~100k cells in a few GB
+(a full 100k-cell fit runs in ~10 min on one A100; see
+[`docs/gpu_speed_and_scale.md`](docs/gpu_speed_and_scale.md)).
+`use_unified=True` also works with `use_gpu=False` (an optimized, single-source CPU path).
 
-4. MulticoreTSNE issues can be solved using
-
-```
-conda create --name seacells -c conda-forge -c bioconda cython python=3.8
-conda activate seacells
-pip install git+https://github.com/settylab/Palantir@removeTSNE
-git clone https://github.com/dpeerlab/SEACells.git
-cd SEACells
-python setup.py install
-```
-
-4. SEACells depends on a number of `python3` packages available on pypi and these dependencies are listed in `setup.py`.
-
-    All the dependencies will be automatically installed using the above commands
-
-5. To uninstall:
-   $> pip uninstall SEACells
-
-6. To install the developer installation of SEACells, run
-
-```
-git clone https://github.com/dpeerlab/SEACells.git
-cd SEACells.git
-
-pip install -e ".[dev]"
-pre-commit install
-```
+**Backward compatible.** `use_unified` defaults to `False`, so existing code is unchanged:
+the default CPU path (`use_gpu=False`) and the legacy `use_gpu=True` / `use_sparse=True`
+backends all behave exactly as before. `use_unified` is strictly opt-in.
 
 #### Usage
 

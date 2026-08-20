@@ -423,7 +423,7 @@ class SEACellsGPU:
 
         Ag = cp.array(A)
         Bg = cp.array(B)
-        Kg = cupyx.scipy.sparse.csc_matrix(self.K)
+        Kg = cupyx.scipy.sparse.csc_matrix(self.K)  # self.K sits on CPU, so it is re-uploaded to the GPU every call. The upload itself is cheap (<1% of an iteration); the real cost of keeping K on the host is that compute_RSS then builds the n x n reconstruction on the CPU (see model.py for the resident, reduced-form version)
 
         # precompute some gradient terms
         t2g = Kg.dot(Bg).T
