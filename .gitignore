@@ -1,8 +1,11 @@
 build
 dist
-pyproject.toml
 SEACells.egg-info
 **/__pycache__
 **/.ipynb_checkpoints/
 **/.DS_Store
 **/.idea
+data/
+docs/
+s41587-023-01716-9.pdf
+uv.lock

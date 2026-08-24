@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "SEACells"
+version = "0.3.3"
+description = "SEACells: Single-cell aggregation of cell states (GPU-accelerated fork)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE.txt" }
+authors = [{ name = "Pe'er Lab", email = "scp2152@columbia.edu" }]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+]
+
+# Core (CPU) dependencies — enough to run SEACells anywhere.
+dependencies = [
+    "numpy",
+    "pandas",
+    "scipy>=1.5",
+    "scanpy>1.8",
+    "anndata",
+    "palantir",
+    "numba>=0.51.2",
+    "scikit-learn",
+    "pyranges",
+    "matplotlib",
+    "seaborn",
+    "tqdm",
+]
+
+[project.optional-dependencies]
+# GPU acceleration (RAPIDS + CuPy + FAISS). Requires an NVIDIA GPU and the
+# NVIDIA pip index (configured under [tool.uv] below). Linux/x86_64 only —
+# on other platforms these markers make the extra resolve to nothing instead
+# of hard-failing. Versions pinned to the validated CUDA-13 / CUDA-12 mix.
+gpu = [
+    "cuml-cu13==26.6.0 ; sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "cudf-cu13==26.6.0 ; sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "cupy-cuda13x==14.1.1 ; sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "faiss-gpu-cu12==1.14.1.post1 ; sys_platform == 'linux' and platform_machine == 'x86_64'",
+]
+dev = ["ruff", "pre-commit"]
+
+[project.urls]
+Homepage = "https://github.com/dpeerlab/SEACells"
+
+[tool.setuptools.packages.find]
+include = ["SEACells*"]
+
+[tool.setuptools.package-data]
+SEACells = ["Rscripts/*", "*.r", "*.R"]
+
+# ---- uv configuration -------------------------------------------------------
+# RAPIDS / CuPy wheels live on the NVIDIA index in addition to PyPI.
+# unsafe-best-match lets uv pick the best version across both indexes
+# (equivalent to pip's --extra-index-url behavior).
+[tool.uv]
+index-strategy = "unsafe-best-match"
+
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple"
+default = true
+
+[[tool.uv.index]]
+name = "nvidia"
+url = "https://pypi.nvidia.com"

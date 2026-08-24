@@ -5,7 +5,7 @@ from multiprocessing import cpu_count
 import numpy as np
 from joblib import Parallel, delayed
 from scipy.sparse import lil_matrix
-from tqdm.notebook import tqdm
+from tqdm.auto import tqdm
 
 # get number of cores for multiprocessing
 NUM_CORES = cpu_count()

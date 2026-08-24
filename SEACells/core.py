@@ -22,6 +22,7 @@ def SEACells(
     l2_penalty: float = 0,
     max_franke_wolfe_iters: int = 50,
     use_sparse: bool = False,
+    use_unified: bool = False,
 ):
     """Core SEACells class.
 
@@ -37,9 +38,34 @@ def SEACells(
     :param l2_penalty: (float) L2 penalty for Franke-Wolfe algorithm
     :param max_franke_wolfe_iters: (int) maximum number of iterations for Franke-Wolfe algorithm
     :param use_sparse: (bool) whether to use sparse matrix operations. Currently only supported for CPU implementation.
+    :param use_unified: (bool) use the optimized unified CPU/GPU implementation (``model.SEACellsModel``)
+                        instead of the legacy ``cpu``/``cpu_dense``/``gpu`` backends. Honors ``use_gpu``.
+                        Recommended for GPU runs and large datasets; the legacy backends are retained
+                        for backward compatibility. Not compatible with ``use_sparse``.
 
-    See cpu.py or gpu.py for descriptions of model attributes and methods.
+    See model.py (unified) or cpu.py/gpu.py (legacy) for descriptions of model attributes and methods.
     """
+    if use_unified:
+        assert (
+            not use_sparse
+        ), "use_sparse is a legacy CPU-only option; the unified backend does not support it."
+        try:
+            from . import model as _model
+        except ImportError:
+            import model as _model
+        return _model.SEACellsModel(
+            ad,
+            build_kernel_on,
+            n_SEACells,
+            use_gpu=use_gpu,
+            verbose=verbose,
+            n_waypoint_eigs=n_waypoint_eigs,
+            n_neighbors=n_neighbors,
+            convergence_epsilon=convergence_epsilon,
+            l2_penalty=l2_penalty,
+            max_franke_wolfe_iters=max_franke_wolfe_iters,
+        )
+
     if use_sparse:
         assert (
             not use_gpu
